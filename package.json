@@ -3,8 +3,12 @@
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:clear-cache": "jest --clearCache",
+    "test:coverage": "jest --coverage",
+    "test": "jest",
+    "lint": "standard"
   },
   "repository": {
     "type": "git",
@@ -17,7 +21,12 @@
   },
   "homepage": "https://github.com/zbrckovic/entail-server#readme",
   "dependencies": {
-    "lodash": "^4.17.20",
-    "@zbrckovic/entail-core": "0.0.45"
+    "@zbrckovic/entail-core": "0.0.45",
+    "express": "^4.17.1",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "standard": "^16.0.2"
   }
 }
