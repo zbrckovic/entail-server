@@ -1,5 +1,6 @@
 import express from 'express'
-import { PORT } from './config.js'
+
+const PORT = process.env.PORT
 
 const app = express()
 
