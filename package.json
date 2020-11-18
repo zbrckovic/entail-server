@@ -24,7 +24,8 @@
   "dependencies": {
     "@zbrckovic/entail-core": "0.0.45",
     "express": "^4.17.1",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "pg": "^8.5.1"
   },
   "devDependencies": {
     "jest": "^26.6.3",
@@ -39,7 +40,12 @@
     "delay": 2500,
     "env": {
       "NODE_ENV": "development",
-      "PORT": 4000
+      "PORT": 4000,
+      "PGUSER": "postgres",
+      "PGHOST": "localhost",
+      "PGPASSWORD": "postgres",
+      "PGDATABASE": "entail",
+      "PGPORT": 5432
     }
   }
 }
