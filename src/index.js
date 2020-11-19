@@ -1,18 +1,36 @@
 import express from 'express'
-import { Database } from './database.js'
+import { environment } from './setup/environment.js'
+import { initDatabase } from './persistence/database.js'
+import { map, switchMap } from 'rxjs/operators/index.js'
+import { createServices } from './services/create-services.js'
+import { Observable } from 'rxjs'
 
-const PORT = process.env.PORT
+export const initExpressApp = services => new Observable(subscriber => {
+  const { userService } = services
 
-const app = express()
+  const app = express()
 
-Database().then(database => {
   app.get('/', (req, res) => {
-    database.getUsers().then(results => {
+    userService.getUsers().then(results => {
       res.send(results)
     })
   })
 
-  app.listen(PORT, () => {
-    console.info(`Listening on port ${PORT}.`)
+  app.listen(environment.port, () => {
+    console.info(`Listening on port ${environment.port}.`)
+
+    subscriber.next(app)
+    subscriber.complete()
   })
 })
+
+initDatabase(environment)
+  .pipe(
+    map(createServices),
+    switchMap(initExpressApp)
+  )
+  .subscribe({
+    complete: () => {
+      console.info('Application has been successfully initialized.')
+    }
+  })
