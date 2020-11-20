@@ -1,4 +1,4 @@
-export const createUserService = database => {
+export const createUsersService = database => {
   const getUsers = () => database.getUsers()
 
   return { getUsers }

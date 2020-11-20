@@ -1,6 +1,7 @@
-import { createUserService } from './user-service.js'
+import { createUsersService } from './users-service.js'
 
 export const createServices = database => {
-  const userService = createUserService(database)
-  return { userService }
+  const usersService = createUsersService(database)
+
+  return { usersService }
 }

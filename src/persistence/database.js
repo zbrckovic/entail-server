@@ -18,12 +18,12 @@ export const initDatabase = environment => {
 }
 
 const createDatabase = client => {
-  const executeQuery = query => defer(() => client.query(query))
-
   const getUsers = () => (
     executeQuery('SELECT * FROM entail.public."user"')
       .pipe(map(result => result.rows))
   )
+
+  const executeQuery = query => defer(() => client.query(query))
 
   return { getUsers }
 }
