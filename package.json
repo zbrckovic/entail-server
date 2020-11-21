@@ -24,6 +24,7 @@
   "dependencies": {
     "@zbrckovic/entail-core": "0.0.45",
     "express": "^4.17.1",
+    "knex": "^0.21.12",
     "lodash": "^4.17.20",
     "pg": "^8.5.1",
     "rxjs": "^6.6.3"

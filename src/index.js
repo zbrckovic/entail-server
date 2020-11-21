@@ -1,12 +1,11 @@
 import express from 'express'
-import { environment } from './setup/environment.js'
-import { initDatabase } from './persistence/database.js'
-import { map, switchMap } from 'rxjs/operators/index.js'
-import { createServices } from './services/create-services.js'
 import { Observable } from 'rxjs'
+import { createDatabase } from './persistence/database.js'
 import { createRouters } from './routers/create-routers.js'
+import { createServices } from './services/create-services.js'
+import { environment } from './setup/environment.js'
 
-export const initExpressApp = routers => new Observable(subscriber => {
+export const createApp = routers => new Observable(subscriber => {
   const { usersRouter } = routers
 
   const app = express()
@@ -21,14 +20,11 @@ export const initExpressApp = routers => new Observable(subscriber => {
   })
 })
 
-initDatabase(environment)
-  .pipe(
-    map(createServices),
-    map(createRouters),
-    switchMap(initExpressApp)
-  )
-  .subscribe({
-    complete: () => {
-      console.info('Application has been successfully initialized.')
-    }
-  })
+const database = createDatabase(environment)
+const services = createServices(database)
+const routers = createRouters(services)
+createApp(routers).subscribe({
+  complete: () => {
+    console.info('Application has been successfully initialized.')
+  }
+})

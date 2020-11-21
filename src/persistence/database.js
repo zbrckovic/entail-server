@@ -1,29 +1,19 @@
-import pg from 'pg'
+import knex from 'knex'
 import { defer } from 'rxjs'
-import { map } from 'rxjs/operators/index.js'
 
-const { Client } = pg
-
-export const initDatabase = environment => {
-  const client = new Client({
-    host: environment.pgHost,
-    user: environment.pgUser,
-    password: environment.pgPassword,
-    database: environment.pgDatabase,
-    port: environment.pgPort
+export const createDatabase = environment => {
+  const client = knex({
+    client: 'pg',
+    connection: {
+      host: environment.pgHost,
+      user: environment.pgUser,
+      password: environment.pgPassword,
+      database: environment.pgDatabase,
+      port: environment.pgPort
+    }
   })
 
-  return defer(() => client.connect())
-    .pipe(map(() => createDatabase(client)))
-}
-
-const createDatabase = client => {
-  const getUsers = () => (
-    executeQuery('SELECT * FROM entail.public."user"')
-      .pipe(map(result => result.rows))
-  )
-
-  const executeQuery = query => defer(() => client.query(query))
+  const getUsers = () => defer(() => client('user').select('*'))
 
   return { getUsers }
 }
