@@ -1,8 +1,7 @@
 import knex from 'knex'
-import { defer } from 'rxjs'
 
-export const createDatabase = environment => {
-  const client = knex({
+export const createDatabaseClient = environment => (
+  knex({
     client: 'pg',
     connection: {
       host: environment.pgHost,
@@ -12,8 +11,4 @@ export const createDatabase = environment => {
       port: environment.pgPort
     }
   })
-
-  const getUsers = () => defer(() => client('user').select('*'))
-
-  return { getUsers }
-}
+)

@@ -1,4 +1,4 @@
-import { createUsersRouter } from './users-router.js'
+import { createUsersRouter } from './users-router.mjs'
 
 export const createRouters = ({ usersService }) => {
   const usersRouter = createUsersRouter(usersService)

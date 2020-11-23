@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { createResSubscriber } from './common.js'
+import { createResSubscriber } from './common.mjs'
 
 export const createUsersRouter = usersService => {
   const router = new Router()
