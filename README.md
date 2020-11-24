@@ -33,3 +33,7 @@ Now find newly added file in `./migrations` and finish it.
 To apply all migrations which were not yet applied run: 
 
     knex migrate:latest
+
+To rollback migrations run:
+    
+    knex migrate:rollback

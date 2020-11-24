@@ -1,7 +1,12 @@
 module.exports = {
-  rootDir: 'src',
+  rootDir: './src',
   testEnvironment: 'node',
   modulePaths: ['<rootDir>/'],
-  coveragePathIgnorePatterns: ['/node_modules/'],
-  coverageDirectory: '../docs/coverage'
+  coverageDirectory: '../docs/coverage',
+  transform: {
+    '^.+\\.m?js$': 'babel-jest'
+  },
+  moduleFileExtensions: ['js', 'mjs'],
+  testRegex: '^.+\\.test\\.m?js$',
+  setupFiles: ['dotenv/config']
 }

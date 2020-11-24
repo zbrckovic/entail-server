@@ -1,31 +1,20 @@
-const pgUser = process.env.PGUSER ?? 'postgres'
-const pgHost = process.env.PGHOST ?? 'localhost'
-const pgPassword = process.env.PGPASSWORD ?? 'postgres'
-const pgDatabase = process.env.PGDATABASE ?? 'entail'
-const pgPort = Number(process.env.PGPORT ?? 5432)
+const dotenv = require('dotenv')
+dotenv.config()
 
-const client = 'pg'
-
-const connection = {
-  host: pgHost,
-  user: pgUser,
-  password: pgPassword,
-  database: pgDatabase,
-  port: pgPort
-}
-
-const migrations = {
-}
+const pgUser = process.env.PGUSER
+const pgHost = process.env.PGHOST
+const pgPassword = process.env.PGPASSWORD
+const pgDatabase = process.env.PGDATABASE
+const pgPort = Number(process.env.PGPORT)
 
 module.exports = {
-  development: {
-    client,
-    connection,
-    migrations
+  client: 'pg',
+  connection: {
+    host: pgHost,
+    user: pgUser,
+    password: pgPassword,
+    database: pgDatabase,
+    port: pgPort
   },
-  production: {
-    client,
-    connection,
-    migrations
-  }
+  migrations: {}
 }
