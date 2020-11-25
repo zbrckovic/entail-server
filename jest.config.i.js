@@ -1,12 +1,10 @@
+// Configuration for integration tests
 module.exports = {
   rootDir: './src',
   testEnvironment: 'node',
   modulePaths: ['<rootDir>/'],
-  coverageDirectory: '../docs/coverage',
-  transform: {
-    '^.+\\.m?js$': 'babel-jest'
-  },
+  transform: { '^.+\\.m?js$': 'babel-jest' },
   moduleFileExtensions: ['js', 'mjs'],
-  testRegex: '^.+\\.test\\.m?js$',
+  testRegex: '\\.itest\\.m?js$',
   setupFiles: ['dotenv/config']
 }

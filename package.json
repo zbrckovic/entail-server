@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test:clear-cache": "jest --clearCache",
-    "test:coverage": "jest --coverage",
-    "test": "jest",
+    "test:unit": "jest -c jest.config.u.js",
+    "test:integration": "jest -c jest.config.i.js",
     "lint": "standard",
     "start": "nodemon -r dotenv/config src/index.mjs",
     "migrate:latest": "knex migrate:latest",
