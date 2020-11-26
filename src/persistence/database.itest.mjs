@@ -1,36 +1,26 @@
 import { DatabaseClient } from './database-client.mjs'
 import { environment } from '../environment.mjs'
 import { concat } from 'rxjs'
+import { tap } from 'rxjs/operators'
 
 let dbClient
-beforeAll(done => {
+beforeAll(() => {
   dbClient = DatabaseClient({ environment })
-  dbClient
-    .migrateToLatest()
-    .subscribe({
-      complete: () => { done() },
-      error: error => { done(error) }
-    })
+  return dbClient.migrateToLatest().toPromise()
 })
 
-afterAll(done => {
+afterAll(() => (
   concat(
     dbClient.rollbackMigrations(),
     dbClient.destroy()
-  ).subscribe({
-    complete: () => { done() },
-    error: error => { done(error) }
-  })
-})
+  ).toPromise()
+))
 
 describe('database', () => {
-  it('contains necessary tables', done => {
+  it('contains necessary tables', () => (
     dbClient
       .hasTable('users')
-      .subscribe({
-        next: hasTable => { expect(hasTable).toBe(true) },
-        complete: () => { done() },
-        error: error => { done(error) }
-      })
-  })
+      .pipe(tap(hasTable => { expect(hasTable).toBe(true) }))
+      .toPromise()
+  ))
 })
