@@ -1,5 +1,3 @@
-export const createUsersService = repository => {
-  const getUsers = () => repository.getUsers()
-
-  return { getUsers }
-}
+export const UsersService = ({ usersRepository }) => ({
+  getUsers: () => usersRepository.getUsers()
+})

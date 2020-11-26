@@ -1,14 +1,12 @@
 import express from 'express'
-import { Observable } from 'rxjs'
-import { createRepository } from './persistence/repository.mjs'
-import { createRouters } from './routers/create-routers.mjs'
-import { createServices } from './services/create-services.mjs'
+import { concat, Observable } from 'rxjs'
 import { environment } from './environment.mjs'
-import { createDBQueryBuilder } from './persistence/database.mjs'
+import { DatabaseClient } from './persistence/database-client.mjs'
+import { UsersService } from './services/users-service.mjs'
+import { UsersRouter } from './routers/users-router.mjs'
+import { UsersRepository } from './repositories.mjs'
 
-export const createApp = routers => new Observable(subscriber => {
-  const { usersRouter } = routers
-
+export const createApp = ({ usersRouter }) => new Observable(subscriber => {
   const app = express()
 
   app.use('/users', usersRouter)
@@ -21,13 +19,22 @@ export const createApp = routers => new Observable(subscriber => {
   })
 })
 
-const dbQueryBuilder = createDBQueryBuilder(environment)
-const repository = createRepository({ dbQueryBuilder, environment })
-const services = createServices(repository)
-const routers = createRouters(services)
+console.debug(`Environment: ${environment.mode}`)
 
-createApp(routers).subscribe({
-  complete: () => {
-    console.info('Application has been successfully initialized.')
-  }
+const databaseClient = DatabaseClient({ environment })
+
+// repositories
+const usersRepository = UsersRepository({ databaseClient })
+
+// services
+const usersService = UsersService({ usersRepository })
+
+// routers
+const usersRouter = UsersRouter({ usersService })
+
+concat(
+  databaseClient.migrateToLatest(),
+  createApp({ usersRouter })
+).subscribe({
+  complete: () => { console.info('Application has been successfully initialized.') }
 })

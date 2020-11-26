@@ -1,49 +1,36 @@
-import { createDBQueryBuilder, createDBSchemaBuilder, resolveDBSchema } from './database.mjs'
+import { DatabaseClient } from './database-client.mjs'
 import { environment } from '../environment.mjs'
+import { concat } from 'rxjs'
 
-let dbQueryBuilder
-let dbSchemaBuilder
+let dbClient
 beforeAll(done => {
-  try {
-    dbQueryBuilder = createDBQueryBuilder(environment)
-    dbSchemaBuilder = createDBSchemaBuilder({ dbQueryBuilder, environment })
-    dbQueryBuilder
-      .migrate
-      .latest({ schemaName: resolveDBSchema(environment) })
-      .then(() => { done() }, done)
-  } catch (error) {
-    done(error)
-  }
+  dbClient = DatabaseClient({ environment })
+  dbClient
+    .migrateToLatest()
+    .subscribe({
+      complete: () => { done() },
+      error: error => { done(error) }
+    })
 })
 
 afterAll(done => {
-  try {
-    dbQueryBuilder
-      .migrate
-      .rollback({ schemaName: resolveDBSchema(environment) })
-      .then(
-        () => { dbQueryBuilder.destroy(done) },
-        () => { dbQueryBuilder.destroy(done) }
-      )
-  } catch (error) {
-    done(error)
-  }
+  concat(
+    dbClient.rollbackMigrations(),
+    dbClient.destroy()
+  ).subscribe({
+    complete: () => { done() },
+    error: error => { done(error) }
+  })
 })
 
 describe('database', () => {
   it('contains necessary tables', done => {
-    try {
-      dbSchemaBuilder
-        .hasTable('users')
-        .then(
-          exists => {
-            expect(exists).toBe(true)
-            done()
-          },
-          done
-        )
-    } catch (error) {
-      done(error)
-    }
+    dbClient
+      .hasTable('users')
+      .subscribe({
+        next: hasTable => { expect(hasTable).toBe(true) },
+        complete: () => { done() },
+        error: error => { done(error) }
+      })
   })
 })
