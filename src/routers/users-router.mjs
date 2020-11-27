@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { createResSubscriber } from './common.mjs'
 
 export const UsersRouter = ({ usersService }) => {
   const router = new Router()
@@ -7,7 +6,10 @@ export const UsersRouter = ({ usersService }) => {
   router.get('/', (req, res) => {
     usersService
       .getUsers()
-      .subscribe(createResSubscriber(res))
+      .then(
+        users => { res.json({ success: users }) },
+        error => { res.json({ error }) }
+      )
   })
 
   return router

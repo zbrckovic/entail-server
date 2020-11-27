@@ -1,6 +1,5 @@
 import knex from 'knex'
 import { migrationSource } from './migrations.mjs'
-import { defer, Observable } from 'rxjs'
 
 export const DatabaseClient = ({ environment }) => {
   const knexInstance = knex({
@@ -22,16 +21,14 @@ export const DatabaseClient = ({ environment }) => {
   const table = name => `${environment.pgSchema}.${name}`
 
   return {
-    destroy: () => new Observable(subscriber => {
-      knexInstance.destroy(() => { subscriber.complete() })
-    }),
+    destroy: () => new Promise(resolve => { knexInstance.destroy(resolve) }),
 
     // schema
-    migrateToLatest: () => defer(() => knexMigrate.latest(migrationConfig)),
-    rollbackMigrations: () => defer(() => knexMigrate.rollback(migrationConfig)),
-    hasTable: table => defer(() => knexSchema.hasTable(table)),
+    migrateToLatest: () => knexMigrate.latest(migrationConfig),
+    rollbackMigrations: () => knexMigrate.rollback(migrationConfig),
+    hasTable: table => knexSchema.hasTable(table),
 
     // data
-    getUsers: () => defer(() => knex(table('user')).select('*'))
+    getUsers: () => knex(table('user')).select('*')
   }
 }

@@ -5,9 +5,9 @@ module.exports = {
   transform: { '^.+\\.m?js$': 'babel-jest' },
   moduleFileExtensions: ['js', 'mjs'],
   setupFiles: ['dotenv/config'],
-  testMatch: ['<rootDir>/e2e/**/*.test.(m)?js'],
+  testMatch: ['<rootDir>/integration/**/*.test.(m)?js'],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '<rootDir>/e2e/',
+    '<rootDir>/e2e/'
   ]
 }

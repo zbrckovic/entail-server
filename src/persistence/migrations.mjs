@@ -2,13 +2,13 @@ import { environment } from '../environment.mjs'
 
 const migrations = [
   [
-    'createUsers',
+    'createUserTable',
     {
       up: knex => (
         knex
           .schema
           .withSchema(environment.pgSchema)
-          .createTable('users', table => {
+          .createTable('user', table => {
             table.increments()
             table.string('email').notNullable()
             table.string('password').notNullable()
@@ -20,7 +20,7 @@ const migrations = [
         knex
           .schema
           .withSchema(environment.pgSchema)
-          .dropTable('users')
+          .dropTable('user')
       )
     }
   ]
