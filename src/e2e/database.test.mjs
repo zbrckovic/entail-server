@@ -1,4 +1,4 @@
-import { DatabaseClient } from './database-client.mjs'
+import { DatabaseClient } from '../persistence/database-client.mjs'
 import { environment } from '../environment.mjs'
 import { concat } from 'rxjs'
 import { tap } from 'rxjs/operators'

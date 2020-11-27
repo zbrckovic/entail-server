@@ -1,10 +1,13 @@
-// Configuration for integration tests
+// Configuration for unit tests
 module.exports = {
   rootDir: './src',
   testEnvironment: 'node',
   modulePaths: ['<rootDir>/'],
   transform: { '^.+\\.m?js$': 'babel-jest' },
   moduleFileExtensions: ['js', 'mjs'],
-  testRegex: '\\.itest\\.m?js$',
-  setupFiles: ['dotenv/config']
+  testMatch: ['<rootDir>/**/*.test.(m)?js'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/e2e/'
+  ]
 }
