@@ -3,14 +3,14 @@ import { environment } from './environment.mjs'
 import { DatabaseClient } from './persistence/database-client.mjs'
 import { UsersService } from './services/users-service.mjs'
 import { UsersRouter } from './routers/users-router.mjs'
-import { UsersRepository } from './repositories.mjs'
+import { Repository } from './persistence/repository.mjs'
 
 (async () => {
   const databaseClient = DatabaseClient({ environment })
 
-  const usersRepository = UsersRepository({ databaseClient })
+  const repository = Repository({ databaseClient })
 
-  const usersService = UsersService({ usersRepository })
+  const usersService = UsersService({ repository })
 
   const usersRouter = UsersRouter({ usersService })
 

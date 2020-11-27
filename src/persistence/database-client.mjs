@@ -1,8 +1,9 @@
-import knex from 'knex'
+import knexFactory from 'knex'
 import { migrationSource } from './migrations.mjs'
 
+// Creates knex instance and provides API for basic administrative operations with database.
 export const DatabaseClient = ({ environment }) => {
-  const knexInstance = knex({
+  const knex = knexFactory({
     client: 'pg',
     connection: {
       host: environment.pgHost,
@@ -15,20 +16,17 @@ export const DatabaseClient = ({ environment }) => {
 
   const migrationConfig = { migrationSource, schemaName: environment.pgSchema }
 
-  const knexMigrate = knexInstance.migrate
-  const knexSchema = knexInstance.schema.withSchema(environment.pgSchema)
-
-  const table = name => `${environment.pgSchema}.${name}`
+  const knexMigrate = knex.migrate
+  const knexSchema = knex.schema.withSchema(environment.pgSchema)
 
   return {
-    destroy: () => new Promise(resolve => { knexInstance.destroy(resolve) }),
+    destroy: () => new Promise(resolve => { knex.destroy(resolve) }),
 
-    // schema
     migrateToLatest: () => knexMigrate.latest(migrationConfig),
     rollbackMigrations: () => knexMigrate.rollback(migrationConfig),
     hasTable: table => knexSchema.hasTable(table),
 
-    // data
-    getUsers: () => knex(table('user')).select('*')
+    getKnex: () => knex,
+    getTableName: name => `${environment.pgSchema}.${name}`
   }
 }

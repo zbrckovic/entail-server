@@ -1,3 +1,4 @@
-export const UsersService = ({ usersRepository }) => ({
-  getUsers: () => usersRepository.getUsers()
+export const UsersService = ({ repository }) => ({
+  getUsers: () => repository.getUsers(),
+  createUser: user => repository.createUser(user)
 })
