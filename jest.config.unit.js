@@ -1,4 +1,3 @@
-// Configuration for unit tests
 module.exports = {
   rootDir: './src',
   testEnvironment: 'node',
@@ -8,6 +7,7 @@ module.exports = {
   testMatch: ['<rootDir>/**/*.test.(m)?js'],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '<rootDir>/e2e/'
+    '<rootDir>/e2e/',
+    '<rootDir>/integration/'
   ]
 }
