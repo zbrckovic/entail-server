@@ -68,7 +68,7 @@ test('Getting non-existent user by id gives undefined.', async () => {
   expect(user).toBeUndefined()
 })
 
-test(`Creating user with existent email throws ${ErrorName.UNIQUE_VIOLATION}.`, async () => {
+test(`Creating user with existent email throws ${ErrorName.EMAIL_ALREADY_USED}.`, async () => {
   const user1 = {
     email: 'raffaello@email.com',
     passwordHash: 'tmnt',
@@ -87,7 +87,7 @@ test(`Creating user with existent email throws ${ErrorName.UNIQUE_VIOLATION}.`, 
 
   return expect(async () => {
     await usersRepository.createUser(user2)
-  }).rejects.toThrow(ErrorName.UNIQUE_VIOLATION)
+  }).rejects.toThrow(ErrorName.EMAIL_ALREADY_USED)
 })
 
 afterEach(async () => {

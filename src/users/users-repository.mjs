@@ -35,7 +35,7 @@ export const UsersRepository = ({ databaseClient }) => {
         return userFromRecord(createdUserRecord)
       } catch (error) {
         if (error.code === PgErrorCodes.UNIQUE_VIOLATION) {
-          throw createError(ErrorName.UNIQUE_VIOLATION)
+          throw createError(ErrorName.EMAIL_ALREADY_USED)
         }
         throw error
       }
