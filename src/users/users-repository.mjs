@@ -7,9 +7,16 @@ export const UsersRepository = ({ databaseClient }) => {
   const table = databaseClient.getTableName('user')
   const knex = databaseClient.getKnex()
 
-  const adaptUpdateProps = ({ email, passwordHash }) => ({
-    email: email === null ? knex.raw('DEFAULT') : email,
-    password: passwordHash === null ? knex.raw('DEFAULT') : passwordHash
+  const userToRecord = user => databaseClient.toRecord(user, value => {
+    if (moment.isMoment(value)) return value.format()
+    return value
+  })
+
+  const userFromRecord = user => databaseClient.fromRecord(user, (value, key) => {
+    if (key === 'created_on' || key === 'last_updated_on') {
+      return value !== undefined ? moment(value) : undefined
+    }
+    return value
   })
 
   return {
@@ -41,10 +48,12 @@ export const UsersRepository = ({ databaseClient }) => {
       }
     },
 
-    updateUser: async ({ id, ...updateProps }) => {
+    updateUser: async ({ id, ...propsToUpdate }) => {
+      const recordPropsToUpdate = userToRecord(propsToUpdate)
+
       const [updatedUserRecord] = await knex(table)
         .where({ id })
-        .update(adaptUpdateProps(updateProps))
+        .update(recordPropsToUpdate)
         .returning('*')
 
       return userFromRecord(updatedUserRecord)
@@ -56,13 +65,3 @@ export const UsersRepository = ({ databaseClient }) => {
     }
   }
 }
-
-export const userToRecord = ({ id, email, passwordHash }) => ({ id, email, password: passwordHash })
-
-export const userFromRecord = ({ id, email, password, created_on, last_updated_on }) => ({
-  id,
-  email,
-  passwordHash: password,
-  createdOn: moment(created_on),
-  lastUpdatedOn: moment(last_updated_on)
-})
