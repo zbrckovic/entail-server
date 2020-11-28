@@ -1,6 +1,7 @@
 import knexFactory from 'knex'
 import { migrationSource } from './migrations.mjs'
 import _ from 'lodash'
+import moment from 'moment'
 
 // Creates knex instance to be used by repositories and provides API for basic administrative
 // operations with database.
@@ -21,6 +22,21 @@ export const DatabaseClient = ({ environment }) => {
   const knexMigrate = knex.migrate
   const knexSchema = knex.schema.withSchema(environment.pgSchema)
 
+  const toRecordKey = key => _.snakeCase(key)
+
+  const fromRecordKey = key => _.camelCase(key)
+
+  const toRecordValue = value => {
+    if (value === null) return knex.raw('DEFAULT')
+    if (moment.isMoment(value)) return value.toDate()
+    return value
+  }
+
+  const fromRecordValue = value => {
+    if (value instanceof Date) return moment(value)
+    return value
+  }
+
   return {
     destroy: () => new Promise(resolve => { knex.destroy(resolve) }),
 
@@ -31,44 +47,25 @@ export const DatabaseClient = ({ environment }) => {
     getKnex: () => knex,
     getTableName: name => `${environment.pgSchema}.${name}`,
 
-    // Transforms object to the format suitable for database. It changes all keys to snake case. If
-    // `transformValue` is provided it'll be used to transform value.
-    //
-    // All `null` values will be transformed by `knex.raw('DEFAULT')` (regardless of
-    // `transformValue`). Providing `null` is a means to set something to default in a database.
-    toRecord: (object, transformValue) => {
+    // Transforms object to the format suitable for database. It changes all keys to snake case.
+    // All `null` values will be transformed by `knex.raw('DEFAULT')`. Providing `null` is a means
+    // to set default value in database.
+    toRecord: object => {
       const result = {}
 
       _.forEach(object, (value, key) => {
-        const transformedKey = _.snakeCase(key)
-
-        let transformedValue
-        if (value === null) {
-          transformedValue = knex.raw('DEFAULT')
-        } else if (transformValue !== undefined) {
-          transformedValue = transformValue(value, key)
-        }
-
-        result[transformedKey] = transformedValue
+        result[toRecordKey(key)] = toRecordValue(value)
       })
 
       return result
     },
 
     // Transforms record to the format suitable for application. It changes all keys to camel case.
-    // If `transformValue` is provided it'll be used to transform value.
-    fromRecord: (record, transformValue) => {
+    fromRecord: record => {
       const result = {}
 
       _.forEach(record, (value, key) => {
-        const transformedKey = _.camelCase(key)
-
-        let transformedValue
-        if (transformValue !== undefined) {
-          transformedValue = transformValue(value, key)
-        }
-
-        result[transformedKey] = transformedValue
+        result[fromRecordKey(key)] = fromRecordValue(value)
       })
 
       return result

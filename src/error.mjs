@@ -7,5 +7,5 @@ export const createError = (name, message = '', extra = undefined) => {
 }
 
 export const ErrorName = {
-  EMAIL_ALREADY_USED: 'EMAIL_ALREADY_USED'
+  UNIQUE_VIOLATION: 'UNIQUE_VIOLATION'
 }
