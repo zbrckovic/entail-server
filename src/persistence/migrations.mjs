@@ -4,24 +4,21 @@ const migrations = [
   [
     'createUserTable',
     {
-      up: knex => (
-        knex
-          .schema
-          .withSchema(environment.pgSchema)
-          .createTable('user', table => {
-            table.increments()
-            table.string('email').notNullable()
-            table.string('password').notNullable()
-            table.timestamp('create_date').defaultTo(knex.fn.now())
-            table.timestamp('update_date').defaultTo(knex.fn.now())
-          })
-      ),
-      down: knex => (
-        knex
-          .schema
-          .withSchema(environment.pgSchema)
-          .dropTable('user')
-      )
+      up: knex => knex
+        .schema
+        .withSchema(environment.pgSchema)
+        .createTable('user', table => {
+          table.increments()
+          table.string('email').unique().notNullable()
+          table.string('password').notNullable()
+          table.timestamp('created_on').defaultTo(knex.fn.now())
+          table.timestamp('last_updated_on').defaultTo(knex.fn.now())
+        }),
+      down: knex => knex
+        .schema
+        .withSchema(environment.pgSchema)
+        .dropTable('user')
+
     }
   ]
 ]

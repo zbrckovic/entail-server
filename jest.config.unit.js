@@ -7,7 +7,7 @@ module.exports = {
   testMatch: ['<rootDir>/**/*.test.(m)?js'],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '<rootDir>/e2e/',
-    '<rootDir>/integration/'
+    '<rootDir>/test/e2e/',
+    '<rootDir>/test/integration/'
   ]
 }
