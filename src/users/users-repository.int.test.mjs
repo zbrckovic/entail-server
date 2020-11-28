@@ -1,10 +1,10 @@
-import { DatabaseClient } from '../../persistence/database-client.mjs'
-import { environment } from '../../environment.mjs'
-import { UsersRepository } from '../../users/users-repository.mjs'
+import { DatabaseClient } from '../persistence/database-client.mjs'
+import { environment } from '../environment.mjs'
+import { UsersRepository } from './users-repository.mjs'
 import moment from 'moment'
 import _ from 'lodash'
-import { createMomentEqualityCustomizer } from '../../utils/equality-customizers.mjs'
-import { ErrorName } from '../../error.mjs'
+import { createMomentEqualityCustomizer } from '../utils/equality-customizers.mjs'
+import { ErrorName } from '../error.mjs'
 
 const eqCustomizer = createMomentEqualityCustomizer('minute')
 
