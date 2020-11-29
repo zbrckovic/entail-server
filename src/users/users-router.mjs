@@ -3,13 +3,9 @@ import { Router } from 'express'
 export const UsersRouter = ({ usersService }) => {
   const router = new Router()
 
-  router.get('/', (req, res) => {
-    usersService
-      .getUsers()
-      .then(
-        users => { res.json({ success: users }) },
-        error => { res.json({ error }) }
-      )
+  router.get('/', async (req, res) => {
+    const users = await usersService.getAll()
+    res.json({ success: users })
   })
 
   return router

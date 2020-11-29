@@ -8,7 +8,7 @@ import { IocContainer } from '../ioc-container'
 describe('UsersRepository', () => {
   let iocContainer
   beforeEach(async () => {
-    iocContainer = IocContainer(environment)
+    iocContainer = IocContainer({ environment })
     await iocContainer.getDatabaseClient().rollbackMigrations()
     await iocContainer.getDatabaseClient().migrateToLatest()
   })
