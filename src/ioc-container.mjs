@@ -9,7 +9,10 @@ export const IocContainer = environment => {
     let result
 
     return () => {
-      if (result === undefined) result = DatabaseClient({ environment })
+      if (result === undefined) {
+        result = DatabaseClient({ environment })
+      }
+
       return result
     }
   })()
@@ -18,8 +21,11 @@ export const IocContainer = environment => {
     let result
 
     return () => {
-      const databaseClient = getDatabaseClient()
-      if (result === undefined) result = UsersRepository({ databaseClient })
+      if (result === undefined) {
+        const databaseClient = getDatabaseClient()
+        result = UsersRepository({ databaseClient })
+      }
+
       return result
     }
   })()
@@ -28,7 +34,10 @@ export const IocContainer = environment => {
     let result
 
     return () => {
-      if (result === undefined) result = CryptographyService({ environment })
+      if (result === undefined) {
+        result = CryptographyService({ environment })
+      }
+
       return result
     }
   })()
@@ -37,9 +46,17 @@ export const IocContainer = environment => {
     let result
 
     return () => {
-      const usersRepository = getUsersRepository()
-      const cryptographyService = getCryptographyService()
-      if (result === undefined) result = UsersService({ usersRepository, cryptographyService })
+      if (result === undefined) {
+        const usersRepository = getUsersRepository()
+        const cryptographyService = getCryptographyService()
+
+        result = UsersService({
+          environment,
+          usersRepository,
+          cryptographyService
+        })
+      }
+
       return result
     }
   })()
@@ -48,8 +65,11 @@ export const IocContainer = environment => {
     let result
 
     return () => {
-      const usersService = getUsersService()
-      if (result === undefined) result = UsersRouter({ usersService })
+      if (result === undefined) {
+        const usersService = getUsersService()
+
+        result = UsersRouter({ usersService })
+      }
       return result
     }
   })()

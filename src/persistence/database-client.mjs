@@ -3,6 +3,9 @@ import { migrationSource } from './migrations.mjs'
 import _ from 'lodash'
 import moment from 'moment'
 
+// A value used to set the value in database to default.
+export const DEFAULT = Symbol('DEFAULT')
+
 // Creates knex instance to be used by repositories and provides API for basic administrative
 // operations with database.
 export const DatabaseClient = ({ environment }) => {
@@ -27,12 +30,13 @@ export const DatabaseClient = ({ environment }) => {
   const fromRecordKey = key => _.camelCase(key)
 
   const toRecordValue = value => {
-    if (value === null) return knex.raw('DEFAULT')
+    if (value === DEFAULT) return knex.raw('DEFAULT')
     if (moment.isMoment(value)) return value.toDate()
     return value
   }
 
   const fromRecordValue = value => {
+    if (value === null) return undefined
     if (value instanceof Date) return moment(value)
     return value
   }
@@ -48,8 +52,6 @@ export const DatabaseClient = ({ environment }) => {
     getTableName: name => `${environment.pgSchema}.${name}`,
 
     // Transforms object to the format suitable for database. It changes all keys to snake case.
-    // All `null` values will be transformed by `knex.raw('DEFAULT')`. Providing `null` is a means
-    // to set default value in database.
     toRecord: object => {
       const result = {}
 

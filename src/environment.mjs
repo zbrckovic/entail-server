@@ -7,9 +7,14 @@ const pgDatabase = process.env.PGDATABASE ?? 'entail'
 const pgPort = process.env.PGPORT ?? '5432'
 const pgSchema = mode === 'test' ? 'test' : 'public'
 
-const bcryptSaltRounds = process.env.BCRYPT_SALT_ROUNDS === undefined
-  ? 10
-  : Number(process.env.BCRYPT_SALT_ROUNDS)
+const bcryptSaltRounds = process.env.BCRYPT_SALT_ROUNDS !== undefined
+  ? Number(process.env.BCRYPT_SALT_ROUNDS)
+  : 10
+
+const activationCodeValidityPeriodMinutes =
+  process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES !== undefined
+    ? Number(process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES)
+    : 60
 
 export const environment = {
   mode,
@@ -20,5 +25,6 @@ export const environment = {
   pgDatabase,
   pgPort,
   pgSchema,
-  bcryptSaltRounds
+  bcryptSaltRounds,
+  activationCodeValidityPeriodMinutes
 }

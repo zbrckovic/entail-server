@@ -27,7 +27,10 @@ export const UsersRepository = ({ databaseClient }) => {
         const [createdUserRecord] = await knex(table).insert(userRecord).returning('*')
         return databaseClient.fromRecord(createdUserRecord)
       } catch (error) {
-        if (error.code === PgErrorCodes.UNIQUE_VIOLATION) {
+        if (
+          error.code === PgErrorCodes.UNIQUE_VIOLATION &&
+          error.constraint === 'user_email_unique'
+        ) {
           throw createError(ErrorName.EMAIL_ALREADY_USED)
         }
         throw error
