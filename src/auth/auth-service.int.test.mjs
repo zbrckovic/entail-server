@@ -6,7 +6,8 @@ import moment from 'moment'
 describe('AuthService', () => {
   let iocContainer
   beforeEach(async () => {
-    iocContainer = IocContainer({ environment })
+    iocContainer = IocContainer({ environment, emailService: EmailServiceMock() })
+    await iocContainer.getI18nService().init()
     await iocContainer.getDatabaseClient().rollbackMigrations()
     await iocContainer.getDatabaseClient().migrateToLatest()
   })
@@ -100,8 +101,8 @@ describe('AuthService', () => {
     let activationCode
 
     beforeEach(async () => {
-      const raffaello = await iocContainer.getAuthService().register(({ email, password }))
-      activationCode = raffaello.activationCode
+      await iocContainer.getAuthService().register(({ email, password }))
+      activationCode = iocContainer.getEmailService().getLastSentActivationCode()
     })
 
     test('passes for correct activation code', () => {
@@ -132,3 +133,15 @@ describe('AuthService', () => {
     await databaseClient.destroy()
   })
 })
+
+const EmailServiceMock = () => {
+  let lastSentActivationCode
+
+  const sendActivationCode = async activationCode => {
+    lastSentActivationCode = activationCode
+  }
+
+  const getLastSentActivationCode = () => lastSentActivationCode
+
+  return { sendActivationCode, getLastSentActivationCode }
+}

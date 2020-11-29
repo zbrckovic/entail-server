@@ -17,12 +17,16 @@ export const AuthService = ({
       'minutes'
     )
 
-    return await usersRepository.createUser({
+    const user = await usersRepository.createUser({
       email,
       passwordHash,
       activationCode,
       activationCodeExpiresOn
     })
+
+    await emailService.sendActivationCode(activationCode, email)
+
+    return user
   },
 
   login: async ({ email, password }) => {

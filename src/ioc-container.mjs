@@ -6,6 +6,7 @@ import { CryptographyService } from './auth/cryptography-service.mjs'
 import { EmailService } from './auth/email-service.mjs'
 import { AuthService } from './auth/auth-service.mjs'
 import { AuthRouter } from './auth/auth-router.mjs'
+import { I18nService } from './i18n/i18n-service.mjs'
 
 export const IocContainer = ({
   environment,
@@ -16,7 +17,8 @@ export const IocContainer = ({
   authService,
   usersService,
   authRouter,
-  usersRouter
+  usersRouter,
+  i18nService
 }) => {
   const getDatabaseClient = () => {
     if (databaseClient === undefined) {
@@ -33,6 +35,13 @@ export const IocContainer = ({
     return usersRepository
   }
 
+  const getI18nService = () => {
+    if (i18nService === undefined) {
+      i18nService = I18nService({ environment })
+    }
+    return i18nService
+  }
+
   const getCryptographyService = () => {
     if (cryptographyService === undefined) {
       cryptographyService = CryptographyService({ environment })
@@ -42,7 +51,8 @@ export const IocContainer = ({
 
   const getEmailService = () => {
     if (emailService === undefined) {
-      emailService = EmailService({ environment })
+      const i18nService = getI18nService()
+      emailService = EmailService({ environment, i18nService })
     }
     return emailService
   }
@@ -92,6 +102,7 @@ export const IocContainer = ({
 
     getUsersRepository,
 
+    getI18nService,
     getEmailService,
     getCryptographyService,
 

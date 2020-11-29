@@ -3,9 +3,17 @@ import { environment } from './environment.mjs'
 import { IocContainer } from './ioc-container.mjs'
 
 (async () => {
-  const { getDatabaseClient, getAuthRouter, getUsersRouter } = IocContainer({ environment })
+  const {
+    getDatabaseClient,
+    getI18nService,
+    getAuthRouter,
+    getUsersRouter
+  } = IocContainer({ environment })
 
   await getDatabaseClient().migrateToLatest()
+  await getI18nService().init()
+  const t = getI18nService().getT()
+  console.log(t)
 
   const app = express()
 

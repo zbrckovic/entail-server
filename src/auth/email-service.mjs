@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer'
 
-export const EmailService = ({ environment }) => {
+export const EmailService = ({ environment, i18nService }) => {
+  const t = i18nService.getT()
+
   const {
     emailServerHost,
     emailServerPort,
@@ -23,8 +25,8 @@ export const EmailService = ({ environment }) => {
   const sendActivationCode = async (activationCode, recipientAddress) => {
     const from = 'authentication@entail.com'
     const to = recipientAddress
-    const subject = 'Activation'
-    const text = 'Content of activation'
+    const subject = t('activationEmail.subject')
+    const text = t('activationEmail.text')
 
     return await transport.sendMail({ from, to, subject, text })
   }
