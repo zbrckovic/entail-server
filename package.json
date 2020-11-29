@@ -25,6 +25,7 @@
   "homepage": "https://github.com/zbrckovic/entail-server#readme",
   "dependencies": {
     "@zbrckovic/entail-core": "0.0.45",
+    "bcrypt": "^5.0.0",
     "express": "^4.17.1",
     "knex": "^0.21.12",
     "lodash": "^4.17.20",

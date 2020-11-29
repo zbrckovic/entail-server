@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { PgErrorCodes } from '../persistence/pg-error-codes.mjs'
 import { createError, ErrorName } from '../error.mjs'
 
@@ -29,7 +28,7 @@ export const UsersRepository = ({ databaseClient }) => {
         return databaseClient.fromRecord(createdUserRecord)
       } catch (error) {
         if (error.code === PgErrorCodes.UNIQUE_VIOLATION) {
-          throw createError(ErrorName.UNIQUE_VIOLATION)
+          throw createError(ErrorName.EMAIL_ALREADY_USED)
         }
         throw error
       }

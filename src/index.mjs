@@ -1,21 +1,15 @@
 import express from 'express'
 import { environment } from './environment.mjs'
-import { DatabaseClient } from './persistence/database-client.mjs'
-import { UsersService } from './users/users-service.mjs'
-import { UsersRouter } from './users/users-router.mjs'
-import { UsersRepository } from './users/users-repository.mjs'
+import { IocContainer } from './ioc-container'
 
 (async () => {
-  const databaseClient = DatabaseClient({ environment })
-  const usersRepository = UsersRepository({ databaseClient })
-  const usersService = UsersService({ usersRepository })
-  const usersRouter = UsersRouter({ usersService })
+  const { getDatabaseClient, getUsersRouter } = IocContainer({ environment })
 
-  await databaseClient.migrateToLatest()
+  await getDatabaseClient().migrateToLatest()
 
   const app = express()
 
-  app.use('/users', usersRouter)
+  app.use('/users', getUsersRouter())
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

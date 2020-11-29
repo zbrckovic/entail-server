@@ -40,9 +40,9 @@ export const DatabaseClient = ({ environment }) => {
   return {
     destroy: () => new Promise(resolve => { knex.destroy(resolve) }),
 
-    migrateToLatest: () => knexMigrate.latest(migrationConfig),
-    rollbackMigrations: () => knexMigrate.rollback(migrationConfig),
-    hasTable: table => knexSchema.hasTable(table),
+    migrateToLatest: async () => knexMigrate.latest(migrationConfig),
+    rollbackMigrations: async () => knexMigrate.rollback(migrationConfig),
+    hasTable: async table => knexSchema.hasTable(table),
 
     getKnex: () => knex,
     getTableName: name => `${environment.pgSchema}.${name}`,

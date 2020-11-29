@@ -1,22 +1,21 @@
-import { DatabaseClient } from '../persistence/database-client.mjs'
 import { environment } from '../environment.mjs'
-import { UsersRepository } from './users-repository.mjs'
 import moment from 'moment'
 import _ from 'lodash'
 import { createMomentEqualityCustomizer } from '../utils/equality-customizers.mjs'
 import { ErrorName } from '../error.mjs'
+import { IocContainer } from '../ioc-container'
 
 const eqCustomizer = createMomentEqualityCustomizer('minute')
 
-let databaseClient
-let usersRepository
+let iocContainer
 beforeEach(async () => {
-  databaseClient = DatabaseClient({ environment })
-  await databaseClient.migrateToLatest()
-  usersRepository = UsersRepository({ databaseClient })
+  iocContainer = IocContainer(environment)
+  await iocContainer.getDatabaseClient().migrateToLatest()
 })
 
 test('Can get, create, update and delete.', async () => {
+  const usersRepository = iocContainer.getUsersRepository()
+
   const user = {
     email: 'raffaello@email.com',
     passwordHash: 'tmnt',
@@ -64,11 +63,15 @@ test('Can get, create, update and delete.', async () => {
 })
 
 test('Getting non-existent user by id gives undefined.', async () => {
+  const usersRepository = iocContainer.getUsersRepository()
+
   const user = await usersRepository.getUserById(1)
   expect(user).toBeUndefined()
 })
 
-test(`Creating user with existent email throws ${ErrorName.UNIQUE_VIOLATION}.`, async () => {
+test(`Creating user with existent email throws ${ErrorName.EMAIL_ALREADY_USED}.`, async () => {
+  const usersRepository = iocContainer.getUsersRepository()
+
   const user1 = {
     email: 'raffaello@email.com',
     passwordHash: 'tmnt',
@@ -87,10 +90,11 @@ test(`Creating user with existent email throws ${ErrorName.UNIQUE_VIOLATION}.`, 
 
   return expect(async () => {
     await usersRepository.createUser(user2)
-  }).rejects.toThrow(ErrorName.UNIQUE_VIOLATION)
+  }).rejects.toThrow(ErrorName.EMAIL_ALREADY_USED)
 })
 
 afterEach(async () => {
+  const databaseClient = iocContainer.getDatabaseClient()
   await databaseClient.rollbackMigrations()
   await databaseClient.destroy()
 })
