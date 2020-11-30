@@ -11,7 +11,7 @@ export const AuthRouter = ({ authService }) => {
       res.send()
     } catch (error) {
       const { name } = error
-      if (name === ErrorName.INVALID_CREDENTIALS) res.status(403).send({ name })
+      if (name === ErrorName.INVALID_CREDENTIALS) res.status(403).json({ name })
       next(error)
     }
   })
@@ -23,8 +23,8 @@ export const AuthRouter = ({ authService }) => {
       res.send()
     } catch (error) {
       const { name } = error
-      if (name === ErrorName.INVALID_CREDENTIALS) res.status(403).send({ name })
-      if (name === ErrorName.EMAIL_ALREADY_USED) res.status(409).send({ name })
+      if (name === ErrorName.INVALID_CREDENTIALS) res.status(403).json({ name })
+      if (name === ErrorName.EMAIL_ALREADY_USED) res.status(409).json({ name })
       next(error)
     }
   })
