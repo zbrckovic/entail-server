@@ -1,7 +1,7 @@
 import express from 'express'
 import { environment } from './environment.mjs'
 import { IocContainer } from './ioc-container.mjs'
-import { logError } from './middleware/error-handlers.mjs'
+import { logError } from './middleware.mjs'
 
 (async () => {
   const {
