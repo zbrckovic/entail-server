@@ -1,6 +1,7 @@
 import express from 'express'
 import { environment } from './environment.mjs'
 import { IocContainer } from './ioc-container.mjs'
+import { appErrorHandler, logError } from './middleware/error-handlers.mjs'
 
 (async () => {
   const {
@@ -12,13 +13,16 @@ import { IocContainer } from './ioc-container.mjs'
 
   await getDatabaseClient().migrateToLatest()
   await getI18nService().init()
-  const t = getI18nService().getT()
-  console.log(t)
 
   const app = express()
 
+  app.use(express.json({ type: 'application/json' }))
+
   app.use('/auth', getAuthRouter())
   app.use('/users', getUsersRouter())
+
+  app.use(logError)
+  app.use(appErrorHandler)
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

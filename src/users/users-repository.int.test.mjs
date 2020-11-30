@@ -72,6 +72,13 @@ describe('UsersRepository', () => {
     expect(user).toBeUndefined()
   })
 
+  test('gives undefined when getting non-existent user by email', async () => {
+    const usersRepository = iocContainer.getUsersRepository()
+
+    const user = await usersRepository.getUserByEmail('raffaello@mail.com')
+    expect(user).toBeUndefined()
+  })
+
   test(
     `throws ${ErrorName.EMAIL_ALREADY_USED} when creating user with existent email`,
     async () => {

@@ -1,8 +1,9 @@
-export const createError = (name, message = '', extra = undefined) => {
+export const createError = ({ name, message, extra, status }) => {
   const error = new Error(message)
   error.name = name
-  error.message = `${name}: ${message}`
+  error.message = message
   error.extra = extra
+  error.status = status
   return error
 }
 

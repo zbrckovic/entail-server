@@ -31,7 +31,7 @@ export const UsersRepository = ({ databaseClient }) => {
           error.code === PgErrorCodes.UNIQUE_VIOLATION &&
           error.constraint === 'user_email_unique'
         ) {
-          throw createError(ErrorName.EMAIL_ALREADY_USED)
+          throw createError({ name: ErrorName.EMAIL_ALREADY_USED })
         }
         throw error
       }

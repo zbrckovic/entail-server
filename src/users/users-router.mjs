@@ -5,7 +5,7 @@ export const UsersRouter = ({ usersService }) => {
 
   router.get('/', async (req, res) => {
     const users = await usersService.getAll()
-    res.json({ success: users })
+    res.json({ users })
   })
 
   return router

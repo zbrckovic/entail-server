@@ -7,7 +7,6 @@ describe('AuthService', () => {
   let iocContainer
   beforeEach(async () => {
     iocContainer = IocContainer({ environment, emailService: EmailServiceMock() })
-    await iocContainer.getI18nService().init()
     await iocContainer.getDatabaseClient().rollbackMigrations()
     await iocContainer.getDatabaseClient().migrateToLatest()
   })
@@ -43,7 +42,7 @@ describe('AuthService', () => {
 
       await expect(authService.register(({ email, password })))
         .rejects
-        .toThrow(createError(ErrorName.EMAIL_ALREADY_USED))
+        .toThrow(createError({ name: ErrorName.EMAIL_ALREADY_USED }))
     })
 
     test('produces inactive user with prepared activation code', async () => {
@@ -68,7 +67,9 @@ describe('AuthService', () => {
     const email = 'raffaello@email.com'
     const password = 'AAAA'
 
-    beforeEach(async () => { await iocContainer.getAuthService().register(({ email, password })) })
+    beforeEach(async () => {
+      await iocContainer.getAuthService().register(({ email, password }))
+    })
 
     test(`throws ${ErrorName.INVALID_CREDENTIALS} for wrong email`, async () => {
       const authService = iocContainer.getAuthService()
