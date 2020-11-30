@@ -1,7 +1,7 @@
 import express from 'express'
 import { environment } from './environment.mjs'
 import { IocContainer } from './ioc-container.mjs'
-import { appErrorHandler, logError } from './middleware/error-handlers.mjs'
+import { logError } from './middleware/error-handlers.mjs'
 
 (async () => {
   const {
@@ -22,7 +22,6 @@ import { appErrorHandler, logError } from './middleware/error-handlers.mjs'
   app.use('/users', getUsersRouter())
 
   app.use(logError)
-  app.use(appErrorHandler)
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

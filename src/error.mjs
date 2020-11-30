@@ -1,9 +1,8 @@
-export const createError = ({ name, message, extra, status }) => {
+export const createError = ({ name, message, extra }) => {
   const error = new Error(message)
   error.name = name
   error.message = message
   error.extra = extra
-  error.status = status
   return error
 }
 
