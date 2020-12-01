@@ -1,6 +1,6 @@
 import { environment } from '../environment.mjs'
 import { IocContainer } from '../ioc-container.mjs'
-import { createError, ErrorName } from '../error.mjs'
+import { ErrorName } from '../error.mjs'
 import moment from 'moment'
 
 describe('AuthService', () => {
@@ -42,7 +42,7 @@ describe('AuthService', () => {
 
       await expect(authService.register(({ email, password })))
         .rejects
-        .toThrow(createError({ name: ErrorName.EMAIL_ALREADY_USED }))
+        .toThrow(ErrorName.EMAIL_ALREADY_USED)
     })
 
     test('produces inactive user with prepared activation code', async () => {

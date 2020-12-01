@@ -6,12 +6,12 @@
   "scripts": {
     "test:clear-cache": "jest --clearCache",
     "test:unit": "jest -c jest.config.unit.js",
-    "test:integration": "jest -c jest.config.integration.js",
-    "test:e2e": "jest -c jest.config.e2e.js",
+    "test:integration": "jest --runInBand -c jest.config.integration.js",
+    "test:e2e": "jest --runInBand -c jest.config.e2e.js",
     "lint": "standard",
     "start": "nodemon -r dotenv/config src/index.mjs",
-    "migrate:latest": "knex migrate:latest",
-    "migrate:rollback": "knex migrate:rollback"
+    "migrate:latest": "node -r dotenv/config src/scripts/migrate-latest.mjs",
+    "migrate:rollback": "node -r dotenv/config src/scripts/migrate-rollback.mjs"
   },
   "repository": {
     "type": "git",
