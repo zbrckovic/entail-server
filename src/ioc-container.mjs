@@ -22,7 +22,8 @@ export const IocContainer = ({
 }) => {
   const getDatabaseClient = () => {
     if (databaseClient === undefined) {
-      databaseClient = DatabaseClient({ environment })
+      cryptographyService = getCryptographyService()
+      databaseClient = DatabaseClient({ environment, cryptographyService })
     }
     return databaseClient
   }

@@ -7,11 +7,6 @@ const pgDatabase = process.env.PGDATABASE ?? 'entail'
 const pgPort = process.env.PGPORT ?? '5432'
 const pgSchema = mode === 'test' ? 'test' : 'public'
 
-const emailServerHost = process.env.EMAIL_SERVER_HOST
-const emailServerPort = process.env.EMAIL_SERVER_PORT
-const emailServerUsername = process.env.EMAIL_SERVER_USERNAME
-const emailServerPassword = process.env.EMAIL_SERVER_PASSWORD
-
 const bcryptSaltRounds = process.env.BCRYPT_SALT_ROUNDS !== undefined
   ? Number(process.env.BCRYPT_SALT_ROUNDS)
   : 10
@@ -20,6 +15,14 @@ const activationCodeValidityPeriodMinutes =
   process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES !== undefined
     ? Number(process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES)
     : 60
+
+const emailServerHost = process.env.EMAIL_SERVER_HOST
+const emailServerPort = process.env.EMAIL_SERVER_PORT
+const emailServerUsername = process.env.EMAIL_SERVER_USERNAME
+const emailServerPassword = process.env.EMAIL_SERVER_PASSWORD
+
+const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
+const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
 
 export const environment = {
   mode,
@@ -35,5 +38,7 @@ export const environment = {
   emailServerHost,
   emailServerPort,
   emailServerUsername,
-  emailServerPassword
+  emailServerPassword,
+  superAdminEmail,
+  superAdminPassword
 }
