@@ -1,9 +1,8 @@
-import { PgErrorCodes } from '../persistence/pg-error-codes.mjs'
+import { PgErrorCodes } from '../persistence/misc.mjs'
 import { createError, ErrorName } from '../error.mjs'
 
-export const UsersRepository = ({ databaseClient }) => {
+export const UsersRepository = ({ knex, databaseClient }) => {
   const table = databaseClient.getTableName('user')
-  const knex = databaseClient.getKnex()
 
   return {
     getUsers: async () => {

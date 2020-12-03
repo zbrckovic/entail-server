@@ -1,6 +1,5 @@
-export const RolesRepository = ({ databaseClient }) => {
+export const RolesRepository = ({ knex, databaseClient }) => {
   const table = databaseClient.getTableName('role')
-  const knex = databaseClient.getKnex()
 
   return {
     getRoles: async () => {

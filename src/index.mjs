@@ -7,12 +7,13 @@ import { IocContainer } from './ioc-container.mjs'
     getDatabaseClient,
     getI18nService,
     getAuthRouter,
-    getUsersRouter
+    getUsersRouter,
+    getDataInitializer
   } = IocContainer({ environment })
 
   const databaseClient = getDatabaseClient()
   await databaseClient.migrateToLatest()
-  await databaseClient.setupInitialData()
+  await getDataInitializer().init()
 
   await getI18nService().init()
 

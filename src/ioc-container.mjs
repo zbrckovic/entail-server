@@ -1,16 +1,22 @@
 import { DatabaseClient } from './persistence/database-client.mjs'
-import { UsersRepository } from './users/users-repository.mjs'
+import { UsersRepository } from './repositories/users-repository.mjs'
 import { UsersService } from './users/users-service.mjs'
 import { UsersRouter } from './users/users-router.mjs'
-import { CryptographyService } from './auth/cryptography-service.mjs'
+import { CryptographyService } from './utils/cryptography-service.mjs'
 import { EmailService } from './auth/email-service.mjs'
 import { AuthService } from './auth/auth-service.mjs'
 import { AuthRouter } from './auth/auth-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
+import { DatabaseUtil } from './persistence/database-util.mjs'
+import { createKnex } from './persistence/knex.mjs'
+import { DataInitializer } from './persistence/data-initializer.mjs'
 
 // Resolves dependencies for each 'component' in the application.
 export const IocContainer = ({
   environment,
+  knex,
+  databaseUtil,
+  dataInitializer,
   databaseClient,
   usersRepository,
   cryptographyService,
@@ -21,18 +27,53 @@ export const IocContainer = ({
   usersRouter,
   i18nService
 }) => {
+  const getKnex = () => {
+    if (knex === undefined) {
+      knex = createKnex({ environment })
+    }
+    return knex
+  }
+
+  const getDatabaseUtil = () => {
+    if (databaseUtil === undefined) {
+      databaseUtil = DatabaseUtil({
+        knex: getKnex(),
+        environment
+      })
+    }
+    return databaseUtil
+  }
+
+  const getDataInitializer = () => {
+    if (dataInitializer === undefined) {
+      dataInitializer = DataInitializer({
+        knex: getKnex(),
+        databaseUtil: getDatabaseUtil(),
+        cryptographyService: getCryptographyService(),
+        environment
+      })
+    }
+    return dataInitializer
+  }
+
   const getDatabaseClient = () => {
     if (databaseClient === undefined) {
-      cryptographyService = getCryptographyService()
-      databaseClient = DatabaseClient({ environment, cryptographyService })
+      databaseClient = DatabaseClient({
+        knex: getKnex(),
+        databaseUtil: getDatabaseUtil(),
+        cryptographyService: getCryptographyService(),
+        environment
+      })
     }
     return databaseClient
   }
 
   const getUsersRepository = () => {
     if (usersRepository === undefined) {
-      const databaseClient = getDatabaseClient()
-      usersRepository = UsersRepository({ databaseClient })
+      usersRepository = UsersRepository({
+        knex: getKnex(),
+        databaseClient: getDatabaseClient()
+      })
     }
     return usersRepository
   }
@@ -53,22 +94,20 @@ export const IocContainer = ({
 
   const getEmailService = () => {
     if (emailService === undefined) {
-      const i18nService = getI18nService()
-      emailService = EmailService({ environment, i18nService })
+      emailService = EmailService({
+        i18nService: getI18nService(),
+        environment
+      })
     }
     return emailService
   }
 
   const getAuthService = () => {
     if (authService === undefined) {
-      const emailService = getEmailService()
-      const usersRepository = getUsersRepository()
-      const cryptographyService = getCryptographyService()
-
       authService = AuthService({
         environment,
-        usersRepository,
-        cryptographyService,
+        usersRepository: getUsersRepository(),
+        cryptographyService: getCryptographyService(),
         emailService
       })
     }
@@ -77,29 +116,33 @@ export const IocContainer = ({
 
   const getUsersService = () => {
     if (usersService === undefined) {
-      const usersRepository = getUsersRepository()
-      usersService = UsersService({ usersRepository })
+      usersService = UsersService({
+        usersRepository: getUsersRepository()
+      })
     }
     return usersService
   }
 
   const getAuthRouter = () => {
     if (authRouter === undefined) {
-      authService = getAuthService()
-      authRouter = AuthRouter({ authService })
+      authRouter = AuthRouter({
+        authService: getAuthService()
+      })
     }
     return authRouter
   }
 
   const getUsersRouter = () => {
     if (usersRouter === undefined) {
-      usersService = getUsersService()
-      usersRouter = UsersRouter({ usersService })
+      usersRouter = UsersRouter({
+        usersService: getUsersService()
+      })
     }
     return usersRouter
   }
 
   return ({
+    getDataInitializer,
     getDatabaseClient,
 
     getUsersRepository,

@@ -2,18 +2,23 @@ import { createError, ErrorName } from '../error.mjs'
 import moment from 'moment'
 
 export const AuthService = ({
-  environment,
+  environment: {
+    activationCodeValidPeriodMinutes
+  },
   usersRepository,
-  cryptographyService,
+  cryptographyService: {
+    createPasswordHash,
+    generateActivationCode,
+    isPasswordCorrect
+  },
   emailService
 }) => ({
   register: async ({ email, password }) => {
-    const passwordHash = await cryptographyService.createPasswordHash(password)
-
-    const activationCode = await cryptographyService.generateActivationCode()
+    const passwordHash = await createPasswordHash(password)
+    const activationCode = await generateActivationCode()
 
     const activationCodeExpiresOn = moment().add(
-      environment.activationCodeValidityPeriodMinutes,
+      activationCodeValidPeriodMinutes,
       'minutes'
     )
 
@@ -33,7 +38,7 @@ export const AuthService = ({
     const user = await usersRepository.getUserByEmail(email)
     if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-    const isPasswordOk = await cryptographyService.isPasswordCorrect(password, user.passwordHash)
+    const isPasswordOk = await isPasswordCorrect(password, user.passwordHash)
     if (!isPasswordOk) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
     return user

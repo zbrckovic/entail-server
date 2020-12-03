@@ -13,9 +13,9 @@ const bcryptSaltRounds = process.env.BCRYPT_SALT_ROUNDS !== undefined
   ? Number(process.env.BCRYPT_SALT_ROUNDS)
   : 10
 
-const activationCodeValidityPeriodMinutes =
-  process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES !== undefined
-    ? Number(process.env.ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES)
+const activationCodeValidPeriodMinutes =
+  process.env.ACTIVATION_CODE_VALID_PERIOD_MINUTES !== undefined
+    ? Number(process.env.ACTIVATION_CODE_VALID_PERIOD_MINUTES)
     : 60
 
 const emailServerHost = process.env.EMAIL_SERVER_HOST
@@ -36,7 +36,7 @@ export const environment = {
   pgPort,
   pgSchema,
   bcryptSaltRounds,
-  activationCodeValidityPeriodMinutes,
+  activationCodeValidPeriodMinutes,
   emailServerHost,
   emailServerPort,
   emailServerUsername,
