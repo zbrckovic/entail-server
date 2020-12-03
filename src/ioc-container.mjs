@@ -8,6 +8,7 @@ import { AuthService } from './auth/auth-service.mjs'
 import { AuthRouter } from './auth/auth-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
 
+// Resolves dependencies for each 'component' in the application.
 export const IocContainer = ({
   environment,
   databaseClient,

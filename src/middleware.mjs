@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator'
 import { ErrorName } from './error.mjs'
 
+// Validates request based on provided validators. In case errors exist returns json response with
+// validation messages.
 export const validate = (...validators) => {
   return [
     ...validators,

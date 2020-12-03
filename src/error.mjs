@@ -1,3 +1,4 @@
+// Main 'constructor' for errors in the application.
 export const createError = ({ name, message, extra }) => {
   const error = new Error(message)
   error.name = name
