@@ -7,8 +7,10 @@ describe('AuthService', () => {
   let iocContainer
   beforeEach(async () => {
     iocContainer = IocContainer({ environment, emailService: EmailServiceMock() })
-    await iocContainer.getDatabaseClient().rollbackMigrations()
-    await iocContainer.getDatabaseClient().migrateToLatest()
+    const databaseClient = iocContainer.getDatabaseClient()
+    await databaseClient.rollbackMigrations()
+    await databaseClient.migrateToLatest()
+    await iocContainer.getDataInitializer().init()
   })
 
   describe('register', () => {
