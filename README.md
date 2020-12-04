@@ -1,6 +1,6 @@
 # entail-server
 
-## Environment Variables
+## Environment variables
 
 Name                                    | Description                                              | Default
 ----------------------------------------|----------------------------------------------------------|--------
@@ -12,9 +12,9 @@ SUPER_ADMIN_EMAIL                       | *                                     
 SUPER_ADMIN_PASSWORD                    | *                                                        | `undefined`
 
 * If `SUPER_ADMIN_EMAIL` and `SUPER_ADMIN_PASSWORD` are defined this user will be created as super
-  admin on application startup if it doesn't already exist.
+  admin on application startup (unless it already exist).
 
-### SMTP Email service provider
+### SMTP email service provider
 
 Name                  | Default
 ----------------------|--------
