@@ -9,7 +9,7 @@
     "test:integration": "jest --runInBand -c jest.config.integration.js",
     "test:e2e": "jest --runInBand -c jest.config.e2e.js",
     "lint": "standard",
-    "start": "nodemon -r dotenv/config src/index.mjs",
+    "start": "nodemon -r dotenv/config src/main.mjs",
     "migrate:latest": "node -r dotenv/config src/scripts/migrate-latest.mjs",
     "migrate:rollback": "node -r dotenv/config src/scripts/migrate-rollback.mjs"
   },

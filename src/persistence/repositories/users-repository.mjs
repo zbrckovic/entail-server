@@ -1,5 +1,5 @@
-import { PgErrorCodes } from '../persistence/misc.mjs'
-import { createError, ErrorName } from '../error.mjs'
+import { PgErrorCodes } from '../database/misc.mjs'
+import { createError, ErrorName } from '../../global/error.mjs'
 
 export const UsersRepository = ({ knex, databaseClient }) => {
   const table = databaseClient.getTableName('user')

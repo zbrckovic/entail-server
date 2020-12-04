@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { ErrorName } from '../error.mjs'
+import { ErrorName } from '../../global/error.mjs'
 import { body } from 'express-validator'
 import { validate } from '../middleware.mjs'
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../constants.mjs'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../global/constants.mjs'
 
 export const AuthRouter = ({ authService }) => {
   const router = new Router()

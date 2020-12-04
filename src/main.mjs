@@ -5,24 +5,17 @@ import { IocContainer } from './ioc-container.mjs'
 (async () => {
   const {
     getDatabaseClient,
+    getDataInitializer,
     getI18nService,
-    getAuthRouter,
-    getUsersRouter,
-    getDataInitializer
+    getWebInitializer,
   } = IocContainer({ environment })
 
-  const databaseClient = getDatabaseClient()
-  await databaseClient.migrateToLatest()
+  await getDatabaseClient().migrateToLatest()
   await getDataInitializer().init()
-
   await getI18nService().init()
 
   const app = express()
-
-  app.use(express.json({ type: 'application/json' }))
-
-  app.use('/auth', getAuthRouter())
-  app.use('/users', getUsersRouter())
+  getWebInitializer().init({ app })
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

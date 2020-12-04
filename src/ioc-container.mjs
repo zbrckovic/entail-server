@@ -1,19 +1,21 @@
-import { DatabaseClient } from './persistence/database-client.mjs'
-import { UsersRepository } from './repositories/users-repository.mjs'
-import { UsersService } from './users/users-service.mjs'
-import { UsersRouter } from './users/users-router.mjs'
+import { DatabaseClient } from './persistence/database/database-client.mjs'
+import { UsersRepository } from './persistence/repositories/users-repository.mjs'
+import { UsersService } from './core/users/users-service.mjs'
+import { UsersRouter } from './web/routers/users-router.mjs'
 import { CryptographyService } from './utils/cryptography-service.mjs'
-import { EmailService } from './auth/email-service.mjs'
-import { AuthService } from './auth/auth-service.mjs'
-import { AuthRouter } from './auth/auth-router.mjs'
+import { EmailService } from './external/email-service.mjs'
+import { AuthService } from './core/users/auth-service.mjs'
+import { AuthRouter } from './web/routers/auth-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
-import { DatabaseUtil } from './persistence/database-util.mjs'
-import { createKnex } from './persistence/knex.mjs'
-import { DataInitializer } from './persistence/data-initializer.mjs'
+import { DatabaseUtil } from './persistence/database/database-util.mjs'
+import { createKnex } from './persistence/database/knex.mjs'
+import { DataInitializer } from './persistence/database/data-initializer.mjs'
+import { WebInitializer } from './web/web-initializer.mjs'
 
 // Resolves dependencies for each 'component' in the application.
 export const IocContainer = ({
   environment,
+  webInitializer,
   knex,
   databaseUtil,
   dataInitializer,
@@ -141,6 +143,16 @@ export const IocContainer = ({
     return usersRouter
   }
 
+  const getWebInitializer = () => {
+    if (webInitializer === undefined) {
+      webInitializer = WebInitializer({
+        authRouter: getAuthRouter(),
+        usersRouter: getUsersRouter()
+      })
+    }
+    return webInitializer
+  }
+
   return ({
     getDataInitializer,
     getDatabaseClient,
@@ -154,6 +166,7 @@ export const IocContainer = ({
     getAuthService,
     getUsersService,
 
+    getWebInitializer,
     getAuthRouter,
     getUsersRouter
   })

@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator'
-import { ErrorName } from './error.mjs'
+import { ErrorName } from '../global/error.mjs'
 
 // Validates request based on provided validators. In case errors exist returns json response with
 // validation messages.

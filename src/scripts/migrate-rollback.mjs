@@ -1,5 +1,5 @@
 import { environment } from '../environment.mjs'
-import { DatabaseClient } from '../persistence/database-client.mjs'
+import { DatabaseClient } from '../persistence/database/database-client.mjs'
 
 const databaseClient = DatabaseClient({ environment })
 

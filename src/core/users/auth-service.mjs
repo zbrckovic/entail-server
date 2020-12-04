@@ -1,4 +1,4 @@
-import { createError, ErrorName } from '../error.mjs'
+import { createError, ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 
 export const AuthService = ({

@@ -1,4 +1,4 @@
-import { environment } from '../environment.mjs'
+import { environment } from '../../environment.mjs'
 
 const migrations = [
   [

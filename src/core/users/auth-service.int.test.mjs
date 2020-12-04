@@ -1,6 +1,6 @@
-import { environment } from '../environment.mjs'
-import { IocContainer } from '../ioc-container.mjs'
-import { ErrorName } from '../error.mjs'
+import { environment } from '../../environment.mjs'
+import { IocContainer } from '../../ioc-container.mjs'
+import { ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 
 describe('AuthService', () => {

@@ -1,4 +1,4 @@
-import { Role } from '../users/role.mjs'
+import { Role } from '../../core/users/role.mjs'
 
 // Stores data which has to be present for application to work properly.
 export const DataInitializer = ({
