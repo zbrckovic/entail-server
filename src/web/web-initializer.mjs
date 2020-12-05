@@ -1,10 +1,10 @@
 import express from 'express'
 
-export const WebInitializer = ({ authRouter, usersRouter }) => ({
+export const WebInitializer = ({ authenticationRouter, usersRouter }) => ({
   init: app => {
     app.use(express.json({ type: 'application/json' }))
 
-    app.use('/auth', authRouter)
+    app.use('/auth', authenticationRouter)
     app.use('/users', usersRouter)
 
     return app

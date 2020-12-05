@@ -1,7 +1,7 @@
 import { createError, ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 
-export const AuthService = ({
+export const AuthenticationService = ({
   environment: {
     activationCodeValidPeriodMinutes
   },
@@ -53,7 +53,9 @@ export const AuthService = ({
       throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
     }
 
-    if (user.activationCode !== activationCode) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+    if (user.activationCode !== activationCode) {
+      throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+    }
 
     await usersRepository.updateUser({
       id: user.id,

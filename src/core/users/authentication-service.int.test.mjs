@@ -3,7 +3,7 @@ import { IocContainer } from '../../ioc-container.mjs'
 import { ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 
-describe('AuthService', () => {
+describe('AuthenticationService', () => {
   let iocContainer
   beforeEach(async () => {
     iocContainer = IocContainer({ environment, emailService: EmailServiceMock() })
@@ -26,29 +26,29 @@ describe('AuthService', () => {
     })
 
     test('passes for unused email', async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
       const email = 'raffaello@email.com'
       const password = 'AAAA'
 
-      const registeredUser = await authService.register(({ email, password }))
+      const registeredUser = await authenticationService.register(({ email, password }))
 
       expect(registeredUser).toBeDefined()
     })
 
     test(`throws ${ErrorName.EMAIL_ALREADY_USED} for used email`, async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
       const email = 'donatello@email.com'
       const password = 'AAAA'
 
-      await expect(authService.register(({ email, password })))
+      await expect(authenticationService.register(({ email, password })))
         .rejects
         .toThrow(ErrorName.EMAIL_ALREADY_USED)
     })
 
     test('produces inactive user with prepared activation code', async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
       const email = 'raffaello@email.com'
       const password = 'AAAA'
@@ -57,7 +57,7 @@ describe('AuthService', () => {
         isActivated,
         activationCode,
         activationCodeExpiresOn
-      } = await authService.register(({ email, password }))
+      } = await authenticationService.register(({ email, password }))
 
       expect(isActivated).toBe(false)
       expect(activationCode).toBeDefined()
@@ -70,29 +70,29 @@ describe('AuthService', () => {
     const password = 'AAAA'
 
     beforeEach(async () => {
-      await iocContainer.getAuthService().register(({ email, password }))
+      await iocContainer.getAuthenticationService().register(({ email, password }))
     })
 
     test(`throws ${ErrorName.INVALID_CREDENTIALS} for wrong email`, async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
-      await expect(authService.login({ email: 'donatello', password }))
+      await expect(authenticationService.login({ email: 'donatello', password }))
         .rejects
         .toThrow(ErrorName.INVALID_CREDENTIALS)
     })
 
     test(`throws ${ErrorName.INVALID_CREDENTIALS} for wrong password`, async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
-      await expect(authService.login({ email, password: 'BBBB' }))
+      await expect(authenticationService.login({ email, password: 'BBBB' }))
         .rejects
         .toThrow(ErrorName.INVALID_CREDENTIALS)
     })
 
     test('passes for correct credentials.', async () => {
-      const authService = iocContainer.getAuthService()
+      const authenticationService = iocContainer.getAuthenticationService()
 
-      const user = await authService.login({ email, password })
+      const user = await authenticationService.login({ email, password })
 
       expect(user).toBeDefined()
     })
@@ -104,12 +104,12 @@ describe('AuthService', () => {
     let activationCode
 
     beforeEach(async () => {
-      await iocContainer.getAuthService().register(({ email, password }))
+      await iocContainer.getAuthenticationService().register(({ email, password }))
       activationCode = iocContainer.getEmailService().getLastSentActivationCode()
     })
 
     test('passes for correct activation code', () => {
-      return expect(iocContainer.getAuthService().activate(({ email, activationCode })))
+      return expect(iocContainer.getAuthenticationService().activate(({ email, activationCode })))
         .resolves
         .toBeUndefined()
     })
@@ -117,14 +117,17 @@ describe('AuthService', () => {
     test(`throws ${ErrorName.INVALID_CREDENTIALS} for invalid email`, async () => {
       const invalidEmail = 'donatello@email.com'
       await expect(
-        iocContainer.getAuthService().activate(({ email: invalidEmail, activationCode }))
+        iocContainer.getAuthenticationService().activate(({ email: invalidEmail, activationCode }))
       )
         .rejects
         .toThrow(ErrorName.INVALID_CREDENTIALS)
     })
 
     test(`throws ${ErrorName.INVALID_CREDENTIALS} for invalid activation code`, async () => {
-      await expect(iocContainer.getAuthService().activate(({ email, activationCode: 'ABCD' })))
+      await expect(iocContainer.getAuthenticationService().activate(({
+        email,
+        activationCode: 'ABCD'
+      })))
         .rejects
         .toThrow(ErrorName.INVALID_CREDENTIALS)
     })

@@ -4,8 +4,8 @@ import { UsersService } from './core/users/users-service.mjs'
 import { UsersRouter } from './web/routers/users-router.mjs'
 import { CryptographyService } from './utils/cryptography-service.mjs'
 import { EmailService } from './external/email-service.mjs'
-import { AuthService } from './core/users/auth-service.mjs'
-import { AuthRouter } from './web/routers/auth-router.mjs'
+import { AuthenticationService } from './core/users/authentication-service.mjs'
+import { AuthenticationRouter } from './web/routers/authentication-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
 import { DatabaseUtil } from './persistence/database/database-util.mjs'
 import { createKnex } from './persistence/database/knex.mjs'
@@ -23,9 +23,9 @@ export const IocContainer = ({
   usersRepository,
   cryptographyService,
   emailService,
-  authService,
+  authenticationService,
   usersService,
-  authRouter,
+  authenticationRouter,
   usersRouter,
   i18nService
 }) => {
@@ -104,16 +104,16 @@ export const IocContainer = ({
     return emailService
   }
 
-  const getAuthService = () => {
-    if (authService === undefined) {
-      authService = AuthService({
+  const getAuthenticationService = () => {
+    if (authenticationService === undefined) {
+      authenticationService = AuthenticationService({
         environment,
         usersRepository: getUsersRepository(),
         cryptographyService: getCryptographyService(),
         emailService
       })
     }
-    return authService
+    return authenticationService
   }
 
   const getUsersService = () => {
@@ -125,13 +125,13 @@ export const IocContainer = ({
     return usersService
   }
 
-  const getAuthRouter = () => {
-    if (authRouter === undefined) {
-      authRouter = AuthRouter({
-        authService: getAuthService()
+  const getAuthenticationRouter = () => {
+    if (authenticationRouter === undefined) {
+      authenticationRouter = AuthenticationRouter({
+        authenticationService: getAuthenticationService()
       })
     }
-    return authRouter
+    return authenticationRouter
   }
 
   const getUsersRouter = () => {
@@ -146,7 +146,7 @@ export const IocContainer = ({
   const getWebInitializer = () => {
     if (webInitializer === undefined) {
       webInitializer = WebInitializer({
-        authRouter: getAuthRouter(),
+        authenticationRouter: getAuthenticationRouter(),
         usersRouter: getUsersRouter()
       })
     }
@@ -163,11 +163,11 @@ export const IocContainer = ({
     getEmailService,
     getCryptographyService,
 
-    getAuthService,
+    getAuthenticationService,
     getUsersService,
 
     getWebInitializer,
-    getAuthRouter,
+    getAuthenticationRouter,
     getUsersRouter
   })
 }
