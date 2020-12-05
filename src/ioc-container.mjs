@@ -7,8 +7,6 @@ import { EmailService } from './external/email-service.mjs'
 import { AuthenticationService } from './core/users/authentication-service.mjs'
 import { AuthenticationRouter } from './web/routers/authentication-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
-import { DatabaseUtil } from './persistence/database/database-util.mjs'
-import { createKnex } from './persistence/database/knex.mjs'
 import { DataInitializer } from './persistence/database/data-initializer.mjs'
 import { WebInitializer } from './web/web-initializer.mjs'
 
@@ -16,8 +14,6 @@ import { WebInitializer } from './web/web-initializer.mjs'
 export const IocContainer = ({
   environment,
   webInitializer,
-  knex,
-  databaseUtil,
   dataInitializer,
   databaseClient,
   usersRepository,
@@ -29,28 +25,17 @@ export const IocContainer = ({
   usersRouter,
   i18nService
 }) => {
-  const getKnex = () => {
-    if (knex === undefined) {
-      knex = createKnex({ environment })
+  const getDatabaseClient = () => {
+    if (databaseClient === undefined) {
+      databaseClient = DatabaseClient({ environment })
     }
-    return knex
-  }
-
-  const getDatabaseUtil = () => {
-    if (databaseUtil === undefined) {
-      databaseUtil = DatabaseUtil({
-        knex: getKnex(),
-        environment
-      })
-    }
-    return databaseUtil
+    return databaseClient
   }
 
   const getDataInitializer = () => {
     if (dataInitializer === undefined) {
       dataInitializer = DataInitializer({
-        knex: getKnex(),
-        databaseUtil: getDatabaseUtil(),
+        databaseClient: getDatabaseClient(),
         cryptographyService: getCryptographyService(),
         environment
       })
@@ -58,22 +43,9 @@ export const IocContainer = ({
     return dataInitializer
   }
 
-  const getDatabaseClient = () => {
-    if (databaseClient === undefined) {
-      databaseClient = DatabaseClient({
-        knex: getKnex(),
-        databaseUtil: getDatabaseUtil(),
-        cryptographyService: getCryptographyService(),
-        environment
-      })
-    }
-    return databaseClient
-  }
-
   const getUsersRepository = () => {
     if (usersRepository === undefined) {
       usersRepository = UsersRepository({
-        knex: getKnex(),
         databaseClient: getDatabaseClient()
       })
     }

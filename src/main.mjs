@@ -3,19 +3,13 @@ import { environment } from './environment.mjs'
 import { IocContainer } from './ioc-container.mjs'
 
 (async () => {
-  const {
-    getDatabaseClient,
-    getDataInitializer,
-    getI18nService,
-    getWebInitializer,
-  } = IocContainer({ environment })
-
-  await getDatabaseClient().migrateToLatest()
-  await getDataInitializer().init()
-  await getI18nService().init()
+  const iocContainer = IocContainer({ environment })
+  await iocContainer.getDatabaseClient().migrateToLatest()
+  await iocContainer.getDataInitializer().initializeData()
+  await iocContainer.getI18nService().init()
 
   const app = express()
-  getWebInitializer().init({ app })
+  iocContainer.getWebInitializer().init({ app })
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

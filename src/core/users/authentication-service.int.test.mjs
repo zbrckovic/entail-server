@@ -6,11 +6,11 @@ import moment from 'moment'
 describe('AuthenticationService', () => {
   let iocContainer
   beforeEach(async () => {
-    iocContainer = IocContainer({ environment, emailService: EmailServiceMock() })
+    iocContainer = IocContainer({ emailService: EmailServiceMock(), environment })
     const databaseClient = iocContainer.getDatabaseClient()
     await databaseClient.rollbackMigrations()
     await databaseClient.migrateToLatest()
-    await iocContainer.getDataInitializer().init()
+    await iocContainer.getDataInitializer().initializeData()
   })
 
   describe('register', () => {

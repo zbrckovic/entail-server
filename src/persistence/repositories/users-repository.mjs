@@ -1,29 +1,37 @@
 import { PgErrorCodes } from '../database/misc.mjs'
 import { createError, ErrorName } from '../../global/error.mjs'
 
-export const UsersRepository = ({ knex, databaseClient }) => {
+export const UsersRepository = ({ databaseClient }) => {
   const table = databaseClient.getTableName('user')
 
   return {
     getUsers: async () => {
-      const userRecords = await knex(table).select('*')
-      return userRecords.map(databaseClient.fromRecord)
+      const userRecords = await databaseClient
+        .knex(table)
+        .select('*')
+
+      return userRecords.map(record => databaseClient.fromRecord(record))
     },
 
     getUserById: async id => {
-      const [userRecord] = await knex(table).where({ id }).select('*')
+      const [userRecord] = await databaseClient.knex(table).where({ id }).select('*')
       return userRecord === undefined ? undefined : databaseClient.fromRecord(userRecord)
     },
 
     getUserByEmail: async email => {
-      const [userRecord] = await knex(table).where({ email }).select('*')
+      const [userRecord] = await databaseClient.knex(table).where({ email }).select('*')
       return userRecord === undefined ? undefined : databaseClient.fromRecord(userRecord)
     },
 
     createUser: async user => {
       try {
         const userRecord = databaseClient.toRecord(user)
-        const [createdUserRecord] = await knex(table).insert(userRecord).returning('*')
+
+        const [createdUserRecord] = await databaseClient
+          .knex(table)
+          .insert(userRecord)
+          .returning('*')
+
         return databaseClient.fromRecord(createdUserRecord)
       } catch (error) {
         if (
@@ -39,7 +47,7 @@ export const UsersRepository = ({ knex, databaseClient }) => {
     updateUser: async ({ id, ...propsToUpdate }) => {
       const recordPropsToUpdate = databaseClient.toRecord(propsToUpdate)
 
-      const [updatedUserRecord] = await knex(table)
+      const [updatedUserRecord] = await databaseClient.knex(table)
         .where({ id })
         .update(recordPropsToUpdate)
         .returning('*')
@@ -48,7 +56,12 @@ export const UsersRepository = ({ knex, databaseClient }) => {
     },
 
     deleteUser: async id => {
-      const [deletedUserRecord] = await knex(table).where({ id }).del().returning('*')
+      const [deletedUserRecord] = await databaseClient
+        .knex(table)
+        .where({ id })
+        .del()
+        .returning('*')
+
       return databaseClient.fromRecord(deletedUserRecord)
     }
   }

@@ -1,55 +1,62 @@
 import { Role } from '../../core/users/role.mjs'
+import stampit from '@stamp/it'
 
 // Stores data which has to be present for application to work properly.
-export const DataInitializer = ({
-  knex,
-  databaseUtil: {
-    getTableName,
-    toRecord,
-    fromRecord
-  },
-  cryptographyService: {
-    createPasswordHash
-  },
-  environment: {
-    superAdminEmail,
-    superAdminPassword
-  }
-}) => ({
-  init: async () => {
-    const tableRole = getTableName('role')
-    const tableUser = getTableName('user')
-    const tableUserRole = getTableName('user_role')
+export const DataInitializer = stampit()
+  .init(function ({ databaseClient, cryptographyService, environment }) {
+    this.client = databaseClient
+    this.cryptographyService = cryptographyService
+    this.environment = environment
+  })
+  .methods({
+    async initializeData () {
+      const tableRole = this.client.getTableName('role')
+      const tableUser = this.client.getTableName('user')
+      const tableUserRole = this.client.getTableName('user_role')
 
-    const roles = Object.keys(Role).map(name => ({ name }))
-    await knex(tableRole).insert(roles.map(toRecord)).onConflict('name').ignore()
+      const roleRecords = Object
+        .keys(Role)
+        .map(name => this.client.toRecord({ name }))
 
-    if (superAdminEmail !== undefined && superAdminPassword !== undefined) {
-      const [superAdminRecord] = await knex(tableUser)
-        .insert(
-          toRecord({
-            email: superAdminEmail,
-            passwordHash: await createPasswordHash(superAdminPassword),
-            isActivated: true
-          }),
-          ['id']
-        )
+      await this.client.knex(tableRole)
+        .insert(roleRecords)
+        .onConflict('name')
+        .ignore()
+
+      const shouldCreateSuperAdmin = (
+        this.environment.superAdminEmail !== undefined &&
+        this.environment.superAdminPassword !== undefined
+      )
+
+      if (!shouldCreateSuperAdmin) return
+
+      const passwordHash = await this.cryptographyService.createPasswordHash(
+        this.environment.superAdminPassword
+      )
+      const superAdminRecordToInsert = this.client.toRecord({
+        email: this.environment.superAdminEmail,
+        passwordHash,
+        isActivated: true
+      })
+
+      const [insertedSuperAdminRecord] = await this.client.knex(tableUser)
+        .insert(superAdminRecordToInsert, ['id'])
         .onConflict('email')
         .ignore()
 
-      if (superAdminRecord !== undefined) {
-        const superAdminId = fromRecord(superAdminRecord).id
+      if (insertedSuperAdminRecord === undefined) return
 
-        const [superAdminRoleRecord] = await knex(tableRole)
-          .where({ name: Role.SUPER_ADMIN })
-          .select(['id'])
-        const superAdminRoleId = fromRecord(superAdminRoleRecord).id
+      const userId = this.client.fromRecord(insertedSuperAdminRecord).id
 
-        await knex(tableUserRole)
-          .insert(toRecord({ userId: superAdminId, roleId: superAdminRoleId }))
-          .onConflict(['user_id', 'role_id'])
-          .ignore()
-      }
+      const [roleRecord] = await this.client.knex(tableRole)
+        .where({ name: Role.SUPER_ADMIN })
+        .select(['id'])
+
+      const roleId = this.client.fromRecord(roleRecord).id
+
+      await this.client.knex(tableUserRole)
+        .insert(this.client.toRecord({ userId, roleId }))
+        .onConflict(['user_id', 'role_id'])
+        .ignore()
     }
-  }
-})
+  })

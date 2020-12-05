@@ -1,21 +1,74 @@
+import stampit from '@stamp/it'
+import knexFactory from 'knex'
+import _ from 'lodash'
+import { DB_DEFAULT_VALUE } from './misc.mjs'
+import moment from 'moment'
 import { migrationSource } from './migrations.mjs'
 
-// Creates knex instance to be used by repositories and provides API for basic administrative
-// operations with database.
-export const DatabaseClient = ({ knex, databaseUtil, environment: { pgSchema } }) => {
-  const migrationConfig = { migrationSource, schemaName: pgSchema }
+export const DatabaseClient = stampit()
+  .init(function ({ environment }) {
+    this.schemaName = environment.pgSchema
 
-  const knexMigrate = knex.migrate
-  const knexSchema = knex.schema.withSchema(pgSchema)
+    this.knex = knexFactory({
+      client: 'pg',
+      connection: {
+        host: environment.pgHost,
+        user: environment.pgUser,
+        password: environment.pgPassword,
+        database: environment.pgDatabase,
+        port: environment.pgPort
+      }
+    })
 
-  return {
-    ...databaseUtil,
+    this.migrationConfig = { migrationSource, schemaName: this.schemaName }
+  })
+  .methods({
+    // Transforms object to the format suitable for database. It changes all keys to snake case.
+    toRecord (object) {
+      const result = {}
 
-    destroy: () => new Promise(resolve => { knex.destroy(resolve) }),
+      _.forEach(object, (value, key) => {
+        result[this._toRecordKey(key)] = this._toRecordValue(value)
+      })
 
-    migrateToLatest: async () => knexMigrate.latest(migrationConfig),
-    rollbackMigrations: async () => knexMigrate.rollback(migrationConfig),
+      return result
+    },
+    _toRecordKey (key) { return _.snakeCase(key) },
+    _toRecordValue (value) {
+      if (value === DB_DEFAULT_VALUE) return this.knex.raw('DEFAULT')
+      if (moment.isMoment(value)) return value.toDate()
+      return value
+    },
 
-    hasTable: async table => knexSchema.hasTable(table),
-  }
-}
+    // Transforms record to the format suitable for application. It changes all keys to camel case.
+    fromRecord (record) {
+      const result = {}
+
+      _.forEach(record, (value, key) => {
+        result[this._fromRecordKey(key)] = this._fromRecordValue(value)
+      })
+
+      return result
+    },
+    _fromRecordKey (key) {return _.camelCase(key) },
+    _fromRecordValue (value) {
+      if (value === null) return undefined
+      if (value instanceof Date) return moment(value)
+      return value
+    },
+
+    getTableName (name) { return `${this.schemaName}.${name}` },
+
+    async destroy () {
+      return new Promise(resolve => { this.knex.destroy(resolve) })
+    },
+    async migrateToLatest () {
+      return await this.knex.migrate.latest(this.migrationConfig)
+    },
+    async rollbackMigrations () {
+      return await this.knex.migrate.rollback(this.migrationConfig)
+    },
+    async hasTable (table) {
+      return await this.knex.schema.withSchema(this.schemaName).hasTable(table)
+    },
+  })
