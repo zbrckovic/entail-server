@@ -1,9 +1,10 @@
 import { PgErrorCodes } from '../database/misc.mjs'
 import { createError, ErrorName } from '../../global/error.mjs'
-import { DatabaseUtil } from '../database/database-util.mjs'
 import stampit from '@stamp/it'
+import { Repository } from './repository.mjs'
 
-export const UsersRepository = stampit(DatabaseUtil, {
+export const UsersRepository = stampit(Repository, {
+  name: 'UsersRepository',
   init () {
     this.table = this.getTableName('user')
   },

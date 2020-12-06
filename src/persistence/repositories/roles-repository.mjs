@@ -1,7 +1,8 @@
 import stampit from '@stamp/it'
-import { DatabaseUtil } from '../database/database-util.mjs'
+import { Repository } from './repository.mjs'
 
-export const RolesRepository = stampit(DatabaseUtil, {
+export const RolesRepository = stampit(Repository, {
+  name: 'RolesRepository',
   init () {
     this.table = this.getTableName('role')
   },

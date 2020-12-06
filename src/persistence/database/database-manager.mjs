@@ -2,6 +2,7 @@ import stampit from '@stamp/it'
 import { migrationSource } from './migrations.mjs'
 
 export const DatabaseManager = stampit({
+  name: 'DatabaseManager',
   init ({ knex, environment }) {
     this.knex = knex
     this.environment = environment

@@ -4,6 +4,7 @@ import { DatabaseUtil } from './database-util.mjs'
 
 // Stores data which has to be present for application to work properly.
 export const DataInitializer = stampit(DatabaseUtil, {
+  name: 'DataInitializer',
   init ({ cryptographyService}) {
     this.cryptographyService = cryptographyService
   },

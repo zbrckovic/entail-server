@@ -4,6 +4,7 @@ import moment from 'moment'
 import { DB_DEFAULT_VALUE } from './misc.mjs'
 
 export const DatabaseUtil = stampit({
+  name: 'DatabaseUtil',
   init ({ knex, environment }) {
     this.knex = knex
     this.environment = environment

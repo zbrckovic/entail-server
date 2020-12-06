@@ -45,23 +45,25 @@ export const AuthenticationService = stampit({
     },
 
     async activate ({ email, activationCode }) {
-      const user = await this.usersRepository.getUserByEmail(email)
-      if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      return await this.usersRepository.withTransaction(async usersRepository => {
+        const user = await usersRepository.getUserByEmail(email)
+        if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-      if (user.isActivated) throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
-      if (user.activationCodeExpiresOn.isBefore(moment())) {
-        throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
-      }
+        if (user.isActivated) throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
+        if (user.activationCodeExpiresOn.isBefore(moment())) {
+          throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
+        }
 
-      if (user.activationCode !== activationCode) {
-        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-      }
+        if (user.activationCode !== activationCode) {
+          throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+        }
 
-      await this.usersRepository.updateUser({
-        id: user.id,
-        isActivated: true,
-        activationCode: null,
-        activationCodeExpiresOn: null
+        await usersRepository.updateUser({
+          id: user.id,
+          isActivated: true,
+          activationCode: null,
+          activationCodeExpiresOn: null
+        })
       })
     }
   }
