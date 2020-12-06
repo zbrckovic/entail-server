@@ -1,5 +1,10 @@
-export const UsersService = ({ usersRepository }) => {
-  const getAll = async () => usersRepository.getUsers()
+import stampit from '@stamp/it'
 
-  return { getAll }
-}
+export const UsersService = stampit({
+  init ({ usersRepository }) {
+    this.usersRepository = usersRepository
+  },
+  methods: {
+    async getAll () { return await this.usersRepository.getUsers() }
+  }
+})

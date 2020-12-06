@@ -2,13 +2,13 @@ import { Role } from '../../core/users/role.mjs'
 import stampit from '@stamp/it'
 
 // Stores data which has to be present for application to work properly.
-export const DataInitializer = stampit()
-  .init(function ({ databaseClient, cryptographyService, environment }) {
+export const DataInitializer = stampit({
+  init ({ databaseClient, cryptographyService, environment }) {
     this.client = databaseClient
     this.cryptographyService = cryptographyService
     this.environment = environment
-  })
-  .methods({
+  },
+  methods: {
     async initializeData () {
       const tableRole = this.client.getTableName('role')
       const tableUser = this.client.getTableName('user')
@@ -59,4 +59,5 @@ export const DataInitializer = stampit()
         .onConflict(['user_id', 'role_id'])
         .ignore()
     }
-  })
+  }
+})

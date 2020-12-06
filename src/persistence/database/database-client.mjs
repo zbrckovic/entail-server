@@ -5,8 +5,8 @@ import { DB_DEFAULT_VALUE } from './misc.mjs'
 import moment from 'moment'
 import { migrationSource } from './migrations.mjs'
 
-export const DatabaseClient = stampit()
-  .init(function ({ environment }) {
+export const DatabaseClient = stampit({
+  init ({ environment }) {
     this.schemaName = environment.pgSchema
 
     this.knex = knexFactory({
@@ -21,8 +21,8 @@ export const DatabaseClient = stampit()
     })
 
     this.migrationConfig = { migrationSource, schemaName: this.schemaName }
-  })
-  .methods({
+  },
+  methods: {
     // Transforms object to the format suitable for database. It changes all keys to snake case.
     toRecord (object) {
       const result = {}
@@ -70,5 +70,6 @@ export const DatabaseClient = stampit()
     },
     async hasTable (table) {
       return await this.knex.schema.withSchema(this.schemaName).hasTable(table)
-    },
-  })
+    }
+  }
+})

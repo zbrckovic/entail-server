@@ -1,35 +1,32 @@
 import nodemailer from 'nodemailer'
+import stampit from '@stamp/it'
 
-export const EmailService = ({ environment, i18nService }) => {
-  const t = i18nService.getT()
+export const EmailService = stampit({
+  init ({ environment, i18nService }) {
+    this.t = i18nService.getT()
 
-  const {
-    emailServerHost,
-    emailServerPort,
-    emailServerUsername,
-    emailServerPassword
-  } = environment
+    this.transport = nodemailer.createTransport({
+      pool: true,
+      host: environment.emailServerHost,
+      port: environment.emailServerPort,
+      auth: {
+        user: environment.emailServerUsername,
+        pass: environment.emailServerPassword
+      }
+    })
+  },
+  methods: {
+    async verifyConnection () {
+      return await this.transport.verify()
+    },
 
-  const transport = nodemailer.createTransport({
-    pool: true,
-    host: emailServerHost,
-    port: emailServerPort,
-    auth: {
-      user: emailServerUsername,
-      pass: emailServerPassword
+    async sendActivationCode (activationCode, recipientAddress) {
+      const from = 'authentication@entail.com'
+      const to = recipientAddress
+      const subject = this.t('activationEmail.subject')
+      const text = this.t('activationEmail.text')
+
+      return await this.transport.sendMail({ from, to, subject, text })
     }
-  })
-
-  const verifyConnection = async () => transport.verify()
-
-  const sendActivationCode = async (activationCode, recipientAddress) => {
-    const from = 'authentication@entail.com'
-    const to = recipientAddress
-    const subject = t('activationEmail.subject')
-    const text = t('activationEmail.text')
-
-    return await transport.sendMail({ from, to, subject, text })
   }
-
-  return { sendActivationCode, verifyConnection }
-}
+})
