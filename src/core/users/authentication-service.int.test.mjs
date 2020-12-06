@@ -7,9 +7,9 @@ describe('AuthenticationService', () => {
   let iocContainer
   beforeEach(async () => {
     iocContainer = IocContainer({ emailService: EmailServiceMock(), environment })
-    const databaseClient = iocContainer.getDatabaseClient()
-    await databaseClient.rollbackMigrations()
-    await databaseClient.migrateToLatest()
+    const databaseManager = iocContainer.getDatabaseManager()
+    await databaseManager.rollbackMigrations()
+    await databaseManager.migrateToLatest()
     await iocContainer.getDataInitializer().initializeData()
   })
 
@@ -134,9 +134,9 @@ describe('AuthenticationService', () => {
   })
 
   afterEach(async () => {
-    const databaseClient = iocContainer.getDatabaseClient()
-    await databaseClient.rollbackMigrations()
-    await databaseClient.destroy()
+    const databaseManager = iocContainer.getDatabaseManager()
+    await databaseManager.rollbackMigrations()
+    await databaseManager.destroy()
   })
 })
 

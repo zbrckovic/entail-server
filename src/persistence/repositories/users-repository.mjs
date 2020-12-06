@@ -1,38 +1,35 @@
 import { PgErrorCodes } from '../database/misc.mjs'
 import { createError, ErrorName } from '../../global/error.mjs'
+import { DatabaseUtil } from '../database/database-util.mjs'
+import stampit from '@stamp/it'
 
-export const UsersRepository = ({ databaseClient }) => {
-  const table = databaseClient.getTableName('user')
-
-  return {
-    getUsers: async () => {
-      const userRecords = await databaseClient
-        .knex(table)
-        .select('*')
-
-      return userRecords.map(record => databaseClient.fromRecord(record))
+export const UsersRepository = stampit(DatabaseUtil, {
+  init () {
+    this.table = this.getTableName('user')
+  },
+  methods: {
+    async getUsers () {
+      const userRecords = await this.knex(this.table).select('*')
+      return userRecords.map(record => this.fromRecord(record))
     },
 
-    getUserById: async id => {
-      const [userRecord] = await databaseClient.knex(table).where({ id }).select('*')
-      return userRecord === undefined ? undefined : databaseClient.fromRecord(userRecord)
+    async getUserById (id) {
+      const [userRecord] = await this.knex(this.table).where({ id }).select('*')
+      return userRecord === undefined ? undefined : this.fromRecord(userRecord)
     },
 
-    getUserByEmail: async email => {
-      const [userRecord] = await databaseClient.knex(table).where({ email }).select('*')
-      return userRecord === undefined ? undefined : databaseClient.fromRecord(userRecord)
+    async getUserByEmail (email) {
+      const [userRecord] = await this.knex(this.table).where({ email }).select('*')
+      return userRecord === undefined ? undefined : this.fromRecord(userRecord)
     },
 
-    createUser: async user => {
+    async createUser (user) {
       try {
-        const userRecord = databaseClient.toRecord(user)
+        const userRecord = this.toRecord(user)
 
-        const [createdUserRecord] = await databaseClient
-          .knex(table)
-          .insert(userRecord)
-          .returning('*')
+        const [createdUserRecord] = await this.knex(this.table).insert(userRecord).returning('*')
 
-        return databaseClient.fromRecord(createdUserRecord)
+        return this.fromRecord(createdUserRecord)
       } catch (error) {
         if (
           error.code === PgErrorCodes.UNIQUE_VIOLATION &&
@@ -44,25 +41,24 @@ export const UsersRepository = ({ databaseClient }) => {
       }
     },
 
-    updateUser: async ({ id, ...propsToUpdate }) => {
-      const recordPropsToUpdate = databaseClient.toRecord(propsToUpdate)
+    async updateUser ({ id, ...propsToUpdate }) {
+      const recordPropsToUpdate = this.toRecord(propsToUpdate)
 
-      const [updatedUserRecord] = await databaseClient.knex(table)
+      const [updatedUserRecord] = await this.knex(this.table)
         .where({ id })
         .update(recordPropsToUpdate)
         .returning('*')
 
-      return databaseClient.fromRecord(updatedUserRecord)
+      return this.fromRecord(updatedUserRecord)
     },
 
-    deleteUser: async id => {
-      const [deletedUserRecord] = await databaseClient
-        .knex(table)
+    async deleteUser (id) {
+      const [deletedUserRecord] = await this.knex(this.table)
         .where({ id })
         .del()
         .returning('*')
 
-      return databaseClient.fromRecord(deletedUserRecord)
+      return this.fromRecord(deletedUserRecord)
     }
   }
-}
+})

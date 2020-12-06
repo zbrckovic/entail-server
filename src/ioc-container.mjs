@@ -1,4 +1,4 @@
-import { DatabaseClient } from './persistence/database/database-client.mjs'
+import { DatabaseManager } from './persistence/database/database-manager.mjs'
 import { UsersRepository } from './persistence/repositories/users-repository.mjs'
 import { UsersService } from './core/users/users-service.mjs'
 import { UsersRouter } from './web/routers/users-router.mjs'
@@ -9,13 +9,15 @@ import { AuthenticationRouter } from './web/routers/authentication-router.mjs'
 import { I18nService } from './i18n/i18n-service.mjs'
 import { DataInitializer } from './persistence/database/data-initializer.mjs'
 import { WebInitializer } from './web/web-initializer.mjs'
+import { knexFactory } from './persistence/database/knex.mjs'
 
 // Resolves dependencies for each 'component' in the application.
 export const IocContainer = ({
   environment,
+  knex,
   webInitializer,
   dataInitializer,
-  databaseClient,
+  databaseManager,
   usersRepository,
   cryptographyService,
   emailService,
@@ -25,19 +27,29 @@ export const IocContainer = ({
   usersRouter,
   i18nService
 }) => {
-  const getDatabaseClient = () => {
-    if (databaseClient === undefined) {
-      databaseClient = DatabaseClient({ environment })
+  const getKnex = () => {
+    if (knex === undefined) {
+      knex = knexFactory(environment)
     }
-    return databaseClient
+    return knex
+  }
+
+  const getDatabaseManager = () => {
+    if (databaseManager === undefined) {
+      databaseManager = DatabaseManager({
+        knex: getKnex(),
+        environment
+      })
+    }
+    return databaseManager
   }
 
   const getDataInitializer = () => {
     if (dataInitializer === undefined) {
       dataInitializer = DataInitializer({
-        databaseClient: getDatabaseClient(),
+        knex: getKnex(),
+        environment,
         cryptographyService: getCryptographyService(),
-        environment
       })
     }
     return dataInitializer
@@ -46,7 +58,8 @@ export const IocContainer = ({
   const getUsersRepository = () => {
     if (usersRepository === undefined) {
       usersRepository = UsersRepository({
-        databaseClient: getDatabaseClient()
+        knex: getKnex(),
+        environment
       })
     }
     return usersRepository
@@ -126,8 +139,10 @@ export const IocContainer = ({
   }
 
   return ({
+    getKnex,
+
+    getDatabaseManager,
     getDataInitializer,
-    getDatabaseClient,
 
     getUsersRepository,
 

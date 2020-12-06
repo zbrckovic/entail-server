@@ -1,20 +1,24 @@
-export const RolesRepository = ({ knex, databaseClient }) => {
-  const table = databaseClient.getTableName('role')
+import stampit from '@stamp/it'
+import { DatabaseUtil } from '../database/database-util.mjs'
 
-  return {
+export const RolesRepository = stampit(DatabaseUtil, {
+  init () {
+    this.table = this.getTableName('role')
+  },
+  methods: {
     getRoles: async () => {
-      const roleRecords = await knex(table).select('*')
-      return roleRecords.map(databaseClient.fromRecord)
+      const roleRecords = await this.knex(this.table).select('*')
+      return roleRecords.map(this.fromRecord)
     },
 
     getRoleById: async id => {
-      const [roleRecord] = await knex(table).where({ id }).select('*')
-      return roleRecord === undefined ? undefined : databaseClient.fromRecord(roleRecord)
+      const [roleRecord] = await this.knex(this.table).where({ id }).select('*')
+      return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
     },
 
     getRoleByName: async name => {
-      const [roleRecord] = await knex(table).where({ name }).select('*')
-      return roleRecord === undefined ? undefined : databaseClient.fromRecord(roleRecord)
+      const [roleRecord] = await this.knex(this.table).where({ name }).select('*')
+      return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
     }
   }
-}
+})

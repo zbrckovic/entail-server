@@ -1,9 +1,9 @@
 import { environment } from '../environment.mjs'
-import { DatabaseClient } from '../persistence/database/database-client.mjs'
+import { DatabaseManager } from '../persistence/database/database-manager.mjs'
 
-const databaseClient = DatabaseClient({ environment })
+const databaseManager = DatabaseManager({ environment })
 
-databaseClient.migrateToLatest().then(() => {
+databaseManager.migrateToLatest().then(() => {
   console.log('Migrated to latest.')
   process.exit()
 })

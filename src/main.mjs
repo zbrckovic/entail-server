@@ -4,7 +4,7 @@ import { IocContainer } from './ioc-container.mjs'
 
 (async () => {
   const iocContainer = IocContainer({ environment })
-  await iocContainer.getDatabaseClient().migrateToLatest()
+  await iocContainer.getDatabaseManager().migrateToLatest()
   await iocContainer.getDataInitializer().initializeData()
   await iocContainer.getI18nService().init()
 

@@ -1,24 +1,23 @@
 import { Role } from '../../core/users/role.mjs'
 import stampit from '@stamp/it'
+import { DatabaseUtil } from './database-util.mjs'
 
 // Stores data which has to be present for application to work properly.
-export const DataInitializer = stampit({
-  init ({ databaseClient, cryptographyService, environment }) {
-    this.client = databaseClient
+export const DataInitializer = stampit(DatabaseUtil, {
+  init ({ cryptographyService}) {
     this.cryptographyService = cryptographyService
-    this.environment = environment
   },
   methods: {
     async initializeData () {
-      const tableRole = this.client.getTableName('role')
-      const tableUser = this.client.getTableName('user')
-      const tableUserRole = this.client.getTableName('user_role')
+      const tableRole = this.getTableName('role')
+      const tableUser = this.getTableName('user')
+      const tableUserRole = this.getTableName('user_role')
 
       const roleRecords = Object
         .keys(Role)
-        .map(name => this.client.toRecord({ name }))
+        .map(name => this.toRecord({ name }))
 
-      await this.client.knex(tableRole)
+      await this.knex(tableRole)
         .insert(roleRecords)
         .onConflict('name')
         .ignore()
@@ -33,29 +32,29 @@ export const DataInitializer = stampit({
       const passwordHash = await this.cryptographyService.createPasswordHash(
         this.environment.superAdminPassword
       )
-      const superAdminRecordToInsert = this.client.toRecord({
+      const superAdminRecordToInsert = this.toRecord({
         email: this.environment.superAdminEmail,
         passwordHash,
         isActivated: true
       })
 
-      const [insertedSuperAdminRecord] = await this.client.knex(tableUser)
+      const [insertedSuperAdminRecord] = await this.knex(tableUser)
         .insert(superAdminRecordToInsert, ['id'])
         .onConflict('email')
         .ignore()
 
       if (insertedSuperAdminRecord === undefined) return
 
-      const userId = this.client.fromRecord(insertedSuperAdminRecord).id
+      const userId = this.fromRecord(insertedSuperAdminRecord).id
 
-      const [roleRecord] = await this.client.knex(tableRole)
+      const [roleRecord] = await this.knex(tableRole)
         .where({ name: Role.SUPER_ADMIN })
         .select(['id'])
 
-      const roleId = this.client.fromRecord(roleRecord).id
+      const roleId = this.fromRecord(roleRecord).id
 
-      await this.client.knex(tableUserRole)
-        .insert(this.client.toRecord({ userId, roleId }))
+      await this.knex(tableUserRole)
+        .insert(this.toRecord({ userId, roleId }))
         .onConflict(['user_id', 'role_id'])
         .ignore()
     }

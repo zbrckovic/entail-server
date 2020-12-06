@@ -1,28 +1,15 @@
 import stampit from '@stamp/it'
-import knexFactory from 'knex'
 import _ from 'lodash'
-import { DB_DEFAULT_VALUE } from './misc.mjs'
 import moment from 'moment'
-import { migrationSource } from './migrations.mjs'
+import { DB_DEFAULT_VALUE } from './misc.mjs'
 
-export const DatabaseClient = stampit({
-  init ({ environment }) {
-    this.schemaName = environment.pgSchema
-
-    this.knex = knexFactory({
-      client: 'pg',
-      connection: {
-        host: environment.pgHost,
-        user: environment.pgUser,
-        password: environment.pgPassword,
-        database: environment.pgDatabase,
-        port: environment.pgPort
-      }
-    })
-
-    this.migrationConfig = { migrationSource, schemaName: this.schemaName }
+export const DatabaseUtil = stampit({
+  init ({ knex, environment }) {
+    this.knex = knex
+    this.environment = environment
   },
   methods: {
+    getTableName (name) { return `${this.environment.pgSchema}.${name}` },
     // Transforms object to the format suitable for database. It changes all keys to snake case.
     toRecord (object) {
       const result = {}
@@ -56,20 +43,5 @@ export const DatabaseClient = stampit({
       if (value instanceof Date) return moment(value)
       return value
     },
-
-    getTableName (name) { return `${this.schemaName}.${name}` },
-
-    async destroy () {
-      return new Promise(resolve => { this.knex.destroy(resolve) })
-    },
-    async migrateToLatest () {
-      return await this.knex.migrate.latest(this.migrationConfig)
-    },
-    async rollbackMigrations () {
-      return await this.knex.migrate.rollback(this.migrationConfig)
-    },
-    async hasTable (table) {
-      return await this.knex.schema.withSchema(this.schemaName).hasTable(table)
-    }
   }
 })
