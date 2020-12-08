@@ -26,6 +26,9 @@ const emailServerPassword = process.env.EMAIL_SERVER_PASSWORD
 const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
 const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
 
+const jwtSecret = process.env.JWT_SECRET
+const jwtExpiresInMinutes = process.env.JWT_EXPIRES_IN_MINUTES
+
 export const environment = {
   mode,
   port,
@@ -42,5 +45,7 @@ export const environment = {
   emailServerUsername,
   emailServerPassword,
   superAdminEmail,
-  superAdminPassword
+  superAdminPassword,
+  jwtSecret,
+  jwtExpiresInMinutes
 }

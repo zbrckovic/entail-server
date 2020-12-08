@@ -2,7 +2,7 @@ import { createError, ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
 
-export const AuthenticationService = stampit({
+export const EntryService = stampit({
   init ({ environment, usersRepository, cryptographyService, emailService }) {
     this.environment = environment
     this.usersRepository = usersRepository

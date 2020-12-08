@@ -6,10 +6,10 @@ import { IocContainer } from './ioc-container.mjs'
   const iocContainer = IocContainer({ environment })
   await iocContainer.getDatabaseManager().migrateToLatest()
   await iocContainer.getDataInitializer().initializeData()
-  await iocContainer.getI18nService().init()
+  await iocContainer.getI18nService().initT()
 
   const app = express()
-  iocContainer.getWebInitializer().init({ app })
+  iocContainer.getWebInitializer().init(app)
 
   return new Promise(resolve => {
     app.listen(environment.port, () => {

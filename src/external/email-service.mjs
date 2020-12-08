@@ -3,7 +3,7 @@ import stampit from '@stamp/it'
 
 export const EmailService = stampit({
   init ({ environment, i18nService }) {
-    this.t = i18nService.getT()
+    this.t = i18nService.t
 
     this.transport = nodemailer.createTransport({
       pool: true,
