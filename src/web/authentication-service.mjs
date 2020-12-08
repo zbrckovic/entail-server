@@ -47,6 +47,7 @@ export const AuthenticationService = stampit({
       })
     },
 
+    // Creates express middleware for token extraction and verification.
     isAuthenticated () {
       return async (req, res, next) => {
         try {
