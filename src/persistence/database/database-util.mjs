@@ -9,12 +9,14 @@ export const DatabaseUtil = stampit({
     this.knex = knex
     this.environment = environment
 
+    this.schema = environment.pgSchema
+
     this.tableRole = this.getTableName('role')
     this.tableUser = this.getTableName('user')
     this.tableUserRole = this.getTableName('user_role')
   },
   methods: {
-    getTableName (name) { return `${this.environment.pgSchema}.${name}` },
+    getTableName (name) { return `${this.schema}.${name}` },
     // Transforms object to the format suitable for database. It changes all keys to snake case.
     toRecord (object) {
       const result = {}

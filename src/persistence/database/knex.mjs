@@ -2,6 +2,7 @@ import knex from 'knex'
 
 export const knexFactory = environment => knex({
   client: 'pg',
+  debug: true,
   connection: {
     host: environment.pgHost,
     user: environment.pgUser,

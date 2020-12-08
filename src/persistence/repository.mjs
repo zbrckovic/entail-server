@@ -39,7 +39,15 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
     },
 
     async getUsers () {
-      const userRecords = await this.knex(this.tableUser).select('*')
+      const userRecords = await this.knex(this.tableUser)
+        .join(this.tableUserRole, `${this.tableUser}.id`, `${this.tableUserRole}.user_id`)
+        .join(this.tableRole, `${this.tableUserRole}.role_id`, `${this.tableRole}.id`)
+        .select(
+          `${this.tableUser}.id`,
+          `${this.tableUser}.email`,
+          this.knex.raw(`ARRAY_AGG(${this.tableRole}.name) as role`)
+        )
+        .groupBy(`${this.tableUser}.id`)
       return userRecords.map(record => this.fromRecord(record))
     },
 
