@@ -16,7 +16,7 @@ describe('EntryService', () => {
   describe('register', () => {
     beforeEach(async () => {
       await iocContainer
-        .getUsersRepository()
+        .getRepository()
         .createUser({
           email: 'donatello@email.com',
           passwordHash: 'AAAA',

@@ -8,6 +8,10 @@ export const DatabaseUtil = stampit({
   init ({ knex, environment }) {
     this.knex = knex
     this.environment = environment
+
+    this.tableRole = this.getTableName('role')
+    this.tableUser = this.getTableName('user')
+    this.tableUserRole = this.getTableName('user_role')
   },
   methods: {
     getTableName (name) { return `${this.environment.pgSchema}.${name}` },

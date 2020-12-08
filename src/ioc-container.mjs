@@ -1,5 +1,5 @@
 import { DatabaseManager } from './persistence/database/database-manager.mjs'
-import { UsersRepository } from './persistence/repositories/users-repository.mjs'
+import { Repository } from './persistence/repository.mjs'
 import { UsersService } from './core/users/users-service.mjs'
 import { UsersRouter } from './web/routers/users-router.mjs'
 import { CryptographyService } from './utils/cryptography-service.mjs'
@@ -21,7 +21,7 @@ export const IocContainer = stampit({
     webInitializer,
     dataInitializer,
     databaseManager,
-    usersRepository,
+    repository,
     cryptographyService,
     emailService,
     entryService,
@@ -36,7 +36,7 @@ export const IocContainer = stampit({
     this.webInitializer = webInitializer
     this.dataInitializer = dataInitializer
     this.databaseManager = databaseManager
-    this.usersRepository = usersRepository
+    this.repository = repository
     this.cryptographyService = cryptographyService
     this.emailService = emailService
     this.entryService = entryService
@@ -79,14 +79,14 @@ export const IocContainer = stampit({
       return this.dataInitializer
     },
 
-    getUsersRepository () {
-      if (this.usersRepository === undefined) {
-        this.usersRepository = UsersRepository({
+    getRepository () {
+      if (this.repository === undefined) {
+        this.repository = Repository({
           knex: this.getKnex(),
           environment: this.getEnvironment()
         })
       }
-      return this.usersRepository
+      return this.repository
     },
 
     getI18nService () {
@@ -121,7 +121,7 @@ export const IocContainer = stampit({
       if (this.entryService === undefined) {
         this.entryService = EntryService({
           environment: this.getEnvironment(),
-          usersRepository: this.getUsersRepository(),
+          repository: this.getRepository(),
           cryptographyService: this.getCryptographyService(),
           emailService: this.getEmailService()
         })
@@ -132,7 +132,7 @@ export const IocContainer = stampit({
     getUsersService () {
       if (this.usersService === undefined) {
         this.usersService = UsersService({
-          usersRepository: this.getUsersRepository()
+          repository: this.getRepository()
         })
       }
       return this.usersService

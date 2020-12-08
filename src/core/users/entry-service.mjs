@@ -3,9 +3,9 @@ import moment from 'moment'
 import stampit from '@stamp/it'
 
 export const EntryService = stampit({
-  init ({ environment, usersRepository, cryptographyService, emailService }) {
+  init ({ environment, repository, cryptographyService, emailService }) {
     this.environment = environment
-    this.usersRepository = usersRepository
+    this.repository = repository
     this.cryptographyService = cryptographyService
     this.emailService = emailService
   },
@@ -19,7 +19,7 @@ export const EntryService = stampit({
         'minutes'
       )
 
-      const user = await this.usersRepository.createUser({
+      const user = await this.repository.createUser({
         email,
         passwordHash,
         activationCode,
@@ -32,7 +32,7 @@ export const EntryService = stampit({
     },
 
     async login ({ email, password }) {
-      const user = await this.usersRepository.getUserByEmail(email)
+      const user = await this.repository.getUserByEmail(email)
       if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
       const isPasswordOk = await this.cryptographyService.isPasswordCorrect(
@@ -45,8 +45,8 @@ export const EntryService = stampit({
     },
 
     async activate ({ email, activationCode }) {
-      return await this.usersRepository.withTransaction(async usersRepository => {
-        const user = await usersRepository.getUserByEmail(email)
+      return await this.repository.withTransaction(async repository => {
+        const user = await repository.getUserByEmail(email)
         if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
         if (user.isActivated) throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
@@ -58,7 +58,7 @@ export const EntryService = stampit({
           throw createError({ name: ErrorName.INVALID_CREDENTIALS })
         }
 
-        await usersRepository.updateUser({
+        await repository.updateUser({
           id: user.id,
           isActivated: true,
           activationCode: null,

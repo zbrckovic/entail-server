@@ -1,10 +1,10 @@
 import stampit from '@stamp/it'
 
 export const UsersService = stampit({
-  init ({ usersRepository }) {
-    this.usersRepository = usersRepository
+  init ({ repository }) {
+    this.repository = repository
   },
   methods: {
-    async getAll () { return await this.usersRepository.getUsers() }
+    async getAll () { return await this.repository.getUsers() }
   }
 })
