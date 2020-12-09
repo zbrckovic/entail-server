@@ -20,6 +20,7 @@ export const DatabaseUtil = stampit({
 
     // Transforms object to the format suitable for database. It changes all keys to snake case.
     toRecord (value) {
+      if (value === null) return null
       if (value === DB_DEFAULT_VALUE) return this.knex.raw('DEFAULT')
       if (Array.isArray(value)) return value.map(element => this.toRecord(element))
       if (moment.isMoment(value)) return value.toDate()
@@ -36,17 +37,11 @@ export const DatabaseUtil = stampit({
 
       return value
     },
-    _toRecordKey (key) { return _.snakeCase(key) },
-    _toRecordValue (value) {
-      if (value === DB_DEFAULT_VALUE) return this.knex.raw('DEFAULT')
-      if (moment.isMoment(value)) return value.toDate()
-      return value
-    },
 
     // Transforms record to the format suitable for application. It changes all keys to camel case.
     fromRecord (value) {
-      if (Array.isArray(value)) return value.map(element => this.fromRecord(element))
       if (value === null) return undefined
+      if (Array.isArray(value)) return value.map(element => this.fromRecord(element))
       if (value instanceof Date) return moment(value)
 
       if (typeof value === 'object') {

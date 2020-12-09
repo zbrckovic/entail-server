@@ -1,6 +1,7 @@
 import { createError, ErrorName } from '../../global/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
+import { Role } from './role.mjs'
 
 export const EntryService = stampit({
   init ({ environment, repository, cryptographyService, emailService }) {
@@ -26,6 +27,8 @@ export const EntryService = stampit({
           activationCode,
           activationCodeExpiresOn
         })
+        const regularRole = await repository.getRoleByName(Role.REGULAR)
+        await repository.setRoleForUser(user.id, regularRole.id)
 
         const roles = await repository.getRolesForUser(user.id)
 

@@ -53,12 +53,12 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
 
     async getUserById (id) {
       const [userRecord] = await this.knex(this.tableUser).where({ id }).select('*')
-      return userRecord === undefined ? undefined : this.fromRecord(userRecord)
+      return this.fromRecord(userRecord)
     },
 
     async getUserByEmail (email) {
       const [userRecord] = await this.knex(this.tableUser).where({ email }).select('*')
-      return userRecord === undefined ? undefined : this.fromRecord(userRecord)
+      return this.fromRecord(userRecord)
     },
 
     async createUser (user) {
@@ -104,6 +104,11 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
       return roleRecords.map(this.fromRecord)
     },
 
+    async getRoleByName (name)  {
+      const [roleRecord] = await this.knex(this.tableRole).where({ name }).select('*')
+      return this.fromRecord(roleRecord)
+    },
+
     async getRolesForUser (id) {
       const [record] = await this.knex(this.tableRole)
         .join(this.tableUserRole, `${this.tableRole}.id`, `${this.tableUserRole}.role_id`)
@@ -111,17 +116,19 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
         .select(this.knex.raw(`ARRAY_AGG(${this.tableRole}.name) as roles`))
         .where({ [`${this.tableUser}.id`]: id })
         .groupBy(`${this.tableUser}.id`)
-      return this.fromRecord(record.roles)
+      return record === undefined ? [] : this.fromRecord(record.roles)
+    },
+
+    async setRoleForUser (userId, roleId) {
+      this.knex(this.tableUserRole)
+        .insert(this.toRecord({ userId, roleId }))
+        .onConflict(['user_id', 'role_id'])
+        .ignore()
     },
 
     async getRoleById (id) {
       const [roleRecord] = await this.knex(this.tableRole).where({ id }).select('*')
       return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
     },
-
-    async getRoleByName (name) {
-      const [roleRecord] = await this.knex(this.tableRole).where({ name }).select('*')
-      return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
-    }
   }
 })

@@ -14,8 +14,8 @@ const migrations = [
           user.timestamp('created_on').notNullable().defaultTo(knex.fn.now())
           user.timestamp('last_updated_on').notNullable().defaultTo(knex.fn.now())
           user.boolean('is_activated').notNullable().defaultTo(false)
-          user.string('activation_code', 256)
-          user.timestamp('activation_code_expires_on')
+          user.string('activation_code', 256).nullable()
+          user.timestamp('activation_code_expires_on').nullable()
         })
         .createTable('role', role => {
           role.increments()
