@@ -12,6 +12,7 @@ import { WebInitializer } from './web/web-initializer.mjs'
 import { knexFactory } from './persistence/database/knex.mjs'
 import stampit from '@stamp/it'
 import { AuthenticationService } from './web/authentication-service.mjs'
+import { AuthorizationService } from './web/authorization-service.mjs'
 
 // Resolves dependencies for each 'component' in the application.
 export const IocContainer = stampit({
@@ -29,7 +30,8 @@ export const IocContainer = stampit({
     entryRouter,
     usersRouter,
     i18nService,
-    authenticationService
+    authenticationService,
+    authorizationService
   }) {
     this.environment = environment
     this.knex = knex
@@ -45,6 +47,7 @@ export const IocContainer = stampit({
     this.usersRouter = usersRouter
     this.i18nService = i18nService
     this.authenticationService = authenticationService
+    this.authorizationService = authorizationService
   },
   methods: {
     getEnvironment () {
@@ -152,7 +155,8 @@ export const IocContainer = stampit({
       if (this.usersRouter === undefined) {
         this.usersRouter = UsersRouter({
           usersService: this.getUsersService(),
-          authenticationService: this.getAuthenticationService()
+          authenticationService: this.getAuthenticationService(),
+          authorizationService: this.getAuthorizationService()
         })
       }
       return this.usersRouter
@@ -165,6 +169,13 @@ export const IocContainer = stampit({
         })
       }
       return this.authenticationService
+    },
+
+    getAuthorizationService () {
+      if (this.authorizationService === undefined) {
+        this.authorizationService = AuthorizationService()
+      }
+      return this.authorizationService
     },
 
     getWebInitializer () {

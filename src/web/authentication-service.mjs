@@ -12,11 +12,11 @@ export const AuthenticationService = stampit({
   },
   methods: {
     async generateToken (user) {
-      const { id, isActivated } = user
+      const { id, isActivated, roles } = user
 
       return new Promise((resolve, reject) => {
         jwt.sign(
-          { user: { isActivated } },
+          { user: { id, isActivated, roles } },
           this.jwtSecret,
           { expiresIn: this.jwtExpiresIn, subject: `${id}` },
           (error, token) => {
@@ -62,7 +62,8 @@ export const AuthenticationService = stampit({
             return
           }
 
-          req.user = await this.verifyToken(token)
+          const decodedToken = await this.verifyToken(token)
+          req.user = decodedToken.user
           next()
         } catch (error) {
           const { name } = error

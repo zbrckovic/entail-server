@@ -99,17 +99,27 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
       return this.fromRecord(deletedUserRecord)
     },
 
-    getRoles: async () => {
+    async getRoles () {
       const roleRecords = await this.knex(this.tableRole).select('*')
       return roleRecords.map(this.fromRecord)
     },
 
-    getRoleById: async id => {
+    async getRolesForUser (id) {
+      const [record] = await this.knex(this.tableRole)
+        .join(this.tableUserRole, `${this.tableRole}.id`, `${this.tableUserRole}.role_id`)
+        .join(this.tableUser, `${this.tableUserRole}.user_id`, `${this.tableUser}.id`)
+        .select(this.knex.raw(`ARRAY_AGG(${this.tableRole}.name) as roles`))
+        .where({ [`${this.tableUser}.id`]: id })
+        .groupBy(`${this.tableUser}.id`)
+      return this.fromRecord(record.roles)
+    },
+
+    async getRoleById (id) {
       const [roleRecord] = await this.knex(this.tableRole).where({ id }).select('*')
       return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
     },
 
-    getRoleByName: async name => {
+    async getRoleByName (name) {
       const [roleRecord] = await this.knex(this.tableRole).where({ name }).select('*')
       return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
     }

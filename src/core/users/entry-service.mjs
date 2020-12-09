@@ -11,37 +11,45 @@ export const EntryService = stampit({
   },
   methods: {
     async register ({ email, password }) {
-      const passwordHash = await this.cryptographyService.createPasswordHash(password)
-      const activationCode = await this.cryptographyService.generateActivationCode()
+      return this.repository.withTransaction(async repository => {
+        const passwordHash = await this.cryptographyService.createPasswordHash(password)
+        const activationCode = await this.cryptographyService.generateActivationCode()
 
-      const activationCodeExpiresOn = moment().add(
-        this.environment.activationCodeValidPeriodMinutes,
-        'minutes'
-      )
+        const activationCodeExpiresOn = moment().add(
+          this.environment.activationCodeValidPeriodMinutes,
+          'minutes'
+        )
 
-      const user = await this.repository.createUser({
-        email,
-        passwordHash,
-        activationCode,
-        activationCodeExpiresOn
+        const user = await repository.createUser({
+          email,
+          passwordHash,
+          activationCode,
+          activationCodeExpiresOn
+        })
+
+        const roles = await repository.getRolesForUser(user.id)
+
+        await this.emailService.sendActivationCode(activationCode, email)
+
+        return { ...user, roles }
       })
-
-      await this.emailService.sendActivationCode(activationCode, email)
-
-      return user
     },
 
     async login ({ email, password }) {
-      const user = await this.repository.getUserByEmail(email)
-      if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      return await this.repository.withTransaction(async repository => {
+        const user = await repository.getUserByEmail(email)
+        if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-      const isPasswordOk = await this.cryptographyService.isPasswordCorrect(
-        password,
-        user.passwordHash
-      )
-      if (!isPasswordOk) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+        const isPasswordOk = await this.cryptographyService.isPasswordCorrect(
+          password,
+          user.passwordHash
+        )
+        if (!isPasswordOk) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-      return user
+        const roles = await repository.getRolesForUser(user.id)
+
+        return { ...user, roles }
+      })
     },
 
     async activate ({ email, activationCode }) {

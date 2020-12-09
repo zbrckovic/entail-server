@@ -17,15 +17,24 @@ export const DatabaseUtil = stampit({
   },
   methods: {
     getTableName (name) { return `${this.schema}.${name}` },
+
     // Transforms object to the format suitable for database. It changes all keys to snake case.
-    toRecord (object) {
-      const result = {}
+    toRecord (value) {
+      if (value === DB_DEFAULT_VALUE) return this.knex.raw('DEFAULT')
+      if (Array.isArray(value)) return value.map(element => this.toRecord(element))
+      if (moment.isMoment(value)) return value.toDate()
 
-      _.forEach(object, (value, key) => {
-        result[this._toRecordKey(key)] = this._toRecordValue(value)
-      })
+      if (typeof value === 'object') {
+        const result = {}
 
-      return result
+        _.forEach(value, (valueForKey, key) => {
+          result[_.snakeCase(key)] = this.toRecord(valueForKey)
+        })
+
+        return result
+      }
+
+      return value
     },
     _toRecordKey (key) { return _.snakeCase(key) },
     _toRecordValue (value) {
@@ -35,20 +44,22 @@ export const DatabaseUtil = stampit({
     },
 
     // Transforms record to the format suitable for application. It changes all keys to camel case.
-    fromRecord (record) {
-      const result = {}
-
-      _.forEach(record, (value, key) => {
-        result[this._fromRecordKey(key)] = this._fromRecordValue(value)
-      })
-
-      return result
-    },
-    _fromRecordKey (key) {return _.camelCase(key) },
-    _fromRecordValue (value) {
+    fromRecord (value) {
+      if (Array.isArray(value)) return value.map(element => this.fromRecord(element))
       if (value === null) return undefined
       if (value instanceof Date) return moment(value)
+
+      if (typeof value === 'object') {
+        const result = {}
+
+        _.forEach(value, (valueForKey, key) => {
+          result[_.camelCase(key)] = this.fromRecord(valueForKey)
+        })
+
+        return result
+      }
+
       return value
-    },
+    }
   }
 })
