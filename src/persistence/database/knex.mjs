@@ -1,6 +1,6 @@
 import knex from 'knex'
 
-export const knexFactory = environment => knex({
+export const createKnex = ({ environment }) => knex({
   client: 'pg',
   debug: false,
   connection: {
