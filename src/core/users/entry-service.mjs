@@ -27,8 +27,7 @@ export const EntryService = stampit({
           activationCode,
           activationCodeExpiresOn
         })
-        const regularRole = await repository.getRoleByName(Role.REGULAR)
-        await repository.setRoleForUser(user.id, regularRole.id)
+        await repository.setRoleForUser(user.id, Role.REGULAR)
 
         const roles = await repository.getRolesForUser(user.id)
 

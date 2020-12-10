@@ -1,4 +1,5 @@
 import { environment } from '../../environment.mjs'
+import { Role } from '../../core/users/role.mjs'
 
 const migrations = [
   [
@@ -17,10 +18,6 @@ const migrations = [
           user.string('activation_code', 256).nullable()
           user.timestamp('activation_code_expires_on').nullable()
         })
-        .createTable('role', role => {
-          role.increments()
-          role.string('name', 128).unique().notNullable()
-        })
         .createTable('user_role', userRole => {
           userRole.increments()
           userRole
@@ -29,19 +26,13 @@ const migrations = [
             .inTable('user')
             .notNullable()
             .onDelete('cascade')
-          userRole
-            .integer('role_id')
-            .references('id')
-            .inTable('role')
-            .notNullable()
-            .onDelete('cascade')
-          userRole.unique(['user_id', 'role_id'])
+          userRole.enum('role', Object.values(Role)).notNullable()
+          userRole.unique(['user_id', 'role'])
         }),
       down: knex => knex
         .schema
         .withSchema(environment.pgSchema)
         .dropTable('user_role')
-        .dropTable('role')
         .dropTable('user')
     },
   ]

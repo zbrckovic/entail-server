@@ -1,8 +1,8 @@
 import { environment } from '../environment.mjs'
 import { DatabaseManager } from '../persistence/database/database-manager.mjs'
-import { knexFactory } from '../persistence/database/knex.mjs'
+import { createKnex } from '../persistence/database/knex.mjs'
 
-const knex = knexFactory(environment)
+const knex = createKnex({ environment })
 const databaseManager = DatabaseManager({ knex, environment })
 
 databaseManager.migrateToLatest().then(() => {

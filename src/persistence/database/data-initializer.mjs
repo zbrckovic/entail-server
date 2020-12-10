@@ -10,15 +10,6 @@ export const DataInitializer = stampit(DatabaseUtil, {
   },
   methods: {
     async initializeData () {
-      const roleRecords = Object
-        .keys(Role)
-        .map(name => this.toRecord({ name }))
-
-      await this.knex(this.tableRole)
-        .insert(roleRecords)
-        .onConflict('name')
-        .ignore()
-
       const shouldCreateSuperAdmin = (
         this.environment.superAdminEmail !== undefined &&
         this.environment.superAdminPassword !== undefined
@@ -44,15 +35,9 @@ export const DataInitializer = stampit(DatabaseUtil, {
 
       const userId = this.fromRecord(insertedSuperAdminRecord).id
 
-      const [roleRecord] = await this.knex(this.tableRole)
-        .where({ name: Role.SUPER_ADMIN })
-        .select(['id'])
-
-      const roleId = this.fromRecord(roleRecord).id
-
       await this.knex(this.tableUserRole)
-        .insert(this.toRecord({ userId, roleId }))
-        .onConflict(['user_id', 'role_id'])
+        .insert(this.toRecord({ userId, role: Role.SUPER_ADMIN }))
+        .onConflict(['user_id', 'role'])
         .ignore()
     }
   }

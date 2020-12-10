@@ -41,11 +41,10 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
     async getUsers () {
       const userRecords = await this.knex(this.tableUser)
         .join(this.tableUserRole, `${this.tableUser}.id`, `${this.tableUserRole}.user_id`)
-        .join(this.tableRole, `${this.tableUserRole}.role_id`, `${this.tableRole}.id`)
         .select(
           `${this.tableUser}.id`,
           `${this.tableUser}.email`,
-          this.knex.raw(`ARRAY_AGG(${this.tableRole}.name) as role`)
+          this.knex.raw(`ARRAY_AGG(${this.tableUserRole}.role) as roles`)
         )
         .groupBy(`${this.tableUser}.id`)
       return userRecords.map(record => this.fromRecord(record))
@@ -99,36 +98,19 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
       return this.fromRecord(deletedUserRecord)
     },
 
-    async getRoles () {
-      const roleRecords = await this.knex(this.tableRole).select('*')
-      return roleRecords.map(this.fromRecord)
-    },
-
-    async getRoleByName (name)  {
-      const [roleRecord] = await this.knex(this.tableRole).where({ name }).select('*')
-      return this.fromRecord(roleRecord)
-    },
-
     async getRolesForUser (id) {
-      const [record] = await this.knex(this.tableRole)
-        .join(this.tableUserRole, `${this.tableRole}.id`, `${this.tableUserRole}.role_id`)
-        .join(this.tableUser, `${this.tableUserRole}.user_id`, `${this.tableUser}.id`)
-        .select(this.knex.raw(`ARRAY_AGG(${this.tableRole}.name) as roles`))
-        .where({ [`${this.tableUser}.id`]: id })
-        .groupBy(`${this.tableUser}.id`)
+      const [record] = await this.knex(this.tableUserRole)
+        .select(this.knex.raw(`ARRAY_AGG(role) as roles`))
+        .where({ ['user_id']: id })
+        .groupBy('user_id')
       return record === undefined ? [] : this.fromRecord(record.roles)
     },
 
-    async setRoleForUser (userId, roleId) {
+    async setRoleForUser (userId, role) {
       this.knex(this.tableUserRole)
-        .insert(this.toRecord({ userId, roleId }))
-        .onConflict(['user_id', 'role_id'])
+        .insert(this.toRecord({ userId, role }))
+        .onConflict(['user_id', 'role'])
         .ignore()
-    },
-
-    async getRoleById (id) {
-      const [roleRecord] = await this.knex(this.tableRole).where({ id }).select('*')
-      return roleRecord === undefined ? undefined : this.fromRecord(roleRecord)
-    },
+    }
   }
 })

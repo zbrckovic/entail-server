@@ -11,7 +11,6 @@ export const DatabaseUtil = stampit({
 
     this.schema = environment.pgSchema
 
-    this.tableRole = this.getTableName('role')
     this.tableUser = this.getTableName('user')
     this.tableUserRole = this.getTableName('user_role')
   },
