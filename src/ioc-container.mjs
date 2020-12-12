@@ -14,7 +14,7 @@ import stampit from '@stamp/it'
 import { AuthenticationService } from './web/authentication-service.mjs'
 import { AuthorizationService } from './web/authorization-service.mjs'
 import { environment } from './environment.mjs'
-import { createDataAccessObjects } from './persistence/database/data-access-objects.mjs'
+import { createBookshelfModels } from './persistence/bookshelf/models.mjs'
 
 // Inversion of control container
 //
@@ -46,7 +46,7 @@ export const IocContainer = stampit({
 export const createDefaultIocContainer = () => IocContainer()
   .setValue('environment', environment)
   .setFactory('knex', ({ environment }) => createKnex({ environment }))
-  .setFactory('dataAccessObjects', ({ knex }) => createDataAccessObjects({ knex }))
+  .setFactory('bookshelfModels', ({ knex }) => createBookshelfModels({ knex }))
   .setFactory('databaseManager', ({ knex }) => DatabaseManager({ knex }))
   .setFactory('dataInitializer', ({
     knex,
@@ -57,10 +57,7 @@ export const createDefaultIocContainer = () => IocContainer()
     environment,
     cryptographyService,
   }))
-  .setFactory('repository', ({ knex, dataAccessObjects }) => Repository({
-    knex,
-    dataAccessObjects
-  }))
+  .setFactory('repository', ({ knex, bookshelfModels }) => Repository({ knex, bookshelfModels }))
   .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
   .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
   .setFactory('emailService', ({ i18nService, environment }) => EmailService({

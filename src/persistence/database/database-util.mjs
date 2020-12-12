@@ -7,9 +7,6 @@ export const DatabaseUtil = stampit({
   name: 'DatabaseUtil',
   init ({ knex }) {
     this.knex = knex
-
-    this.tableUser = 'user'
-    this.tableUserRole = 'user_role'
   },
   methods: {
     // Transforms object to the format suitable for database. It changes all keys to snake case.

@@ -11,7 +11,11 @@ export const UsersRouter = ({ usersService, authenticationService, authorization
     '/',
     async (req, res) => {
       const users = await usersService.getAll()
-      res.json({ users })
+      const userDTOs = users.map(user => {
+        const { id, passwordHash, ...rest } = user
+        return { ...rest }
+      })
+      res.json({ users: userDTOs })
     }
   )
 

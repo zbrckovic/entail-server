@@ -3,55 +3,46 @@ import { DatabaseUtil } from './database/database-util.mjs'
 import { Cloneable } from '../misc/stampit-util.mjs'
 import { PgErrorCodes } from './database/misc.mjs'
 import { createError, ErrorName } from '../global/error.mjs'
+import { userDAOToDomain, userDomainToDAO } from './bookshelf/domain-dao-transform.mjs'
+import _ from 'lodash'
 
 export const Repository = stampit(DatabaseUtil, Cloneable, {
   name: 'Repository',
-  init ({ dataAccessObjects }) {
-    this.dataAccessObjects = dataAccessObjects
+  init ({ bookshelfModels: { UserModel, RoleModel } }) {
+    this.UserModel = UserModel
+    this.RoleModel = RoleModel
   },
   methods: {
-    // Calls `callback` with transactional version of repository. All repository actions performed
-    // inside `callback` will belong to the same transaction.
-    async withTransaction (callback) {
-      return this.knex.transaction(async knex => {
-        const clone = this.clone()
-        clone.knex = knex
-        return await callback(clone)
-      })
-    },
-
     async getUsers () {
-      const { models } = await new this.dataAccessObjects.User().fetchAll({ withRelated: ['roles'] })
+      const { models } = await this.UserModel.fetchAll({ withRelated: ['roles'] })
       return models
-
-      const userRecords = await this.knex(this.tableUser)
-        .join(this.tableUserRole, `${this.tableUser}.id`, `${this.tableUserRole}.user_id`)
-        .select(
-          `${this.tableUser}.id`,
-          `${this.tableUser}.email`,
-          this.knex.raw(`ARRAY_AGG(${this.tableUserRole}.role) as roles`)
-        )
-        .groupBy(`${this.tableUser}.id`)
-      return userRecords.map(record => this.fromRecord(record))
-    },
-
-    async getUserById (id) {
-      const [userRecord] = await this.knex(this.tableUser).where({ id }).select('*')
-      return this.fromRecord(userRecord)
+        .map(model => model.serialize({ omitPivot: true }))
+        .map(userDAOToDomain)
     },
 
     async getUserByEmail (email) {
-      const [userRecord] = await this.knex(this.tableUser).where({ email }).select('*')
-      return this.fromRecord(userRecord)
+      try {
+        const m = this.UserModel.forge()
+        const model = await m.fetch({ require: true, withRelated: ['roles'] })
+        const userDAO = model?.serialize({ omitPivot: true })
+        return userDAOToDomain(userDAO)
+      } catch (error) {
+        throw error
+      }
     },
 
     async createUser (user) {
       try {
-        const userRecord = this.toRecord(user)
+        const userModel = await this.UserModel.forge(userDomainToDAO(user)).save()
 
-        const [createdUserRecord] = await this.knex(this.tableUser).insert(userRecord).returning('*')
-
-        return this.fromRecord(createdUserRecord)
+        const { models: roleModels } = await this.RoleModel.fetchAll()
+        const roleDAOs = roleModels.map(roleModel => roleModel.serialize())
+        const roleDAOsByName = _.mapValues(_.groupBy(roleDAOs, 'name'), ([role]) => role)
+        const roleIds = user.roles.map(role => roleDAOsByName[role].id)
+        await userModel.roles().attach(roleIds)
+        await userModel.load('roles')
+        const userDAO = userModel.serialize()
+        userDAOToDomain(userDAO)
       } catch (error) {
         if (
           error.code === PgErrorCodes.UNIQUE_VIOLATION &&

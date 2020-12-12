@@ -1,9 +1,8 @@
 import knex from 'knex'
-import { promisify } from 'util'
 
 export const createKnex = ({ environment }) => knex({
   client: 'pg',
-  debug: false,
+  debug: true,
   connection: {
     host: environment.pgHost,
     user: environment.pgUser,
