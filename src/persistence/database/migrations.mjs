@@ -7,7 +7,6 @@ const migrations = [
     {
       up: knex => knex
         .schema
-        .withSchema(environment.pgSchema)
         .createTable('user', user => {
           user.increments()
           user.string('email', 256).unique().notNullable()
@@ -31,7 +30,6 @@ const migrations = [
         }),
       down: knex => knex
         .schema
-        .withSchema(environment.pgSchema)
         .dropTable('user_role')
         .dropTable('user')
     },

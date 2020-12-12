@@ -27,6 +27,7 @@
     "@stamp/it": "^1.1.0",
     "@zbrckovic/entail-core": "0.0.45",
     "bcrypt": "^5.0.0",
+    "bookshelf": "^1.2.0",
     "express": "^4.17.1",
     "express-jwt": "^6.0.0",
     "express-validator": "^6.7.0",

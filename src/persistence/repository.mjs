@@ -6,32 +6,14 @@ import { createError, ErrorName } from '../global/error.mjs'
 
 export const Repository = stampit(DatabaseUtil, Cloneable, {
   name: 'Repository',
-  statics: {
-    // Calls `callback` with transactional versions of `repositories`. All repository actions
-    // performed inside `callback` will belong to the same transaction.
-    async withTransaction (repositories, callback) {
-      if (repositories.length === 0) {
-        return await callback([])
-      }
-
-      const knex = repositories[0].knex
-
-      return await knex.transaction(async transactionalKnex => {
-        const transactionalRepositories = repositories.map(repository => {
-          const clone = repository.clone()
-          clone.knex = transactionalKnex
-          return clone
-        })
-
-        return await callback(transactionalRepositories)
-      })
-    }
+  init ({ dataAccessObjects }) {
+    this.dataAccessObjects = dataAccessObjects
   },
   methods: {
     // Calls `callback` with transactional version of repository. All repository actions performed
     // inside `callback` will belong to the same transaction.
     async withTransaction (callback) {
-      return await this.knex.transaction(async knex => {
+      return this.knex.transaction(async knex => {
         const clone = this.clone()
         clone.knex = knex
         return await callback(clone)
@@ -39,6 +21,9 @@ export const Repository = stampit(DatabaseUtil, Cloneable, {
     },
 
     async getUsers () {
+      const { models } = await new this.dataAccessObjects.User().fetchAll({ withRelated: ['roles'] })
+      return models
+
       const userRecords = await this.knex(this.tableUser)
         .join(this.tableUserRole, `${this.tableUser}.id`, `${this.tableUserRole}.user_id`)
         .select(

@@ -5,18 +5,13 @@ import { DB_DEFAULT_VALUE } from './misc.mjs'
 
 export const DatabaseUtil = stampit({
   name: 'DatabaseUtil',
-  init ({ knex, environment }) {
+  init ({ knex }) {
     this.knex = knex
-    this.environment = environment
 
-    this.schema = environment.pgSchema
-
-    this.tableUser = this.getTableName('user')
-    this.tableUserRole = this.getTableName('user_role')
+    this.tableUser = 'user'
+    this.tableUserRole = 'user_role'
   },
   methods: {
-    getTableName (name) { return `${this.schema}.${name}` },
-
     // Transforms object to the format suitable for database. It changes all keys to snake case.
     toRecord (value) {
       if (value === null) return null

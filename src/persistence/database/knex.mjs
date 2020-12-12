@@ -1,4 +1,5 @@
 import knex from 'knex'
+import { promisify } from 'util'
 
 export const createKnex = ({ environment }) => knex({
   client: 'pg',
@@ -9,5 +10,12 @@ export const createKnex = ({ environment }) => knex({
     password: environment.pgPassword,
     database: environment.pgDatabase,
     port: environment.pgPort
+  },
+  pool: {
+    afterCreate: function (connection, done) {
+      connection.query(`SET SESSION SCHEMA '${environment.pgSchema}';`, error => {
+        done(error, connection);
+      });
+    }
   }
 })

@@ -3,13 +3,12 @@ import { migrationSource } from './migrations.mjs'
 
 export const DatabaseManager = stampit({
   name: 'DatabaseManager',
-  init ({ knex, environment }) {
+  init ({ knex }) {
     this.knex = knex
-    this.environment = environment
   },
   methods: {
     _getMigratorConfig () {
-      return { migrationSource, schemaName: this.environment.pgSchema }
+      return { migrationSource }
     },
     async migrateToLatest () {
       return await this.knex.migrate.latest(this._getMigratorConfig())
