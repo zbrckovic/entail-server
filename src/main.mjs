@@ -4,8 +4,6 @@ import { createDefaultIocContainer } from './ioc-container.mjs'
 
 (async () => {
   const iocContainer = createDefaultIocContainer()
-  await iocContainer.databaseManager.migrateToLatest()
-  await iocContainer.dataInitializer.initializeData()
   await iocContainer.i18nService.initT()
 
   const app = express()

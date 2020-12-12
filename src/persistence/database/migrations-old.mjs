@@ -1,6 +1,6 @@
 import { Role } from '../../core/users/role.mjs'
 
-const migrations = [
+const migrationsOld = [
   [
     'createTables',
     {
@@ -48,8 +48,8 @@ const migrations = [
   ]
 ]
 
-const migrationsByNames = Object.fromEntries(migrations)
-const migrationNames = migrations.map(([name]) => name)
+const migrationsByNames = Object.fromEntries(migrationsOld)
+const migrationNames = migrationsOld.map(([name]) => name)
 
 export const migrationSource = {
   getMigrations: async () => migrationNames,
