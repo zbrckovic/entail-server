@@ -5,6 +5,8 @@ import { createDefaultIocContainer } from './ioc-container.mjs'
 (async () => {
   const iocContainer = createDefaultIocContainer()
   await iocContainer.i18nService.initT()
+  await iocContainer.sequelize.authenticate()
+  await iocContainer.sequelize.sync({ force: true })
 
   const app = express()
   iocContainer.webInitializer.init(app)

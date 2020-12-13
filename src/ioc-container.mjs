@@ -4,6 +4,7 @@ import { UsersService } from './application/users-service.mjs'
 import { environment } from './environment.mjs'
 import { CryptographyService } from './infrastructure/cryptography-service.mjs'
 import { EmailService } from './infrastructure/email-service.mjs'
+import { createSequelize } from './persistence/database/sequelize.mjs'
 import { Repository } from './persistence/repository.mjs'
 import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
 import { AuthenticationService } from './presentation/web/aspects/authentication-service.mjs'
@@ -13,15 +14,13 @@ import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
 
-// Inversion of control container
-//
-// Resolves dependencies for each 'component' in the application.
 export const IocContainer = stampit({
   props: {
     values: {}
   },
   methods: {
-    // Factory gets the container as first parameter.
+    // Registers `create` factory which will be called when dependency with `name` is first time
+    // requested. `create` gets the container as first parameter.
     setFactory (name, create) {
       Object.defineProperty(this, name, {
         get: () => {
@@ -43,10 +42,14 @@ export const IocContainer = stampit({
 
 export const createDefaultIocContainer = () => IocContainer()
   .setValue('environment', environment)
-  .setFactory('repository', () => Repository({}))
+  .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
+  .setFactory('repository', ({ sequelize }) => Repository({ sequelize }))
   .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
   .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
-  .setFactory('emailService', ({ i18nService, environment }) => EmailService({
+  .setFactory('emailService', ({
+    i18nService,
+    environment
+  }) => EmailService({
     i18nService,
     environment
   }))
@@ -83,7 +86,10 @@ export const createDefaultIocContainer = () => IocContainer()
   .setFactory('validationService', () => ValidationService())
   .setFactory('authenticationService', ({ environment }) => AuthenticationService({ environment }))
   .setFactory('authorizationService', () => AuthorizationService())
-  .setFactory('webInitializer', ({ entryRouter, usersRouter }) => WebInitializer({
+  .setFactory('webInitializer', ({
+    entryRouter,
+    usersRouter
+  }) => WebInitializer({
     entryRouter,
     usersRouter
   }))
