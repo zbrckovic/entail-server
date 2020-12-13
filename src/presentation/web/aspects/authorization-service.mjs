@@ -1,5 +1,5 @@
 import stampit from '@stamp/it'
-import { PermissionsAssignments } from '../permissions.mjs'
+import { PermissionsAssignments } from './permissions.mjs'
 import { ErrorName } from '../../../common/error.mjs'
 
 export const AuthorizationService = stampit({

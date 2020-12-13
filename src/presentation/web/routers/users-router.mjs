@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { Permission } from '../permissions.mjs'
+import { Permission } from '../aspects/permissions.mjs'
 
 export const UsersRouter = ({
   usersService,
