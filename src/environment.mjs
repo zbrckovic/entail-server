@@ -1,4 +1,4 @@
-// Extracts data from all necessary environment variables and exports it as `environment` object.
+// Extracts data from all required environment variables and exports it as `environment` object.
 // Rest of the application will read only `environment`, never `process.env`.
 const mode = process.env.NODE_ENV ?? 'development'
 const port = process.env.PORT ?? 5000

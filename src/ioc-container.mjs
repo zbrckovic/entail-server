@@ -1,16 +1,17 @@
-import { Repository } from './persistence/repository.mjs'
-import { UsersService } from './core/users/users-service.mjs'
-import { UsersRouter } from './web/routers/users-router.mjs'
-import { CryptographyService } from './utils/cryptography-service.mjs'
-import { EmailService } from './external/email-service.mjs'
-import { EntryService } from './core/users/entry-service.mjs'
-import { EntryRouter } from './web/routers/entry-router.mjs'
-import { I18nService } from './i18n/i18n-service.mjs'
-import { WebInitializer } from './web/web-initializer.mjs'
 import stampit from '@stamp/it'
-import { AuthenticationService } from './web/authentication-service.mjs'
-import { AuthorizationService } from './web/authorization-service.mjs'
+import { EntryService } from './application/entry-service.mjs'
+import { UsersService } from './application/users-service.mjs'
 import { environment } from './environment.mjs'
+import { CryptographyService } from './infrastructure/cryptography-service.mjs'
+import { EmailService } from './infrastructure/email-service.mjs'
+import { Repository } from './persistence/repository.mjs'
+import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
+import { AuthenticationService } from './presentation/web/aspects/authentication-service.mjs'
+import { AuthorizationService } from './presentation/web/aspects/authorization-service.mjs'
+import { ValidationService } from './presentation/web/aspects/validation-service.mjs'
+import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
+import { UsersRouter } from './presentation/web/routers/users-router.mjs'
+import { WebInitializer } from './presentation/web/web-initializer.mjs'
 
 // Inversion of control container
 //
@@ -24,6 +25,7 @@ export const IocContainer = stampit({
     setFactory (name, create) {
       Object.defineProperty(this, name, {
         get: () => {
+          // eslint-disable-next-line no-prototype-builtins
           if (!this.values.hasOwnProperty(name)) {
             this.values[name] = create(this)
           }
@@ -41,7 +43,7 @@ export const IocContainer = stampit({
 
 export const createDefaultIocContainer = () => IocContainer()
   .setValue('environment', environment)
-  .setFactory('repository', ({}) => Repository({}))
+  .setFactory('repository', () => Repository({}))
   .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
   .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
   .setFactory('emailService', ({ i18nService, environment }) => EmailService({
@@ -60,20 +62,28 @@ export const createDefaultIocContainer = () => IocContainer()
     emailService
   }))
   .setFactory('usersService', ({ repository }) => UsersService({ repository }))
-  .setFactory('entryRouter', ({ entryService, authenticationService }) => EntryRouter({
+  .setFactory('entryRouter', ({
     entryService,
-    authenticationService
+    authenticationService,
+    validationService
+  }) => EntryRouter({
+    entryService,
+    authenticationService,
+    validationService
   }))
   .setFactory('usersRouter', ({
-    usersService, authenticationService, authorizationService
+    usersService,
+    authenticationService,
+    authorizationService
   }) => UsersRouter({
     usersService,
     authenticationService,
-    authorizationService,
+    authorizationService
   }))
+  .setFactory('validationService', () => ValidationService())
   .setFactory('authenticationService', ({ environment }) => AuthenticationService({ environment }))
   .setFactory('authorizationService', () => AuthorizationService())
   .setFactory('webInitializer', ({ entryRouter, usersRouter }) => WebInitializer({
     entryRouter,
-    usersRouter,
+    usersRouter
   }))

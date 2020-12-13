@@ -1,7 +1,7 @@
-import { createError, ErrorName } from '../../global/error.mjs'
+import { createError, ErrorName } from '../common/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
-import { Role } from './role.mjs'
+import { Role } from '../domain/users/role.mjs'
 
 export const EntryService = stampit({
   init ({ environment, repository, cryptographyService, emailService }) {

@@ -1,6 +1,6 @@
 import stampit from '@stamp/it'
 import { PgErrorCodes } from './database/misc.mjs'
-import { createError, ErrorName } from '../global/error.mjs'
+import { createError, ErrorName } from '../common/error.mjs'
 
 export const Repository = stampit({
   name: 'Repository',

@@ -1,7 +1,11 @@
 import { Router } from 'express'
 import { Permission } from '../permissions.mjs'
 
-export const UsersRouter = ({ usersService, authenticationService, authorizationService }) => {
+export const UsersRouter = ({
+  usersService,
+  authenticationService,
+  authorizationService
+}) => {
   const router = new Router()
 
   router.use(authenticationService.isAuthenticated())

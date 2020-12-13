@@ -1,9 +1,11 @@
 import stampit from '@stamp/it'
-import { PermissionsAssignments } from './permissions.mjs'
-import { ErrorName } from '../global/error.mjs'
+import { PermissionsAssignments } from '../permissions.mjs'
+import { ErrorName } from '../../../common/error.mjs'
 
 export const AuthorizationService = stampit({
   methods: {
+    // Creates a middleware which checks whether previously authenticated user has all required
+    // permissions. If not, returns an error response.
     isAuthorized (...requiredPermissions) {
       requiredPermissions = new Set(requiredPermissions)
 

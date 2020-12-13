@@ -1,6 +1,6 @@
+import stampit from '@stamp/it'
 import i18next from 'i18next'
 import { en } from './en.mjs'
-import stampit from '@stamp/it'
 
 export const I18nService = stampit({
   props: {

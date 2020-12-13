@@ -1,15 +1,18 @@
 import { Router } from 'express'
-import { ErrorName } from '../../global/error.mjs'
+import { ErrorName } from '../../../common/error.mjs'
 import { body } from 'express-validator'
-import { validate } from '../middleware.mjs'
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../global/constants.mjs'
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../common/constants.mjs'
 
-export const EntryRouter = ({ entryService, authenticationService }) => {
+export const EntryRouter = ({
+  entryService,
+  authenticationService,
+  validationService
+}) => {
   const router = new Router()
 
   router.post(
     '/register',
-    validate(emailValidator, passwordValidator),
+    validationService.isValid(emailValidator, passwordValidator),
     async (req, res, next) => {
       try {
         const { email, password } = req.body
@@ -30,7 +33,7 @@ export const EntryRouter = ({ entryService, authenticationService }) => {
 
   router.post(
     '/login',
-    validate(emailValidator, passwordValidator),
+    validationService.isValid(emailValidator, passwordValidator),
     async (req, res, next) => {
       try {
         const { email, password } = req.body

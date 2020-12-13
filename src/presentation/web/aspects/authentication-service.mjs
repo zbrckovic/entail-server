@@ -1,7 +1,7 @@
 import stampit from '@stamp/it'
 import jwt from 'jsonwebtoken'
 import moment from 'moment'
-import { ErrorName } from '../global/error.mjs'
+import { ErrorName } from '../../../common/error.mjs'
 
 export const AuthenticationService = stampit({
   init ({ environment }) {
@@ -47,7 +47,7 @@ export const AuthenticationService = stampit({
       })
     },
 
-    // Creates express middleware for token extraction and verification.
+    // Creates a middleware for token extraction and verification.
     isAuthenticated () {
       return async (req, res, next) => {
         try {
