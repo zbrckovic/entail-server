@@ -1,4 +1,4 @@
-import { Role } from '../../../domain/users/role.mjs'
+import { Role } from '../../../domain/user.mjs'
 
 export const Permission = {
   USER_MANAGEMENT: 'USER_MANAGEMENT'
