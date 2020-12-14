@@ -6,7 +6,7 @@ import { createDefaultIocContainer } from './ioc-container.mjs'
   const iocContainer = createDefaultIocContainer()
   await iocContainer.i18nService.initT()
   await iocContainer.sequelize.authenticate()
-  await iocContainer.sequelize.sync()
+  await iocContainer.sequelize.sync({ force: true })
 
   await iocContainer.repository.storeAllRoles()
 

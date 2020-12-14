@@ -1,7 +1,7 @@
 import { createError, ErrorName } from '../common/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
-import { Role } from '../domain/user.mjs'
+import { Role } from '../domain/role.mjs'
 
 export const EntryService = stampit({
   init ({ environment, repository, cryptographyService, emailService }) {
@@ -23,8 +23,11 @@ export const EntryService = stampit({
       const user = await this.repository.createUser({
         email,
         passwordHash,
-        activationCode,
-        activationCodeExpiresOn,
+        activationStatus: {
+          isActivated: false,
+          activationCode,
+          activationCodeExpiresOn
+        },
         roles: [Role.REGULAR]
       })
 

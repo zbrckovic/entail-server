@@ -1,5 +1,5 @@
 import stampit from '@stamp/it'
-import { User } from '../domain/user.mjs'
+import moment from 'moment'
 
 export const Mapper = stampit({
   methods: {
@@ -7,27 +7,54 @@ export const Mapper = stampit({
       id,
       email,
       passwordHash,
-      isActivated,
-      activationCode,
-      roles: roleDAOs
+      activationStatus,
+      roles
     }) {
-      return User({
-        id,
-        email,
-        passwordHash,
-        isActivated,
-        activationCode: activationCode ?? undefined,
-        roles: roleDAOs.map(roleDAO => this.roleFromDAO(roleDAO))
-      })
-    },
-    userToDAO ({ id, email, passwordHash, isActivated, activationCode, roles }) {
       return {
         id,
         email,
         passwordHash,
-        isActivated,
-        activationCode,
+        activationStatus: this.activationStatusFromDAO(activationStatus),
+        roles: roles.map(roleDAO => this.roleFromDAO(roleDAO))
+      }
+    },
+    userToDAO ({
+      id,
+      email,
+      passwordHash,
+      activationStatus,
+      roles
+    }) {
+      return {
+        id,
+        email,
+        passwordHash,
+        activationStatus: this.activationStatusToDAO(activationStatus),
         roles: roles.map(role => this.roleToDAO(role))
+      }
+    },
+    activationStatusFromDAO ({
+      isActivated,
+      activationCode,
+      activationCodeExpiresOn
+    }) {
+      return {
+        isActivated,
+        activationCode: activationCode ?? undefined,
+        activationCodeExpiresOn: activationCodeExpiresOn === null
+          ? undefined
+          : moment(activationCodeExpiresOn)
+      }
+    },
+    activationStatusToDAO ({
+      isActivated,
+      activationCode,
+      activationCodeExpiresOn
+    }) {
+      return {
+        isActivated,
+        activationCode: activationCode ?? null,
+        activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
       }
     },
     roleToDAO (role) {

@@ -67,5 +67,27 @@ export const createSequelize = ({ environment }) => {
     foreignKey: 'roleName'
   })
 
+  const ActivationStatus = sequelize.define('ActivationStatus', {
+    isActivated: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    activationCode: {
+      type: DataTypes.STRING
+    },
+    activationCodeExpiresOn: {
+      type: DataTypes.DATE
+    }
+  })
+
+  User.hasOne(ActivationStatus, {
+    foreignKey: 'userId',
+    as: 'activationStatus'
+  })
+  ActivationStatus.belongsTo(User, {
+    as: 'user'
+  })
+
   return sequelize
 }

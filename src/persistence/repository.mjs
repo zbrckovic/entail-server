@@ -1,5 +1,5 @@
 import stampit from '@stamp/it'
-import { Role } from '../domain/user.mjs'
+import { Role } from '../domain/role.mjs'
 import { Mapper } from './mapper.mjs'
 
 export const Repository = stampit({
@@ -25,7 +25,7 @@ export const Repository = stampit({
     },
 
     async getUserByEmail (email) {
-      const user = await this.sequelize.models.User.findOne().where({ email })
+      const user = await this.sequelize.models.User.findOne({ where: { email } })
       return user ?? undefined
     },
 
