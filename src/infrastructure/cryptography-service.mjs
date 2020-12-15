@@ -5,7 +5,7 @@ export const CryptographyService = ({ environment }) => ({
   createPasswordHash: async password => bcrypt.hash(password, environment.bcryptSaltRounds),
   isPasswordCorrect: async (password, hash) => bcrypt.compare(password, hash),
   generateActivationCode: async () => new Promise((resolve, reject) => {
-    crypto.randomBytes(128, (error, buffer) => {
+    crypto.randomBytes(64, (error, buffer) => {
       if (error) {
         reject(error)
       } else {

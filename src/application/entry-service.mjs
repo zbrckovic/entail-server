@@ -1,42 +1,41 @@
 import { createError, ErrorName } from '../common/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
-import { Role } from '../domain/role.mjs'
+import { ActivationStatus, Role, User } from '../domain/user.mjs'
 
 export const EntryService = stampit({
-  init ({ environment, repository, cryptographyService, emailService }) {
+  init({ environment, repository, cryptographyService, emailService }) {
     this.environment = environment
     this.repository = repository
     this.cryptographyService = cryptographyService
     this.emailService = emailService
   },
   methods: {
-    async register ({ email, password }) {
+    async register({ email, password }) {
       const passwordHash = await this.cryptographyService.createPasswordHash(password)
-      const activationCode = await this.cryptographyService.generateActivationCode()
+      const code = await this.cryptographyService.generateActivationCode()
 
-      const activationCodeExpiresOn = moment().add(
-        this.environment.activationCodeValidPeriodMinutes,
-        'minutes'
-      )
+      const expiresOn = moment().add(this.environment.activationCodeValidPeriodMinutes, 'minutes')
 
-      const user = await this.repository.createUser({
+      let user = User({
         email,
         passwordHash,
-        activationStatus: {
+        activationStatus: ActivationStatus({
           isActivated: false,
-          activationCode,
-          activationCodeExpiresOn
-        },
+          code,
+          expiresOn
+        }),
         roles: [Role.REGULAR]
       })
 
-      await this.emailService.sendActivationCode(activationCode, email)
+      user = await this.repository.createUser(user)
 
-      return { ...user }
+      await this.emailService.sendActivationCode(user.activationStatus.code, email)
+
+      return user
     },
 
-    async login ({ email, password }) {
+    async login({ email, password }) {
       const user = await this.repository.getUserByEmail(email)
       if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
@@ -49,25 +48,28 @@ export const EntryService = stampit({
       return user
     },
 
-    async activate ({ email, activationCode }) {
+    async activate({ email, code }) {
       const user = await this.repository.getUserByEmail(email)
       if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-      if (user.isActivated) throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
-      if (user.activationCodeExpiresOn.isBefore(moment())) {
+      const { activationStatus } = user
+
+      if (activationStatus.isActivated) {
+        throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
+      }
+      if (activationStatus.didExpire()) {
         throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
       }
 
-      if (user.activationCode !== activationCode) {
+      if (user.code !== code) {
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
 
-      await this.repository.updateUser({
-        id: user.id,
-        isActivated: true,
-        activationCode: null,
-        activationCodeExpiresOn: null
-      })
+      activationStatus.isActivated = true
+      activationStatus.code = undefined
+      activationStatus.expiresOn = undefined
+
+      await this.repository.updateUser(user)
     }
   }
 })

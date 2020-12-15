@@ -33,17 +33,6 @@ export const createSequelize = ({ environment }) => {
     passwordHash: {
       type: DataTypes.STRING(60),
       allowNull: false
-    },
-    isActivated: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
-    activationCode: {
-      type: DataTypes.STRING
-    },
-    activationCodeExpiresOn: {
-      type: DataTypes.DATE
     }
   })
 
@@ -73,10 +62,10 @@ export const createSequelize = ({ environment }) => {
       allowNull: false,
       defaultValue: false
     },
-    activationCode: {
-      type: DataTypes.STRING
+    code: {
+      type: DataTypes.STRING,
     },
-    activationCodeExpiresOn: {
+    expiresOn: {
       type: DataTypes.DATE
     }
   })

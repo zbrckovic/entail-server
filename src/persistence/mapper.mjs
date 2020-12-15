@@ -1,24 +1,25 @@
 import stampit from '@stamp/it'
 import moment from 'moment'
+import { ActivationStatus, User } from '../domain/user.mjs'
 
 export const Mapper = stampit({
   methods: {
-    userFromDAO ({
+    userFromDAO({
       id,
       email,
       passwordHash,
       activationStatus,
       roles
     }) {
-      return {
+      return User({
         id,
         email,
         passwordHash,
         activationStatus: this.activationStatusFromDAO(activationStatus),
         roles: roles.map(roleDAO => this.roleFromDAO(roleDAO))
-      }
+      })
     },
-    userToDAO ({
+    userToDAOSpecs({
       id,
       email,
       passwordHash,
@@ -29,39 +30,37 @@ export const Mapper = stampit({
         id,
         email,
         passwordHash,
-        activationStatus: this.activationStatusToDAO(activationStatus),
-        roles: roles.map(role => this.roleToDAO(role))
+        activationStatus: this.activationStatusToDAOSpecs(activationStatus),
+        roles: roles.map(role => this.roleToDAOSpecs(role))
       }
     },
-    activationStatusFromDAO ({
+    activationStatusFromDAO({
       isActivated,
-      activationCode,
-      activationCodeExpiresOn
+      code,
+      expiresOn
+    }) {
+      return ActivationStatus({
+        isActivated,
+        code: code ?? undefined,
+        expiresOn: expiresOn === null ? undefined : moment(expiresOn)
+      })
+    },
+    activationStatusToDAOSpecs({
+      isActivated,
+      code,
+      expiresOn
     }) {
       return {
         isActivated,
-        activationCode: activationCode ?? undefined,
-        activationCodeExpiresOn: activationCodeExpiresOn === null
-          ? undefined
-          : moment(activationCodeExpiresOn)
+        code: code ?? null,
+        expiresOn: expiresOn?.toDate() ?? null
       }
     },
-    activationStatusToDAO ({
-      isActivated,
-      activationCode,
-      activationCodeExpiresOn
-    }) {
-      return {
-        isActivated,
-        activationCode: activationCode ?? null,
-        activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
-      }
-    },
-    roleToDAO (role) {
+    roleToDAOSpecs(role) {
       return { name: role }
     },
-    roleFromDAO (roleDAO) {
-      return roleDAO.name
+    roleFromDAO({ name }) {
+      return name
     }
   }
 })

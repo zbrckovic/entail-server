@@ -21,7 +21,7 @@ export const IocContainer = stampit({
   methods: {
     // Registers `create` factory which will be called when dependency with `name` is first time
     // requested. `create` gets the container as first parameter.
-    setFactory (name, create) {
+    setFactory(name, create) {
       Object.defineProperty(this, name, {
         get: () => {
           // eslint-disable-next-line no-prototype-builtins
@@ -36,7 +36,7 @@ export const IocContainer = stampit({
 
       return this
     },
-    setValue (name, value) { return this.setFactory(name, () => value) }
+    setValue(name, value) { return this.setFactory(name, () => value) }
   }
 })
 
