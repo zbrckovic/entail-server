@@ -13,10 +13,7 @@ export const Repository = stampit({
     this.mapper = Mapper()
   },
   methods: {
-    // Saves all roles to database if they don't already exist.
-    async storeAllRoles() {
-      const roles = Object.values(Role)
-
+    async saveRolesIgnoreDuplicates(roles) {
       return await this.Role.bulkCreate(
         roles.map(name => ({ name })),
         { ignoreDuplicates: true }
@@ -24,13 +21,16 @@ export const Repository = stampit({
     },
 
     async getUsers() {
-      const userDAOs = await this.User.findAll()
+      const userDAOs = await this.User.findAll({ include: ['roles', 'activationStatus'] })
       return userDAOs.map(userDAO => this.mapper.userFromDAO(userDAO))
     },
 
     async getUserByEmail(email) {
-      const userDAO = await this.User.findOne({ where: { email } })
-      return userDAO ?? this.mapper.userFromDAO(userDAO)
+      const userDAO = await this.User.findOne({
+        where: { email },
+        include: ['roles', 'activationStatus']
+      })
+      return userDAO === null ? undefined : this.mapper.userFromDAO(userDAO)
     },
 
     async createUser(user) {

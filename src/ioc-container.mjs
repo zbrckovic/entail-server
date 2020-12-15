@@ -13,6 +13,7 @@ import { ValidationService } from './presentation/web/aspects/validation-service
 import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
+import { DataInitializationService } from './application/data-initialization-service.mjs'
 
 export const IocContainer = stampit({
   props: {
@@ -44,6 +45,15 @@ export const createDefaultIocContainer = () => IocContainer()
   .setValue('environment', environment)
   .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
   .setFactory('repository', ({ sequelize }) => Repository({ sequelize }))
+  .setFactory('dataInitializationService', ({
+    repository,
+    environment,
+    cryptographyService
+  }) => DataInitializationService({
+    repository,
+    environment,
+    cryptographyService
+  }))
   .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
   .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
   .setFactory('emailService', ({

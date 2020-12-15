@@ -36,28 +36,24 @@ export const EntryService = stampit({
     },
 
     async login({ email, password }) {
-      const user = await this.repository.getUserByEmail(email)
-      if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      const user = await this._getUserByEmailOrThrow(email)
 
-      const isPasswordOk = await this.cryptographyService.isPasswordCorrect(
+      const isPasswordCorrect = await this.cryptographyService.isPasswordCorrect(
         password,
         user.passwordHash
       )
-      if (!isPasswordOk) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      if (!isPasswordCorrect) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
       return user
     },
 
     async activate({ email, code }) {
-      const user = await this.repository.getUserByEmail(email)
-      if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      const user = await this._getUserByEmailOrThrow(email)
 
-      const { activationStatus } = user
-
-      if (activationStatus.isActivated) {
+      if (user.activationStatus.isActivated) {
         throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
       }
-      if (activationStatus.didExpire()) {
+      if (user.activationStatus.didExpire()) {
         throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
       }
 
@@ -65,11 +61,17 @@ export const EntryService = stampit({
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
 
-      activationStatus.isActivated = true
-      activationStatus.code = undefined
-      activationStatus.expiresOn = undefined
+      user.activationStatus.isActivated = true
+      user.activationStatus.code = undefined
+      user.activationStatus.expiresOn = undefined
 
       await this.repository.updateUser(user)
+    },
+
+    async _getUserByEmailOrThrow(email) {
+      const user = await this.repository.getUserByEmail(email)
+      if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      return user
     }
   }
 })
