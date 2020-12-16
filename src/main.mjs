@@ -1,13 +1,15 @@
 import express from 'express'
 import { environment } from './environment.mjs'
 import { createDefaultIocContainer } from './ioc-container.mjs'
+import figlet from 'figlet'
 
 (async () => {
+  console.log(figlet.textSync('Entail', { font: 'slant' }))
   const iocContainer = createDefaultIocContainer()
   await iocContainer.i18nService.initT()
   await iocContainer.sequelize.authenticate()
-  await iocContainer.sequelize.sync({ alter: true })
-  await iocContainer.dataInitializationService.initData()
+  await iocContainer.sequelize.sync({ alter: environment.dbSchemaSyncAlter })
+  if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
   const app = express()
   iocContainer.webInitializer.init(app)

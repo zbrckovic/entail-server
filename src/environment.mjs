@@ -29,6 +29,11 @@ const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
 const jwtSecret = process.env.JWT_SECRET
 const jwtExpiresInMinutes = process.env.JWT_EXPIRES_IN_MINUTES
 
+const logSql = process.env.LOG_SQL ?? false
+const dbSchemaSyncAlter = process.env.DB_SCHEMA_SYNC_ALTER ?? false
+const insertInitData = process.env.INSERT_INIT_DATA ?? false
+const logI18n = process.env.LOG_I18N ?? false
+
 export const environment = {
   mode,
   port,
@@ -47,5 +52,9 @@ export const environment = {
   superAdminEmail,
   superAdminPassword,
   jwtSecret,
-  jwtExpiresInMinutes
+  jwtExpiresInMinutes,
+  logSql,
+  dbSchemaSyncAlter,
+  insertInitData,
+  logI18n
 }

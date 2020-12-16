@@ -18,11 +18,13 @@ export const DataInitializationService = stampit({
       }
     },
 
+    // Inserts all roles into database if they don't already exist.
     async _saveAllRoles() {
       const roles = Object.values(Role)
       await this.repository.saveRolesIgnoreDuplicates(roles)
     },
 
+    // Inserts super admin with specified credentials into database.
     async _saveSuperAdmin(email, password) {
       const passwordHash = await this.cryptographyService.createPasswordHash(password)
       const user = User({

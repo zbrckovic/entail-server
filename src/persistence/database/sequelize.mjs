@@ -9,14 +9,17 @@ export const createSequelize = ({ environment }) => {
     pgPassword,
     pgDatabase,
     pgPort,
-    pgSchema
+    pgSchema,
+    mode,
+    logSql
   } = environment
 
   const sequelize = new Sequelize(pgDatabase, pgUser, pgPassword, {
     host: pgHost,
     port: pgPort,
     dialect: 'postgres',
-    schema: pgSchema
+    schema: pgSchema,
+    logging: (mode === 'development' || mode === 'test') && logSql,
   })
 
   const User = sequelize.define('User', {

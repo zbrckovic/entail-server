@@ -17,7 +17,7 @@ export const I18nService = stampit({
 
       this.t = await i18next.init({
         lng: 'en',
-        debug: mode === 'development' || mode === 'test',
+        debug: (mode === 'development' || mode === 'test') && this.environment.logI18n,
         resources: { en }
       })
     }
