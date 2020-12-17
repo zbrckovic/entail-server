@@ -16,9 +16,16 @@ export const EntryRouter = ({
     async (req, res, next) => {
       try {
         const { email, password } = req.body
-        const user = await entryService.register({ email, password })
-        const token = await authenticationService.generateToken(user)
-        res.send({ token })
+        const { user, refreshToken } = await entryService.register({ email, password })
+        const apiToken = await authenticationService.generateApiToken(user)
+
+        // TODO: finish this
+        res.cookie('JWT', refreshToken, {
+          maxAge: 86_400_000,
+          httpOnly: true
+        })
+
+        res.send({ apiToken })
       } catch (error) {
         const { name } = error
         if (name === ErrorName.INVALID_CREDENTIALS) {
@@ -37,9 +44,16 @@ export const EntryRouter = ({
     async (req, res, next) => {
       try {
         const { email, password } = req.body
-        const user = await entryService.login({ email, password })
-        const token = await authenticationService.generateToken(user)
-        res.send({ token })
+        const { user, refreshToken } = await entryService.login({ email, password })
+        const apiToken = await authenticationService.generateApiToken(user)
+
+        // TODO: finish this
+        res.cookie('JWT', refreshToken, {
+          maxAge: 86_400_000,
+          httpOnly: true
+        })
+
+        res.send({ apiToken })
       } catch (error) {
         const { name } = error
         if (name === ErrorName.INVALID_CREDENTIALS) {

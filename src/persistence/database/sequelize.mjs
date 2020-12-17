@@ -19,7 +19,7 @@ export const createSequelize = ({ environment }) => {
     port: pgPort,
     dialect: 'postgres',
     schema: pgSchema,
-    logging: (mode === 'development' || mode === 'test') && logSql,
+    logging: (mode === 'development' || mode === 'test') && logSql
   })
 
   const User = sequelize.define('User', {
@@ -65,10 +65,10 @@ export const createSequelize = ({ environment }) => {
       allowNull: false,
       defaultValue: false
     },
-    codeHash: {
-      type: DataTypes.STRING(60),
+    activationCodeHash: {
+      type: DataTypes.STRING(60)
     },
-    expiresOn: {
+    activationCodeExpiresOn: {
       type: DataTypes.DATE
     }
   })
@@ -78,6 +78,25 @@ export const createSequelize = ({ environment }) => {
     as: 'activationStatus'
   })
   ActivationStatus.belongsTo(User, {
+    as: 'user'
+  })
+
+  const Session = sequelize.define('Session', {
+    refreshTokenHash: {
+      type: DataTypes.STRING(60),
+      allowNull: false
+    },
+    refreshTokenExpiresOn: {
+      type: DataTypes.DATE,
+      allowNull: false
+    }
+  })
+
+  User.hasOne(Session, {
+    foreignKey: 'userId',
+    as: 'session'
+  })
+  Session.belongsTo(User, {
     as: 'user'
   })
 

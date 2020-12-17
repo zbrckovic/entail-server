@@ -5,11 +5,12 @@ import validator from 'validator'
 import { createError } from '../common/error.mjs'
 
 export const User = stampit({
-  init ({ id, email, passwordHash, activationStatus, roles = [] }) {
+  init ({ id, email, passwordHash, activationStatus, session, roles = [] }) {
     this.id = id ?? uuid()
     this.email = email
     this.passwordHash = passwordHash
     this.activationStatus = activationStatus
+    this.session = session
     this.roles = roles
 
     this._validate()
@@ -36,14 +37,26 @@ export const Role = {
 }
 
 export const ActivationStatus = stampit({
-  init ({ isActivated, codeHash, expiresOn }) {
+  init ({ isActivated, activationCodeHash, activationCodeExpiresOn }) {
     this.isActivated = isActivated
-    this.codeHash = codeHash
-    this.expiresOn = expiresOn
+    this.activationCodeHash = activationCodeHash
+    this.activationCodeExpiresOn = activationCodeExpiresOn
   },
   methods: {
     didExpire () {
-      return this.expiresOn.isBefore(moment())
+      return this.activationCodeExpiresOn.isBefore(moment())
+    }
+  }
+})
+
+export const Session = stampit({
+  init ({ refreshTokenHash, refreshTokenExpiresOn }) {
+    this.refreshTokenHash = refreshTokenHash
+    this.refreshTokenExpiresOn = refreshTokenExpiresOn
+  },
+  methods: {
+    didExpire () {
+      return this.refreshTokenExpiresOn.isBefore(moment())
     }
   }
 })

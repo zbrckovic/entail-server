@@ -1,7 +1,7 @@
 import { createError, ErrorName } from '../common/error.mjs'
 import moment from 'moment'
 import stampit from '@stamp/it'
-import { ActivationStatus, Role, User } from '../domain/user.mjs'
+import { ActivationStatus, Role, Session, User } from '../domain/user.mjs'
 
 export const EntryService = stampit({
   init({ environment, repository, cryptographyService, emailService }) {
@@ -12,40 +12,65 @@ export const EntryService = stampit({
   },
   methods: {
     async register({ email, password }) {
-      const passwordHash = await this.cryptographyService.createPasswordHash(password)
-      const code = await this.cryptographyService.generateActivationCode()
-      const codeHash = this.cryptographyService.createPasswordHash(code)
+      const passwordHash = await this.cryptographyService.createSecureHash(password)
 
-      const expiresOn = moment().add(this.environment.activationCodeValidPeriodMinutes, 'minutes')
+      const activationCode = await this.cryptographyService.generateSecureCode()
+      const activationCodeHash = await this.cryptographyService.createSecureHash(activationCode)
+      const activationCodeExpiresOn = moment().add(
+        this.environment.activationCodeValidPeriodMinutes, 'minutes'
+      )
+
+      const refreshToken = await this.cryptographyService.generateSecureCode()
+      const refreshTokenHash = await this.cryptographyService.createSecureHash(refreshToken)
+      const refreshTokenExpiresOn = moment().add(
+        this.environment.refreshTokenExpiresInMinutes, 'minutes'
+      )
 
       let user = User({
         email,
         passwordHash,
         activationStatus: ActivationStatus({
           isActivated: false,
-          codeHash,
-          expiresOn
+          activationCodeHash,
+          activationCodeExpiresOn
+        }),
+        session: Session({
+          refreshTokenHash,
+          refreshTokenExpiresOn
         }),
         roles: [Role.REGULAR]
       })
 
       user = await this.repository.createUser(user)
 
-      await this.emailService.sendActivationCode(user.activationStatus.code, email)
+      await this.emailService.sendActivationCode(activationCode, email)
 
-      return user
+      return { user, refreshToken }
     },
 
     async login({ email, password }) {
-      const user = await this._getUserByEmailOrThrow(email)
+      let user = await this._getUserByEmailOrThrow(email)
 
-      const isPasswordCorrect = await this.cryptographyService.isPasswordCorrect(
+      const doesValueMatchSecureHash = await this.cryptographyService.doesValueMatchSecureHash(
         password,
         user.passwordHash
       )
-      if (!isPasswordCorrect) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      if (!doesValueMatchSecureHash) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
 
-      return user
+      const refreshToken = await this.cryptographyService.generateSecureCode()
+      const refreshTokenHash = await this.cryptographyService.createSecureHash(refreshToken)
+      const refreshTokenExpiresOn = moment().add(
+        this.environment.refreshTokenExpiresInMinutes, 'minutes'
+      )
+
+      user.session = Session({
+        refreshTokenHash,
+        refreshTokenExpiresOn
+      })
+
+      user = await this.repository.updateUser(user)
+
+      return { user, refreshToken }
     },
 
     async activate({ email, code }) {
@@ -58,17 +83,17 @@ export const EntryService = stampit({
         throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
       }
 
-      const isCodeCorrect = await this.cryptographyService.isPasswordCorrect(
-        code, user.activationStatus.codeHash
+      const isActivationCodeCorrect = await this.cryptographyService.doesValueMatchSecureHash(
+        code, user.activationStatus.activationCodeHash
       )
 
-      if (!isCodeCorrect) {
+      if (!isActivationCodeCorrect) {
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
 
       user.activationStatus.isActivated = true
-      user.activationStatus.codeHash = undefined
-      user.activationStatus.expiresOn = undefined
+      user.activationStatus.activationCodeHash = undefined
+      user.activationStatus.activationCodeExpiresOn = undefined
 
       await this.repository.updateUser(user)
     },

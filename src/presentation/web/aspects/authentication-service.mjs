@@ -4,21 +4,30 @@ import moment from 'moment'
 import { ErrorName } from '../../../common/error.mjs'
 
 export const AuthenticationService = stampit({
-  init ({ environment }) {
+  init({ environment, cryptographyService }) {
     this.environment = environment
-    this.jwtSecret = environment.jwtSecret
-    this.jwtExpiresIn = moment.duration(environment.jwtExpiresInMinutes, 'minutes').asSeconds()
+    this.cryptographyService = cryptographyService
+
+    this.apiTokenSecret = environment.apiTokenSecret
+    this.apiTokenExpiresInSeconds = moment.duration(
+      environment.apiTokenExpiresInMinutes, 'minutes'
+    ).asSeconds()
+
     this.authorizationHeaderPattern = /^Bearer (.+)$/
   },
   methods: {
-    async generateToken (user) {
+    async generateRefreshToken() {
+      return await this.cryptographyService.generateSecureCode()
+    },
+
+    async generateApiToken(user) {
       const { id, isActivated, roles } = user
 
       return new Promise((resolve, reject) => {
         jwt.sign(
           { user: { id, isActivated, roles } },
-          this.jwtSecret,
-          { expiresIn: this.jwtExpiresIn, subject: `${id}` },
+          this.apiTokenSecret,
+          { expiresIn: this.apiTokenExpiresInSeconds, subject: `${id}` },
           (error, token) => {
             if (error !== null) {
               reject(error)
@@ -30,11 +39,11 @@ export const AuthenticationService = stampit({
       })
     },
 
-    async verifyToken (token) {
+    async verifyToken(token) {
       return new Promise((resolve, reject) => {
         jwt.verify(
           token,
-          this.jwtSecret,
+          this.apiTokenSecret,
           {},
           (error, decodedToken) => {
             if (error !== null) {
@@ -48,7 +57,7 @@ export const AuthenticationService = stampit({
     },
 
     // Creates a middleware for token extraction and verification.
-    isAuthenticated () {
+    isAuthenticated() {
       return async (req, res, next) => {
         try {
           const token = req

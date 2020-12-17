@@ -94,7 +94,10 @@ export const createDefaultIocContainer = () => IocContainer()
     authorizationService
   }))
   .setFactory('validationService', () => ValidationService())
-  .setFactory('authenticationService', ({ environment }) => AuthenticationService({ environment }))
+  .setFactory('authenticationService', ({
+    environment,
+    cryptographyService
+  }) => AuthenticationService({ environment, cryptographyService }))
   .setFactory('authorizationService', () => AuthorizationService())
   .setFactory('webInitializer', ({
     entryRouter,

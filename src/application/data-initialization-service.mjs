@@ -26,7 +26,7 @@ export const DataInitializationService = stampit({
 
     // Inserts super admin with specified credentials into database.
     async _saveSuperAdmin(email, password) {
-      const passwordHash = await this.cryptographyService.createPasswordHash(password)
+      const passwordHash = await this.cryptographyService.createSecureHash(password)
       const user = User({
         email,
         passwordHash,
