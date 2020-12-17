@@ -36,9 +36,9 @@ export const Role = {
 }
 
 export const ActivationStatus = stampit({
-  init ({ isActivated, code, expiresOn }) {
+  init ({ isActivated, codeHash, expiresOn }) {
     this.isActivated = isActivated
-    this.code = code
+    this.codeHash = codeHash
     this.expiresOn = expiresOn
   },
   methods: {

@@ -36,23 +36,23 @@ export const Mapper = stampit({
     },
     activationStatusFromDAO({
       isActivated,
-      code,
+      codeHash,
       expiresOn
     }) {
       return ActivationStatus({
         isActivated,
-        code: code ?? undefined,
+        codeHash: codeHash ?? undefined,
         expiresOn: expiresOn === null ? undefined : moment(expiresOn)
       })
     },
     activationStatusToDAOSpecs({
       isActivated,
-      code,
+      codeHash,
       expiresOn
     }) {
       return {
         isActivated,
-        code: code ?? null,
+        codeHash: codeHash ?? null,
         expiresOn: expiresOn?.toDate() ?? null
       }
     },

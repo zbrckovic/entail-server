@@ -14,6 +14,7 @@ export const EntryService = stampit({
     async register({ email, password }) {
       const passwordHash = await this.cryptographyService.createPasswordHash(password)
       const code = await this.cryptographyService.generateActivationCode()
+      const codeHash = this.cryptographyService.createPasswordHash(code)
 
       const expiresOn = moment().add(this.environment.activationCodeValidPeriodMinutes, 'minutes')
 
@@ -22,7 +23,7 @@ export const EntryService = stampit({
         passwordHash,
         activationStatus: ActivationStatus({
           isActivated: false,
-          code,
+          codeHash,
           expiresOn
         }),
         roles: [Role.REGULAR]
@@ -57,12 +58,16 @@ export const EntryService = stampit({
         throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
       }
 
-      if (user.code !== code) {
+      const isCodeCorrect = await this.cryptographyService.isPasswordCorrect(
+        code, user.activationStatus.codeHash
+      )
+
+      if (!isCodeCorrect) {
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
 
       user.activationStatus.isActivated = true
-      user.activationStatus.code = undefined
+      user.activationStatus.codeHash = undefined
       user.activationStatus.expiresOn = undefined
 
       await this.repository.updateUser(user)

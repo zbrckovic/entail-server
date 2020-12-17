@@ -1,5 +1,11 @@
 // Extracts data from all required environment variables and exports it as `environment` object.
 // Rest of the application will read only `environment`, never `process.env`.
+
+const parseBoolean = (value, defaultValue) => {
+  if (value === undefined) return defaultValue
+  return JSON.parse(value)
+}
+
 const mode = process.env.NODE_ENV ?? 'development'
 const port = process.env.PORT ?? 5000
 const pgUser = process.env.PGUSER ?? 'postgres'
@@ -29,10 +35,10 @@ const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
 const jwtSecret = process.env.JWT_SECRET
 const jwtExpiresInMinutes = process.env.JWT_EXPIRES_IN_MINUTES
 
-const logSql = process.env.LOG_SQL ?? false
-const dbSchemaSyncAlter = process.env.DB_SCHEMA_SYNC_ALTER ?? false
-const insertInitData = process.env.INSERT_INIT_DATA ?? false
-const logI18n = process.env.LOG_I18N ?? false
+const logSql = parseBoolean(process.env.LOG_SQL, false)
+const dbSchemaSyncAlter = parseBoolean(process.env.DB_SCHEMA_SYNC_ALTER, false)
+const insertInitData = parseBoolean(process.env.INSERT_INIT_DATA, false)
+const logI18n = parseBoolean(process.env.LOG_I18N, false)
 
 export const environment = {
   mode,
@@ -58,3 +64,4 @@ export const environment = {
   insertInitData,
   logI18n
 }
+

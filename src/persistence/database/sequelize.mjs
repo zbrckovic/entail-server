@@ -65,8 +65,8 @@ export const createSequelize = ({ environment }) => {
       allowNull: false,
       defaultValue: false
     },
-    code: {
-      type: DataTypes.STRING,
+    codeHash: {
+      type: DataTypes.STRING(60),
     },
     expiresOn: {
       type: DataTypes.DATE

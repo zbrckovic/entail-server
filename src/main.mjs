@@ -8,7 +8,7 @@ import figlet from 'figlet'
   const iocContainer = createDefaultIocContainer()
   await iocContainer.i18nService.initT()
   await iocContainer.sequelize.authenticate()
-  await iocContainer.sequelize.sync({ alter: environment.dbSchemaSyncAlter })
+  await iocContainer.sequelize.sync({ force: true })
   if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
   const app = express()
