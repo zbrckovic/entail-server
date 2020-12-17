@@ -63,12 +63,14 @@ export const EntryService = stampit({
         this.environment.refreshTokenExpiresInMinutes, 'minutes'
       )
 
-      user.session = Session({
-        refreshTokenHash,
-        refreshTokenExpiresOn
-      })
+      user = await this.repository.updateUser(user.id, user => {
+        user.session = Session({
+          refreshTokenHash,
+          refreshTokenExpiresOn
+        })
 
-      user = await this.repository.updateUser(user)
+        return user
+      })
 
       return { user, refreshToken }
     },

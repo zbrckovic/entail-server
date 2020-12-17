@@ -55,15 +55,19 @@ export const Repository = stampit({
       }
     },
 
-    async updateUser(user) {
-      const userDAOSpecs = this.mapper.userToDAOSpecs(user)
+    async updateUser(id, updater) {
+      const userDAO = await this.User.findByPk(
+        id,
+        { include: ['activationStatus', 'roles', 'session'] }
+      )
+      const user = this.mapper.userFromDAO(userDAO)
+      const updatedUser = updater(user)
 
-      let userDAO = await this.User.build({
-        ...userDAOSpecs,
-        roles: []
-      }, { include: ['activationStatus', 'roles', 'session'] })
+      // TODO: finish this
+
+      const updatedUserDAOSpecs = this.mapper.userToDAOSpecs(updatedUser)
       await userDAO.save()
-      await userDAO.setRoles(userDAOSpecs.roles.map(({ name }) => name))
+      await userDAO.setRoles(updatedUserDAOSpecs.roles.map(({ name }) => name))
       return this.mapper.userFromDAO(userDAO)
     }
   }
