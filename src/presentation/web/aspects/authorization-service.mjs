@@ -1,9 +1,8 @@
-import stampit from '@stamp/it'
-import { PermissionsAssignments } from './permissions.mjs'
 import { ErrorName } from '../../../common/error.mjs'
+import { PermissionsAssignments } from './permissions.mjs'
 
-export const AuthorizationService = stampit({
-  methods: {
+export const AuthorizationService = () => {
+  const result = Object.freeze({
     // Creates a middleware which checks whether previously authenticated user has all required
     // permissions. If not, returns an error response.
     isAuthorized (...requiredPermissions) {
@@ -26,33 +25,37 @@ export const AuthorizationService = stampit({
         next()
       }
     }
+  })
+
+  const getPermissionsForRoles = (...roles) => {
+    const result = new Set()
+
+    roles.forEach(role => {
+      getPermissionsForRole(role).forEach(permission => {
+        result.add(permission)
+      })
+    })
+
+    return result
   }
-})
 
-const getPermissionsForRoles = (...roles) => {
-  const result = new Set()
+  const getPermissionsForRole = role => {
+    const result = new Set()
 
-  roles.forEach(role => {
-    getPermissionsForRole(role).forEach(permission => {
-      result.add(permission)
+    const { superiorTo, permissions } = PermissionsAssignments[role]
+
+    permissions.forEach(permission => { result.add(permission) })
+
+    superiorTo.forEach(role => {
+      getPermissionsForRole(role).forEach(permissionForRole => {
+        result.add(permissionForRole)
+      })
     })
-  })
+
+    return result
+  }
 
   return result
 }
 
-const getPermissionsForRole = role => {
-  const result = new Set()
 
-  const { superiorTo, permissions } = PermissionsAssignments[role]
-
-  permissions.forEach(permission => { result.add(permission) })
-
-  superiorTo.forEach(role => {
-    getPermissionsForRole(role).forEach(permissionForRole => {
-      result.add(permissionForRole)
-    })
-  })
-
-  return result
-}

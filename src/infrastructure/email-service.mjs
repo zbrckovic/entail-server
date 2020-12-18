@@ -1,32 +1,30 @@
 import nodemailer from 'nodemailer'
-import stampit from '@stamp/it'
 
-export const EmailService = stampit({
-  init ({ environment, i18nService }) {
-    this.t = i18nService.t
+export const EmailService = ({ environment, i18nService }) => {
+  const t = i18nService.getT()
 
-    this.transport = nodemailer.createTransport({
-      pool: true,
-      host: environment.emailServerHost,
-      port: environment.emailServerPort,
-      auth: {
-        user: environment.emailServerUsername,
-        pass: environment.emailServerPassword
-      }
-    })
-  },
-  methods: {
+  const transport = nodemailer.createTransport({
+    pool: true,
+    host: environment.emailServerHost,
+    port: environment.emailServerPort,
+    auth: {
+      user: environment.emailServerUsername,
+      pass: environment.emailServerPassword
+    }
+  })
+
+  return Object.freeze({
     async verifyConnection () {
-      return await this.transport.verify()
+      return await transport.verify()
     },
 
     async sendActivationCode (activationCode, recipientAddress) {
       const from = 'authentication@entail.com'
       const to = recipientAddress
-      const subject = this.t('activationEmail.subject')
-      const text = this.t('activationEmail.text')
+      const subject = t('activationEmail.subject')
+      const text = t('activationEmail.text')
 
-      return await this.transport.sendMail({ from, to, subject, text })
+      return await transport.sendMail({ from, to, subject, text })
     }
-  }
-})
+  })
+}

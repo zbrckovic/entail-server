@@ -1,25 +1,25 @@
-import stampit from '@stamp/it'
 import i18next from 'i18next'
+import { createError } from '../../common/error.mjs'
 import { en } from './en.mjs'
 
-export const I18nService = stampit({
-  props: {
-    t: undefined
-  },
-  init ({ environment }) {
-    this.environment = environment
-  },
-  methods: {
+export const I18nService = ({ environment }) => {
+  let t = undefined
+
+  return Object.freeze({
     async initT () {
-      if (this.t !== undefined) return
+      if (t !== undefined) return
 
-      const mode = this.environment.mode
+      const mode = environment.mode
 
-      this.t = await i18next.init({
+      t = await i18next.init({
         lng: 'en',
-        debug: (mode === 'development' || mode === 'test') && this.environment.logI18n,
+        debug: (mode === 'development' || mode === 'test') && environment.logI18n,
         resources: { en }
       })
-    }
-  }
-})
+    },
+    getT () {
+      if (t === undefined) throw createError({ message: 'I18n is not yet initialized.' })
+      return t
+    },
+  })
+}

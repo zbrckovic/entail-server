@@ -1,50 +1,42 @@
-import stampit from '@stamp/it'
-import { Role } from '../domain/user.mjs'
-import { Mapper } from './mapper.mjs'
 import { createError, ErrorName } from '../common/error.mjs'
+import { Mapper } from './mapper.mjs'
 
-export const Repository = stampit({
-  name: 'Repository',
-  init({ sequelize }) {
-    const { User, Role, ActivationStatus, Session } = sequelize.models
-    this.User = User
-    this.Role = Role
-    this.ActivationStatus = ActivationStatus
-    this.Session = Session
-    this.mapper = Mapper()
-  },
-  methods: {
-    async saveRolesIgnoreDuplicates(roles) {
-      return await this.Role.bulkCreate(
+export const Repository = ({ sequelize }) => {
+  const { User, Role } = sequelize.models
+  const mapper = Mapper()
+
+  return Object.freeze({
+    async saveRolesIgnoreDuplicates (roles) {
+      return await Role.bulkCreate(
         roles.map(name => ({ name })),
         { ignoreDuplicates: true }
       )
     },
 
-    async getUsers() {
-      const userDAOs = await this.User.findAll({
+    async getUsers () {
+      const userDAOs = await User.findAll({
         include: ['roles', 'activationStatus', 'session']
       })
-      return userDAOs.map(userDAO => this.mapper.userFromDAO(userDAO))
+      return userDAOs.map(userDAO => mapper.userFromDAO(userDAO))
     },
 
-    async getUserByEmail(email) {
-      const userDAO = await this.User.findOne({
+    async getUserByEmail (email) {
+      const userDAO = await User.findOne({
         where: { email },
         include: ['roles', 'activationStatus', 'session']
       })
-      return userDAO === null ? undefined : this.mapper.userFromDAO(userDAO)
+      return userDAO === null ? undefined : mapper.userFromDAO(userDAO)
     },
 
-    async createUser(user) {
+    async createUser (user) {
       try {
-        const userDAOSpecs = this.mapper.userToDAOSpecs(user)
-        let userDAO = await this.User.create({
+        const userDAOSpecs = mapper.userToDAOSpecs(user)
+        let userDAO = await User.create({
           ...userDAOSpecs,
           roles: []
         }, { include: ['activationStatus', 'roles', 'session'] })
         await userDAO.setRoles(userDAOSpecs.roles.map(({ name }) => name))
-        return this.mapper.userFromDAO(userDAO)
+        return mapper.userFromDAO(userDAO)
       } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
           if (error.fields.hasOwnProperty('email')) {
@@ -55,20 +47,21 @@ export const Repository = stampit({
       }
     },
 
-    async updateUser(id, updater) {
-      const userDAO = await this.User.findByPk(
+    async updateUser (id, updater) {
+      const userDAO = await User.findByPk(
         id,
         { include: ['activationStatus', 'roles', 'session'] }
       )
-      const user = this.mapper.userFromDAO(userDAO)
+      const user = mapper.userFromDAO(userDAO)
       const updatedUser = updater(user)
 
       // TODO: finish this
 
-      const updatedUserDAOSpecs = this.mapper.userToDAOSpecs(updatedUser)
+      const updatedUserDAOSpecs = mapper.userToDAOSpecs(updatedUser)
       await userDAO.save()
       await userDAO.setRoles(updatedUserDAOSpecs.roles.map(({ name }) => name))
-      return this.mapper.userFromDAO(userDAO)
+      return mapper.userFromDAO(userDAO)
     }
-  }
-})
+  })
+}
+

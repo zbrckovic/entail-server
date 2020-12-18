@@ -1,9 +1,8 @@
-import stampit from '@stamp/it'
 import { validationResult } from 'express-validator'
 import { ErrorName } from '../../../common/error.mjs'
 
-export const ValidationService = stampit({
-  methods: {
+export const ValidationService = () => (
+  Object.freeze({
     // Creates a middleware which validates request based on provided validators. In case validation
     // results in errors it returns json response with validation messages extracted from those
     // errors.
@@ -21,6 +20,5 @@ export const ValidationService = stampit({
         }
       ]
     }
-
-  }
-})
+  })
+)

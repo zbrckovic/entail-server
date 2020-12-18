@@ -1,34 +1,31 @@
-import stampit from '@stamp/it'
 import { v4 as uuid } from 'uuid'
 import moment from 'moment'
 import validator from 'validator'
 import { createError } from '../common/error.mjs'
 
-export const User = stampit({
-  init ({ id, email, passwordHash, activationStatus, session, roles = [] }) {
-    this.id = id ?? uuid()
-    this.email = email
-    this.passwordHash = passwordHash
-    this.activationStatus = activationStatus
-    this.session = session
-    this.roles = roles
-
-    this._validate()
-  },
-  methods: {
-    _validate () {
-      if (!validator.isEmail(this.email)) {
-        throw createError({ message: 'email is invalid' })
-      }
-      if (this.passwordHash.length !== 60) {
-        throw createError({ message: 'passwordHash is invalid' })
-      }
-      if (this.activationStatus === undefined) {
-        throw createError({ message: 'activationStatus not provided' })
-      }
-    }
+export const User = ({
+  id = uuid(),
+  email,
+  passwordHash,
+  activationStatus,
+  session,
+  roles = []
+}) => {
+  if (!validator.isEmail(email)) throw createError({ message: 'email is invalid' })
+  if (passwordHash.length !== 60) throw createError({ message: 'passwordHash is invalid' })
+  if (activationStatus === undefined) {
+    throw createError({ message: 'activationStatus not provided' })
   }
-})
+
+  return Object.freeze({
+    id: id ?? uuid(),
+    email: email,
+    passwordHash: passwordHash,
+    activationStatus: activationStatus,
+    session: session,
+    roles: roles,
+  })
+}
 
 export const Role = {
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -36,27 +33,23 @@ export const Role = {
   REGULAR: 'REGULAR'
 }
 
-export const ActivationStatus = stampit({
-  init ({ isActivated, activationCodeHash, activationCodeExpiresOn }) {
-    this.isActivated = isActivated
-    this.activationCodeHash = activationCodeHash
-    this.activationCodeExpiresOn = activationCodeExpiresOn
-  },
-  methods: {
+export const ActivationStatus = ({ isActivated, activationCodeHash, activationCodeExpiresOn }) => (
+  Object.freeze({
+    isActivated,
+    activationCodeHash,
+    activationCodeExpiresOn,
     didExpire () {
       return this.activationCodeExpiresOn.isBefore(moment())
     }
-  }
-})
+  })
+)
 
-export const Session = stampit({
-  init ({ refreshTokenHash, refreshTokenExpiresOn }) {
-    this.refreshTokenHash = refreshTokenHash
-    this.refreshTokenExpiresOn = refreshTokenExpiresOn
-  },
-  methods: {
+export const Session = ({ refreshTokenHash, refreshTokenExpiresOn }) => (
+  Object.freeze({
+    refreshTokenHash,
+    refreshTokenExpiresOn,
     didExpire () {
       return this.refreshTokenExpiresOn.isBefore(moment())
     }
-  }
-})
+  })
+)

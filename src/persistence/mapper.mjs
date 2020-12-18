@@ -1,10 +1,9 @@
-import stampit from '@stamp/it'
 import moment from 'moment'
 import { ActivationStatus, Session, User } from '../domain/user.mjs'
 
-export const Mapper = stampit({
-  methods: {
-    userFromDAO({
+export const Mapper = () => {
+  const result = Object.freeze({
+    userFromDAO ({
       id,
       email,
       passwordHash,
@@ -16,12 +15,12 @@ export const Mapper = stampit({
         id: id ?? undefined,
         email,
         passwordHash,
-        activationStatus: this.activationStatusFromDAO(activationStatus),
-        session: session !== null ? this.sessionFromDAO(session) : undefined,
-        roles: roles.map(roleDAO => this.roleFromDAO(roleDAO))
+        activationStatus: activationStatusFromDAO(activationStatus),
+        session: session !== null ? sessionFromDAO(session) : undefined,
+        roles: roles.map(roleDAO => roleFromDAO(roleDAO))
       })
     },
-    userToDAOSpecs({
+    userToDAOSpecs ({
       id,
       email,
       passwordHash,
@@ -33,54 +32,54 @@ export const Mapper = stampit({
         id: id ?? null,
         email,
         passwordHash,
-        activationStatus: this.activationStatusToDAOSpecs(activationStatus),
-        session: session !== undefined ? this.sessionToDAOSpecs(session) : null,
-        roles: roles.map(role => this.roleToDAOSpecs(role))
+        activationStatus: activationStatusToDAOSpecs(activationStatus),
+        session: session !== undefined ? sessionToDAOSpecs(session) : null,
+        roles: roles.map(role => roleToDAOSpecs(role))
       }
     },
-    activationStatusFromDAO({
+  })
+
+  const sessionFromDAO = ({ refreshTokenHash, refreshTokenExpiresOn }) => (
+    Session({
+      refreshTokenHash: refreshTokenHash ?? undefined,
+      refreshTokenExpiresOn: refreshTokenExpiresOn === null
+        ? undefined
+        : moment(refreshTokenExpiresOn)
+    })
+  )
+
+  const sessionToDAOSpecs = ({ refreshTokenHash, refreshTokenExpiresOn }) => ({
+    refreshTokenHash: refreshTokenHash ?? null,
+    refreshTokenExpiresOn: refreshTokenExpiresOn?.toDate() ?? null
+  })
+
+  const roleToDAOSpecs = role => ({ name: role })
+
+  const roleFromDAO = ({ name }) => name
+
+  const activationStatusFromDAO = ({
+    isActivated,
+    activationCodeHash,
+    activationCodeExpiresOn
+  }) => (
+    ActivationStatus({
       isActivated,
-      activationCodeHash,
-      activationCodeExpiresOn
-    }) {
-      return ActivationStatus({
-        isActivated,
-        activationCodeHash: activationCodeHash ?? undefined,
-        activationCodeExpiresOn: activationCodeExpiresOn === null
-          ? undefined
-          : moment(activationCodeExpiresOn)
-      })
-    },
-    activationStatusToDAOSpecs({
-      isActivated,
-      activationCodeHash,
-      activationCodeExpiresOn
-    }) {
-      return {
-        isActivated,
-        activationCodeHash: activationCodeHash ?? null,
-        activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
-      }
-    },
-    sessionFromDAO({ refreshTokenHash, refreshTokenExpiresOn }) {
-      return Session({
-        refreshTokenHash: refreshTokenHash ?? undefined,
-        refreshTokenExpiresOn: refreshTokenExpiresOn === null
-          ? undefined
-          : moment(refreshTokenExpiresOn)
-      })
-    },
-    sessionToDAOSpecs({ refreshTokenHash, refreshTokenExpiresOn }) {
-      return {
-        refreshTokenHash: refreshTokenHash ?? null,
-        refreshTokenExpiresOn: refreshTokenExpiresOn?.toDate() ?? null
-      }
-    },
-    roleToDAOSpecs(role) {
-      return { name: role }
-    },
-    roleFromDAO({ name }) {
-      return name
-    }
-  }
-})
+      activationCodeHash: activationCodeHash ?? undefined,
+      activationCodeExpiresOn: activationCodeExpiresOn === null
+        ? undefined
+        : moment(activationCodeExpiresOn)
+    })
+  )
+
+  const activationStatusToDAOSpecs = ({
+    isActivated,
+    activationCodeHash,
+    activationCodeExpiresOn
+  }) => ({
+    isActivated,
+    activationCodeHash: activationCodeHash ?? null,
+    activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
+  })
+
+  return result
+}

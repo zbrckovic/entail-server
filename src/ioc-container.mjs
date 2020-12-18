@@ -1,35 +1,33 @@
-import stampit from '@stamp/it'
+import { DataInitializationService } from './application/data-initialization-service.mjs'
 import { EntryService } from './application/entry-service.mjs'
 import { UsersService } from './application/users-service.mjs'
 import { environment } from './environment.mjs'
 import { CryptographyService } from './infrastructure/cryptography-service.mjs'
 import { EmailService } from './infrastructure/email-service.mjs'
+import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
 import { createSequelize } from './persistence/database/sequelize.mjs'
 import { Repository } from './persistence/repository.mjs'
-import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
 import { AuthenticationService } from './presentation/web/aspects/authentication-service.mjs'
 import { AuthorizationService } from './presentation/web/aspects/authorization-service.mjs'
 import { ValidationService } from './presentation/web/aspects/validation-service.mjs'
 import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
-import { DataInitializationService } from './application/data-initialization-service.mjs'
 
-export const IocContainer = stampit({
-  props: {
-    values: {}
-  },
-  methods: {
+const IocContainer = () => {
+  const values = {}
+
+  return Object.freeze({
     // Registers `create` factory which will be called when dependency with `name` is first time
     // requested. `create` gets the container as first parameter.
-    setFactory(name, create) {
-      Object.defineProperty(this, name, {
+    setFactory (name, create) {
+      Object.defineProperty(values, name, {
         get: () => {
           // eslint-disable-next-line no-prototype-builtins
-          if (!this.values.hasOwnProperty(name)) {
-            this.values[name] = create(this)
+          if (!values.hasOwnProperty(name)) {
+            values[name] = create(this)
           }
-          return this.values[name]
+          return values[name]
         },
         configurable: true,
         enumerable: true
@@ -37,9 +35,11 @@ export const IocContainer = stampit({
 
       return this
     },
-    setValue(name, value) { return this.setFactory(name, () => value) }
-  }
-})
+    setValue (name, value) {
+      return this.setFactory(name, () => value)
+    }
+  })
+}
 
 export const createDefaultIocContainer = () => IocContainer()
   .setValue('environment', environment)
