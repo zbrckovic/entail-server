@@ -6,122 +6,95 @@ export const EntryService = ({
   environment,
   usersRepository,
   cryptographyService,
-  emailService
+  emailService,
+  authenticationService
 }) => {
   const result = Object.freeze({
-    async register ({
-      email,
-      password
-    }) {
+    async register ({ email, password }) {
       const passwordHash = await cryptographyService.createSecureHash(password)
 
-      const activationCode = await cryptographyService.generateSecureCode()
-      const activationCodeHash = await cryptographyService.createSecureHash(activationCode)
-      const activationCodeExpiresOn = moment().add(
-        environment.activationCodeValidPeriodMinutes, 'minutes'
-      )
-
-      const refreshToken = await cryptographyService.generateSecureCode()
-      const refreshTokenHash = await cryptographyService.createSecureHash(refreshToken)
-      const refreshTokenExpiresOn = moment().add(
-        environment.refreshTokenExpiresInMinutes, 'minutes'
-      )
+      const [activationStatus, activationCode] = await generateActivationStatusWithCode()
+      const [session, refreshToken] = await generateSessionWithRefreshToken()
 
       const user = User({
         email,
         passwordHash,
-        activationStatus: ActivationStatus({
-          isActivated: false,
-          activationCodeHash,
-          activationCodeExpiresOn
-        }),
-        session: Session({
-          refreshTokenHash,
-          refreshTokenExpiresOn
-        }),
+        activationStatus,
+        session,
         roles: [Role.REGULAR]
       })
-
       await usersRepository.createUser(user)
-
       await emailService.sendActivationCode(activationCode, email)
 
-      return {
-        user,
-        refreshToken
-      }
+      const apiToken = await authenticationService.generateApiToken()
+
+      return { user, refreshToken, apiToken }
     },
 
-    async login ({
-      email,
-      password
-    }) {
-      const user = await getUserByEmailOrThrow(email)
+    async login ({ email, password }) {
+      const user = await authenticationService.verifyCredentials({ email, password })
 
-      const doesValueMatchSecureHash = await cryptographyService.doesValueMatchSecureHash(
-        password,
-        user.passwordHash
-      )
-      if (!doesValueMatchSecureHash) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-
-      const refreshToken = await cryptographyService.generateSecureCode()
-      const refreshTokenHash = await cryptographyService.createSecureHash(refreshToken)
-      const refreshTokenExpiresOn = moment().add(
-        environment.refreshTokenExpiresInMinutes, 'minutes'
-      )
-
-      const userWithNewSession = user.setSession(
-        Session({
-          refreshTokenHash,
-          refreshTokenExpiresOn
-        })
-      )
-
+      const [session, refreshToken] = await generateSessionWithRefreshToken()
+      const userWithNewSession = user.setSession(session)
       await usersRepository.updateUser(userWithNewSession)
 
-      return {
-        user: userWithNewSession,
-        refreshToken
-      }
+      const apiToken = await authenticationService.generateApiToken()
+
+      return { user: userWithNewSession, refreshToken, apiToken }
     },
 
-    async activate ({
-      email,
-      code
-    }) {
-      const user = await getUserByEmailOrThrow(email)
+    async activate (user, activationCode) {
+      await authenticationService.verifyActivationCode(user, activationCode)
 
+      const newActivationStatus = ActivationStatus({ isActivated: true })
+      const userWithNewActivationStatus = user.setActivationStatus(newActivationStatus)
+
+      await usersRepository.updateUser(userWithNewActivationStatus)
+    },
+
+    async refreshActivationCode (user) {
       if (user.activationStatus.isActivated) {
         throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
       }
-      if (user.activationStatus.didExpire()) {
-        throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
-      }
 
-      const isActivationCodeCorrect = await cryptographyService.doesValueMatchSecureHash(
-        code, user.activationStatus.activationCodeHash
-      )
-
-      if (!isActivationCodeCorrect) {
-        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-      }
-
-      const userWithNewActivationStatus = user.setActivationStatus(
-        ActivationStatus({
-          isActivated: true,
-          activationCodeHash: undefined,
-          activationCodeExpiresOn: undefined
-        })
-      )
-
+      const [activationStatus, activationCode] = generateActivationStatusWithCode()
+      const userWithNewActivationStatus = user.setActivationStatus(activationStatus)
       await usersRepository.updateUser(userWithNewActivationStatus)
+
+      return activationCode
+    },
+
+    async refreshApiToken (user, refreshToken) {
+      await authenticationService.verifyRefreshToken(user, refreshToken)
+      return await authenticationService.generateApiToken(user)
     }
   })
 
-  const getUserByEmailOrThrow = async email => {
-    const user = await usersRepository.getUserByEmail(email)
-    if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-    return user
+  const generateActivationStatusWithCode = async () => {
+    const activationCode = await authenticationService.generateActivationCode()
+    const activationCodeHash = await cryptographyService.createSecureHash(activationCode)
+    const activationCodeExpiresOn = moment().add(
+      environment.activationCodeValidPeriodMinutes,
+      'minutes'
+    )
+
+    const activationStatus = ActivationStatus({
+      isActivated: false,
+      activationCodeHash,
+      activationCodeExpiresOn
+    })
+
+    return [activationStatus, activationCode]
+  }
+
+  const generateSessionWithRefreshToken = async () => {
+    const refreshToken = await authenticationService.generateRefreshToken()
+    const refreshTokenHash = await cryptographyService.createSecureHash(refreshToken)
+    const refreshTokenExpiresOn = moment().add(environment.refreshTokenExpiresInMinutes, 'minutes')
+
+    const session = Session({ refreshTokenHash, refreshTokenExpiresOn })
+
+    return [session, refreshToken]
   }
 
   return result

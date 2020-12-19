@@ -1,7 +1,7 @@
 import { validationResult } from 'express-validator'
 import { ErrorName } from '../../../common/error.mjs'
 
-export const ValidationService = () => (
+export const ValidationMiddlewareFactory = () => (
   Object.freeze({
     // Creates a middleware which validates request based on provided validators. In case validation
     // results in errors it returns json response with validation messages extracted from those

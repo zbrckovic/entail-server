@@ -1,15 +1,15 @@
 import { Router } from 'express'
-import { Permission } from '../aspects/permissions.mjs'
+import { Permission } from '../../../application/permissions.mjs'
 
 export const UsersRouter = ({
   usersService,
-  authenticationService,
-  authorizationService
+  authenticationMiddlewareFactory: authentication,
+  authorizationMiddlewareFactory: authorization
 }) => {
   const router = new Router()
 
-  router.use(authenticationService.isAuthenticated())
-  router.use(authorizationService.isAuthorized(Permission.USER_MANAGEMENT))
+  router.use(authentication.isAuthenticated())
+  router.use(authorization.isAuthorized(Permission.USER_MANAGEMENT))
 
   router.get(
     '/',

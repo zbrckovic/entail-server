@@ -2,7 +2,7 @@ import sequelizeLibrary from 'sequelize'
 
 const { DataTypes } = sequelizeLibrary
 
-export const createModels = ({ sequelize }) => {
+export const createModels = sequelize => {
   const UserModel = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,
@@ -79,6 +79,4 @@ export const createModels = ({ sequelize }) => {
   SessionModel.belongsTo(UserModel, {
     as: 'user'
   })
-
-  return sequelize
 }

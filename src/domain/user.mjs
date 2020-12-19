@@ -10,7 +10,7 @@ export const User = ({
   activationStatus,
   session,
   roles = []
-}) => {
+} = {}) => {
   if (!validator.isEmail(email)) throw createError({ message: 'email is invalid' })
   if (passwordHash.length !== 60) throw createError({ message: 'passwordHash is invalid' })
   if (activationStatus === undefined) {
@@ -46,10 +46,10 @@ export const Role = {
 }
 
 export const ActivationStatus = ({
-  isActivated,
+  isActivated = false,
   activationCodeHash,
   activationCodeExpiresOn
-}) => (
+} = {}) => (
   Object.freeze({
     isActivated,
     activationCodeHash,
@@ -63,7 +63,7 @@ export const ActivationStatus = ({
 export const Session = ({
   refreshTokenHash,
   refreshTokenExpiresOn
-}) => (
+} = {}) => (
   Object.freeze({
     refreshTokenHash,
     refreshTokenExpiresOn,

@@ -5,26 +5,20 @@ import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../common/consta
 
 export const EntryRouter = ({
   entryService,
-  authenticationService,
-  validationService
+  authenticationMiddlewareFactory: authentication,
+  validationMiddlewareFactory: validation
 }) => {
   const router = new Router()
 
   router.post(
     '/register',
-    validationService.isValid(emailValidator, passwordValidator),
+    validation.isValid(emailValidator, passwordValidator),
     async (req, res, next) => {
       try {
         const { email, password } = req.body
-        const { user, refreshToken } = await entryService.register({ email, password })
-        const apiToken = await authenticationService.generateApiToken(user)
+        const { refreshToken, apiToken } = await entryService.register({ email, password })
 
-        // TODO: finish this
-        res.cookie('JWT', refreshToken, {
-          maxAge: 86_400_000,
-          httpOnly: true
-        })
-
+        res.cookie('JWT', refreshToken, { maxAge: 86_400_000, httpOnly: true })
         res.send({ apiToken })
       } catch (error) {
         const { name } = error
@@ -40,18 +34,13 @@ export const EntryRouter = ({
 
   router.post(
     '/login',
-    validationService.isValid(emailValidator, passwordValidator),
+    validation.isValid(emailValidator, passwordValidator),
     async (req, res, next) => {
       try {
         const { email, password } = req.body
-        const { user, refreshToken } = await entryService.login({ email, password })
-        const apiToken = await authenticationService.generateApiToken(user)
+        const { refreshToken, apiToken } = await entryService.login({ email, password })
 
-        // TODO: finish this
-        res.cookie('JWT', refreshToken, {
-          maxAge: 86_400_000,
-          httpOnly: true
-        })
+        res.cookie('JWT', refreshToken, { maxAge: 86_400_000, httpOnly: true })
 
         res.send({ apiToken })
       } catch (error) {
