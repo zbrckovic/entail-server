@@ -27,7 +27,7 @@ export const EntryService = ({
         environment.refreshTokenExpiresInMinutes, 'minutes'
       )
 
-      let user = User({
+      const user = User({
         email,
         passwordHash,
         activationStatus: ActivationStatus({
@@ -42,7 +42,7 @@ export const EntryService = ({
         roles: [Role.REGULAR]
       })
 
-      user = await usersRepository.createUser(user)
+      await usersRepository.createUser(user)
 
       await emailService.sendActivationCode(activationCode, email)
 
@@ -56,7 +56,7 @@ export const EntryService = ({
       email,
       password
     }) {
-      let user = await getUserByEmailOrThrow(email)
+      const user = await getUserByEmailOrThrow(email)
 
       const doesValueMatchSecureHash = await cryptographyService.doesValueMatchSecureHash(
         password,
@@ -70,15 +70,17 @@ export const EntryService = ({
         environment.refreshTokenExpiresInMinutes, 'minutes'
       )
 
-      user = await usersRepository.updateUserById(user.id, async user => {
-        await user.createOrUpdateSession(Session({
+      const userWithNewSession = user.setSession(
+        Session({
           refreshTokenHash,
           refreshTokenExpiresOn
-        }))
-      })
+        })
+      )
+
+      await usersRepository.updateUser(userWithNewSession)
 
       return {
-        user,
+        user: userWithNewSession,
         refreshToken
       }
     },
@@ -104,11 +106,15 @@ export const EntryService = ({
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
 
-      user.activationStatus.isActivated = true
-      user.activationStatus.activationCodeHash = undefined
-      user.activationStatus.activationCodeExpiresOn = undefined
+      const userWithNewActivationStatus = user.setActivationStatus(
+        ActivationStatus({
+          isActivated: true,
+          activationCodeHash: undefined,
+          activationCodeExpiresOn: undefined
+        })
+      )
 
-      await usersRepository.updateUser(user)
+      await usersRepository.updateUser(userWithNewActivationStatus)
     }
   })
 

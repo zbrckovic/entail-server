@@ -23,7 +23,19 @@ export const User = ({
     passwordHash: passwordHash,
     activationStatus: activationStatus,
     session: session,
-    roles: roles
+    roles: roles,
+    setActivationStatus () {
+      return User({
+        ...this,
+        activationStatus
+      })
+    },
+    setSession () {
+      return Session({
+        ...this,
+        activationStatus
+      })
+    }
   })
 }
 

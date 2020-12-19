@@ -5,14 +5,15 @@ import { environment } from './environment.mjs'
 import { CryptographyService } from './infrastructure/cryptography-service.mjs'
 import { EmailService } from './infrastructure/email-service.mjs'
 import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
-import { createSequelize } from './persistence/database/sequelize.mjs'
-import { UsersRepository } from './persistence/users-repository.mjs'
+import { createModels } from './persistence/sequelize.mjs'
+import { UsersRepository } from './persistence/repositories/users-repository.mjs'
 import { AuthenticationService } from './presentation/web/aspects/authentication-service.mjs'
 import { AuthorizationService } from './presentation/web/aspects/authorization-service.mjs'
 import { ValidationService } from './presentation/web/aspects/validation-service.mjs'
 import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
+import { RolesRepository } from './persistence/repositories/roles-repository.mjs'
 
 const IocContainer = () => {
   const values = {}
@@ -43,13 +44,16 @@ const IocContainer = () => {
 export const createDefaultIocContainer = () => (
   IocContainer()
     .setValue('environment', environment)
-    .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
+    .setFactory('sequelize', ({ environment }) => createModels({ environment }))
+    .setFactory('rolesRepository', ({ sequelize }) => RolesRepository({ sequelize }))
     .setFactory('usersRepository', ({ sequelize }) => UsersRepository({ sequelize }))
     .setFactory('dataInitializationService', ({
+      rolesRepository,
       usersRepository,
       environment,
       cryptographyService
     }) => DataInitializationService({
+      rolesRepository,
       usersRepository,
       environment,
       cryptographyService

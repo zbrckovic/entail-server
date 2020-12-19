@@ -1,27 +1,8 @@
 import sequelizeLibrary from 'sequelize'
 
-const { DataTypes, Sequelize } = sequelizeLibrary
+const { DataTypes } = sequelizeLibrary
 
-export const createSequelize = ({ environment }) => {
-  const {
-    pgUser,
-    pgHost,
-    pgPassword,
-    pgDatabase,
-    pgPort,
-    pgSchema,
-    mode,
-    logSql
-  } = environment
-
-  const sequelize = new Sequelize(pgDatabase, pgUser, pgPassword, {
-    host: pgHost,
-    port: pgPort,
-    dialect: 'postgres',
-    schema: pgSchema,
-    logging: (mode === 'development' || mode === 'test') && logSql
-  })
-
+export const createModels = ({ sequelize }) => {
   const UserModel = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,

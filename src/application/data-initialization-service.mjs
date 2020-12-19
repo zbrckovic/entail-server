@@ -2,7 +2,8 @@ import { ActivationStatus, Role, User } from '../domain/user.mjs'
 import { ErrorName } from '../common/error.mjs'
 
 export const DataInitializationService = ({
-  repository,
+  usersRepository,
+  rolesRepository,
   environment,
   cryptographyService
 }) => {
@@ -24,7 +25,7 @@ export const DataInitializationService = ({
   // Inserts all roles into database if they don't already exist.
   const saveAllRoles = async () => {
     const roles = Object.values(Role)
-    await repository.saveRolesIgnoreDuplicates(roles)
+    await rolesRepository.saveRoles(roles)
   }
 
   // Inserts super admin with specified credentials into database.
@@ -34,12 +35,14 @@ export const DataInitializationService = ({
       email,
       passwordHash,
       activationStatus: ActivationStatus({
-        isActivated: true
+        isActivated: true,
+        activationCodeHash: undefined,
+        activationCodeExpiresOn: undefined
       }),
       roles: [Role.SUPER_ADMIN]
     })
     try {
-      await repository.createUser(user)
+      await usersRepository.createUser(user)
     } catch (error) {
       if (error.name === ErrorName.EMAIL_ALREADY_USED) return
       throw error
