@@ -6,7 +6,7 @@ export const I18nService = ({ environment }) => {
   let t = undefined
 
   return Object.freeze({
-    async initT () {
+    async initT() {
       if (t !== undefined) return
 
       const mode = environment.mode
@@ -17,9 +17,9 @@ export const I18nService = ({ environment }) => {
         resources: { en }
       })
     },
-    getT () {
+    getT() {
       if (t === undefined) throw createError({ message: 'I18n is not yet initialized.' })
       return t
-    },
+    }
   })
 }

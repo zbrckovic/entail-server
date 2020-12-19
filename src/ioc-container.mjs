@@ -17,11 +17,11 @@ import { WebInitializer } from './presentation/web/web-initializer.mjs'
 const IocContainer = () => {
   const values = {}
 
-  return Object.freeze({
+  return {
     // Registers `create` factory which will be called when dependency with `name` is first time
     // requested. `create` gets the container as first parameter.
-    setFactory (name, create) {
-      Object.defineProperty(values, name, {
+    setFactory(name, create) {
+      Object.defineProperty(this, name, {
         get: () => {
           // eslint-disable-next-line no-prototype-builtins
           if (!values.hasOwnProperty(name)) {
@@ -35,74 +35,76 @@ const IocContainer = () => {
 
       return this
     },
-    setValue (name, value) {
+    setValue(name, value) {
       return this.setFactory(name, () => value)
     }
-  })
+  }
 }
 
-export const createDefaultIocContainer = () => IocContainer()
-  .setValue('environment', environment)
-  .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
-  .setFactory('repository', ({ sequelize }) => Repository({ sequelize }))
-  .setFactory('dataInitializationService', ({
-    repository,
-    environment,
-    cryptographyService
-  }) => DataInitializationService({
-    repository,
-    environment,
-    cryptographyService
-  }))
-  .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
-  .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
-  .setFactory('emailService', ({
-    i18nService,
-    environment
-  }) => EmailService({
-    i18nService,
-    environment
-  }))
-  .setFactory('entryService', ({
-    environment,
-    repository,
-    cryptographyService,
-    emailService
-  }) => EntryService({
-    environment,
-    repository,
-    cryptographyService,
-    emailService
-  }))
-  .setFactory('usersService', ({ repository }) => UsersService({ repository }))
-  .setFactory('entryRouter', ({
-    entryService,
-    authenticationService,
-    validationService
-  }) => EntryRouter({
-    entryService,
-    authenticationService,
-    validationService
-  }))
-  .setFactory('usersRouter', ({
-    usersService,
-    authenticationService,
-    authorizationService
-  }) => UsersRouter({
-    usersService,
-    authenticationService,
-    authorizationService
-  }))
-  .setFactory('validationService', () => ValidationService())
-  .setFactory('authenticationService', ({
-    environment,
-    cryptographyService
-  }) => AuthenticationService({ environment, cryptographyService }))
-  .setFactory('authorizationService', () => AuthorizationService())
-  .setFactory('webInitializer', ({
-    entryRouter,
-    usersRouter
-  }) => WebInitializer({
-    entryRouter,
-    usersRouter
-  }))
+export const createDefaultIocContainer = () => (
+  IocContainer()
+    .setValue('environment', environment)
+    .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
+    .setFactory('repository', ({ sequelize }) => Repository({ sequelize }))
+    .setFactory('dataInitializationService', ({
+      repository,
+      environment,
+      cryptographyService
+    }) => DataInitializationService({
+      repository,
+      environment,
+      cryptographyService
+    }))
+    .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
+    .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
+    .setFactory('emailService', ({
+      i18nService,
+      environment
+    }) => EmailService({
+      i18nService,
+      environment
+    }))
+    .setFactory('entryService', ({
+      environment,
+      repository,
+      cryptographyService,
+      emailService
+    }) => EntryService({
+      environment,
+      repository,
+      cryptographyService,
+      emailService
+    }))
+    .setFactory('usersService', ({ repository }) => UsersService({ repository }))
+    .setFactory('entryRouter', ({
+      entryService,
+      authenticationService,
+      validationService
+    }) => EntryRouter({
+      entryService,
+      authenticationService,
+      validationService
+    }))
+    .setFactory('usersRouter', ({
+      usersService,
+      authenticationService,
+      authorizationService
+    }) => UsersRouter({
+      usersService,
+      authenticationService,
+      authorizationService
+    }))
+    .setFactory('validationService', () => ValidationService())
+    .setFactory('authenticationService', ({
+      environment,
+      cryptographyService
+    }) => AuthenticationService({ environment, cryptographyService }))
+    .setFactory('authorizationService', () => AuthorizationService())
+    .setFactory('webInitializer', ({
+      entryRouter,
+      usersRouter
+    }) => WebInitializer({
+      entryRouter,
+      usersRouter
+    }))
+)
