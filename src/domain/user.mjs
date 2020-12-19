@@ -23,7 +23,7 @@ export const User = ({
     passwordHash: passwordHash,
     activationStatus: activationStatus,
     session: session,
-    roles: roles,
+    roles: roles
   })
 }
 
@@ -33,7 +33,11 @@ export const Role = {
   REGULAR: 'REGULAR'
 }
 
-export const ActivationStatus = ({ isActivated, activationCodeHash, activationCodeExpiresOn }) => (
+export const ActivationStatus = ({
+  isActivated,
+  activationCodeHash,
+  activationCodeExpiresOn
+}) => (
   Object.freeze({
     isActivated,
     activationCodeHash,
@@ -44,7 +48,10 @@ export const ActivationStatus = ({ isActivated, activationCodeHash, activationCo
   })
 )
 
-export const Session = ({ refreshTokenHash, refreshTokenExpiresOn }) => (
+export const Session = ({
+  refreshTokenHash,
+  refreshTokenExpiresOn
+}) => (
   Object.freeze({
     refreshTokenHash,
     refreshTokenExpiresOn,

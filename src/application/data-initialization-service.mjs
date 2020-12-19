@@ -1,12 +1,20 @@
 import { ActivationStatus, Role, User } from '../domain/user.mjs'
 import { ErrorName } from '../common/error.mjs'
 
-export const DataInitializationService = ({ repository, environment, cryptographyService }) => {
+export const DataInitializationService = ({
+  repository,
+  environment,
+  cryptographyService
+}) => {
   const result = Object.freeze({
     async initData () {
       await saveAllRoles()
 
-      const { superAdminEmail, superAdminPassword } = environment
+      const {
+        superAdminEmail,
+        superAdminPassword
+      } = environment
+
       if (superAdminEmail !== undefined && superAdminPassword !== undefined) {
         await saveSuperAdmin(superAdminEmail, superAdminPassword)
       }

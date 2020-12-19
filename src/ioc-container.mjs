@@ -6,7 +6,7 @@ import { CryptographyService } from './infrastructure/cryptography-service.mjs'
 import { EmailService } from './infrastructure/email-service.mjs'
 import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
 import { createSequelize } from './persistence/database/sequelize.mjs'
-import { Repository } from './persistence/repository.mjs'
+import { UsersRepository } from './persistence/users-repository.mjs'
 import { AuthenticationService } from './presentation/web/aspects/authentication-service.mjs'
 import { AuthorizationService } from './presentation/web/aspects/authorization-service.mjs'
 import { ValidationService } from './presentation/web/aspects/validation-service.mjs'
@@ -20,11 +20,10 @@ const IocContainer = () => {
   return {
     // Registers `create` factory which will be called when dependency with `name` is first time
     // requested. `create` gets the container as first parameter.
-    setFactory(name, create) {
+    setFactory (name, create) {
       Object.defineProperty(this, name, {
         get: () => {
-          // eslint-disable-next-line no-prototype-builtins
-          if (!values.hasOwnProperty(name)) {
+          if (!Object.prototype.hasOwnProperty.call(values, name)) {
             values[name] = create(this)
           }
           return values[name]
@@ -35,7 +34,7 @@ const IocContainer = () => {
 
       return this
     },
-    setValue(name, value) {
+    setValue (name, value) {
       return this.setFactory(name, () => value)
     }
   }
@@ -45,13 +44,13 @@ export const createDefaultIocContainer = () => (
   IocContainer()
     .setValue('environment', environment)
     .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
-    .setFactory('repository', ({ sequelize }) => Repository({ sequelize }))
+    .setFactory('usersRepository', ({ sequelize }) => UsersRepository({ sequelize }))
     .setFactory('dataInitializationService', ({
-      repository,
+      usersRepository,
       environment,
       cryptographyService
     }) => DataInitializationService({
-      repository,
+      usersRepository,
       environment,
       cryptographyService
     }))
@@ -66,16 +65,16 @@ export const createDefaultIocContainer = () => (
     }))
     .setFactory('entryService', ({
       environment,
-      repository,
+      usersRepository,
       cryptographyService,
       emailService
     }) => EntryService({
       environment,
-      repository,
+      usersRepository,
       cryptographyService,
       emailService
     }))
-    .setFactory('usersService', ({ repository }) => UsersService({ repository }))
+    .setFactory('usersService', ({ usersRepository }) => UsersService({ usersRepository }))
     .setFactory('entryRouter', ({
       entryService,
       authenticationService,
@@ -98,7 +97,10 @@ export const createDefaultIocContainer = () => (
     .setFactory('authenticationService', ({
       environment,
       cryptographyService
-    }) => AuthenticationService({ environment, cryptographyService }))
+    }) => AuthenticationService({
+      environment,
+      cryptographyService
+    }))
     .setFactory('authorizationService', () => AuthorizationService())
     .setFactory('webInitializer', ({
       entryRouter,

@@ -22,7 +22,7 @@ export const createSequelize = ({ environment }) => {
     logging: (mode === 'development' || mode === 'test') && logSql
   })
 
-  const User = sequelize.define('User', {
+  const UserModel = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -39,7 +39,7 @@ export const createSequelize = ({ environment }) => {
     }
   })
 
-  const Role = sequelize.define('Role', {
+  const RoleModel = sequelize.define('Role', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -47,19 +47,18 @@ export const createSequelize = ({ environment }) => {
     }
   }, { timestamps: false })
 
-  User.belongsToMany(Role, {
+  UserModel.belongsToMany(RoleModel, {
     through: 'UsersRoles',
     as: 'roles',
     foreignKey: 'userId'
   })
-
-  Role.belongsToMany(User, {
+  RoleModel.belongsToMany(UserModel, {
     through: 'UsersRoles',
     as: 'users',
     foreignKey: 'roleName'
   })
 
-  const ActivationStatus = sequelize.define('ActivationStatus', {
+  const ActivationStatusModel = sequelize.define('ActivationStatus', {
     isActivated: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -73,15 +72,15 @@ export const createSequelize = ({ environment }) => {
     }
   })
 
-  User.hasOne(ActivationStatus, {
+  UserModel.hasOne(ActivationStatusModel, {
     foreignKey: 'userId',
     as: 'activationStatus'
   })
-  ActivationStatus.belongsTo(User, {
+  ActivationStatusModel.belongsTo(UserModel, {
     as: 'user'
   })
 
-  const Session = sequelize.define('Session', {
+  const SessionModel = sequelize.define('Session', {
     refreshTokenHash: {
       type: DataTypes.STRING(60),
       allowNull: false
@@ -92,11 +91,11 @@ export const createSequelize = ({ environment }) => {
     }
   })
 
-  User.hasOne(Session, {
+  UserModel.hasOne(SessionModel, {
     foreignKey: 'userId',
     as: 'session'
   })
-  Session.belongsTo(User, {
+  SessionModel.belongsTo(UserModel, {
     as: 'user'
   })
 

@@ -2,9 +2,17 @@ import moment from 'moment'
 import { createError, ErrorName } from '../common/error.mjs'
 import { ActivationStatus, Role, Session, User } from '../domain/user.mjs'
 
-export const EntryService = ({ environment, repository, cryptographyService, emailService }) => {
+export const EntryService = ({
+  environment,
+  usersRepository,
+  cryptographyService,
+  emailService
+}) => {
   const result = Object.freeze({
-    async register ({ email, password }) {
+    async register ({
+      email,
+      password
+    }) {
       const passwordHash = await cryptographyService.createSecureHash(password)
 
       const activationCode = await cryptographyService.generateSecureCode()
@@ -34,14 +42,20 @@ export const EntryService = ({ environment, repository, cryptographyService, ema
         roles: [Role.REGULAR]
       })
 
-      user = await repository.createUser(user)
+      user = await usersRepository.createUser(user)
 
       await emailService.sendActivationCode(activationCode, email)
 
-      return { user, refreshToken }
+      return {
+        user,
+        refreshToken
+      }
     },
 
-    async login ({ email, password }) {
+    async login ({
+      email,
+      password
+    }) {
       let user = await getUserByEmailOrThrow(email)
 
       const doesValueMatchSecureHash = await cryptographyService.doesValueMatchSecureHash(
@@ -56,19 +70,23 @@ export const EntryService = ({ environment, repository, cryptographyService, ema
         environment.refreshTokenExpiresInMinutes, 'minutes'
       )
 
-      user = await repository.updateUser(user.id, user => {
-        user.session = Session({
+      user = await usersRepository.updateUserById(user.id, async user => {
+        await user.createOrUpdateSession(Session({
           refreshTokenHash,
           refreshTokenExpiresOn
-        })
-
-        return user
+        }))
       })
 
-      return { user, refreshToken }
+      return {
+        user,
+        refreshToken
+      }
     },
 
-    async activate ({ email, code }) {
+    async activate ({
+      email,
+      code
+    }) {
       const user = await getUserByEmailOrThrow(email)
 
       if (user.activationStatus.isActivated) {
@@ -90,12 +108,12 @@ export const EntryService = ({ environment, repository, cryptographyService, ema
       user.activationStatus.activationCodeHash = undefined
       user.activationStatus.activationCodeExpiresOn = undefined
 
-      await repository.updateUser(user)
+      await usersRepository.updateUser(user)
     }
   })
 
   const getUserByEmailOrThrow = async email => {
-    const user = await repository.getUserByEmail(email)
+    const user = await usersRepository.getUserByEmail(email)
     if (user === undefined) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
     return user
   }

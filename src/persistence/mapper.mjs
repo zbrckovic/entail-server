@@ -1,85 +1,84 @@
 import moment from 'moment'
 import { ActivationStatus, Session, User } from '../domain/user.mjs'
 
-export const Mapper = () => {
-  const result = Object.freeze({
-    userFromDAO ({
-      id,
-      email,
-      passwordHash,
-      activationStatus,
-      session,
-      roles
-    }) {
-      return User({
-        id: id ?? undefined,
-        email,
-        passwordHash,
-        activationStatus: activationStatusFromDAO(activationStatus),
-        session: session !== null ? sessionFromDAO(session) : undefined,
-        roles: roles.map(roleDAO => roleFromDAO(roleDAO))
-      })
-    },
-    userToDAOSpecs ({
-      id,
-      email,
-      passwordHash,
-      activationStatus,
-      session,
-      roles
-    }) {
-      return {
-        id: id ?? null,
-        email,
-        passwordHash,
-        activationStatus: activationStatusToDAOSpecs(activationStatus),
-        session: session !== undefined ? sessionToDAOSpecs(session) : null,
-        roles: roles.map(role => roleToDAOSpecs(role))
-      }
-    },
+export const sessionFromModel = ({
+  refreshTokenHash,
+  refreshTokenExpiresOn
+}) => (
+  Session({
+    refreshTokenHash: refreshTokenHash ?? undefined,
+    refreshTokenExpiresOn: refreshTokenExpiresOn === null
+      ? undefined
+      : moment(refreshTokenExpiresOn)
   })
+)
 
-  const sessionFromDAO = ({ refreshTokenHash, refreshTokenExpiresOn }) => (
-    Session({
-      refreshTokenHash: refreshTokenHash ?? undefined,
-      refreshTokenExpiresOn: refreshTokenExpiresOn === null
-        ? undefined
-        : moment(refreshTokenExpiresOn)
-    })
-  )
+export const sessionToModelSpecs = ({
+  refreshTokenHash,
+  refreshTokenExpiresOn
+}) => ({
+  refreshTokenHash: refreshTokenHash ?? null,
+  refreshTokenExpiresOn: refreshTokenExpiresOn?.toDate() ?? null
+})
 
-  const sessionToDAOSpecs = ({ refreshTokenHash, refreshTokenExpiresOn }) => ({
-    refreshTokenHash: refreshTokenHash ?? null,
-    refreshTokenExpiresOn: refreshTokenExpiresOn?.toDate() ?? null
+export const roleToModelSpecs = role => ({ name: role })
+
+export const roleFromModel = ({ name }) => name
+
+export const activationStatusFromModel = ({
+  isActivated,
+  activationCodeHash,
+  activationCodeExpiresOn
+}) => (
+  ActivationStatus({
+    isActivated,
+    activationCodeHash: activationCodeHash ?? undefined,
+    activationCodeExpiresOn: activationCodeExpiresOn === null
+      ? undefined
+      : moment(activationCodeExpiresOn)
   })
+)
 
-  const roleToDAOSpecs = role => ({ name: role })
+export const activationStatusToModelSpecs = ({
+  isActivated,
+  activationCodeHash,
+  activationCodeExpiresOn
+}) => ({
+  isActivated,
+  activationCodeHash: activationCodeHash ?? null,
+  activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
+})
 
-  const roleFromDAO = ({ name }) => name
-
-  const activationStatusFromDAO = ({
-    isActivated,
-    activationCodeHash,
-    activationCodeExpiresOn
-  }) => (
-    ActivationStatus({
-      isActivated,
-      activationCodeHash: activationCodeHash ?? undefined,
-      activationCodeExpiresOn: activationCodeExpiresOn === null
-        ? undefined
-        : moment(activationCodeExpiresOn)
-    })
-  )
-
-  const activationStatusToDAOSpecs = ({
-    isActivated,
-    activationCodeHash,
-    activationCodeExpiresOn
-  }) => ({
-    isActivated,
-    activationCodeHash: activationCodeHash ?? null,
-    activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
+export const userFromModel = ({
+  id,
+  email,
+  passwordHash,
+  activationStatus,
+  session,
+  roles
+}) => (
+  User({
+    id: id ?? undefined,
+    email,
+    passwordHash,
+    activationStatus: activationStatusFromModel(activationStatus),
+    session: session !== null ? sessionFromModel(session) : undefined,
+    roles: roles.map(roleDAO => roleFromModel(roleDAO))
   })
+)
 
-  return result
-}
+export const userToModelSpecs = ({
+  id,
+  email,
+  passwordHash,
+  activationStatus,
+  session,
+  roles
+}) => ({
+  id: id ?? null,
+  email,
+  passwordHash,
+  activationStatus: activationStatusToModelSpecs(activationStatus),
+  session: session !== undefined ? sessionToModelSpecs(session) : null,
+  roles: roles.map(role => roleToModelSpecs(role))
+})
