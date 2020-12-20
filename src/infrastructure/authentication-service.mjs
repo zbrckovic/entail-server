@@ -1,18 +1,36 @@
 import moment from 'moment'
 import { createError, ErrorName } from '../common/error.mjs'
 
+const TokenType = {
+  API: 'API',
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+  PASSWORD_CHANGE: 'PASSWORD_CHANGE'
+}
+
 export const AuthenticationService = ({ environment, cryptographyService, usersRepository }) => {
-  const apiTokenSecret = environment.apiTokenSecret
+  const tokenSecret = environment.tokenSecret
+
   const apiTokenExpiresInSeconds = moment.duration(
-    environment.apiTokenExpiresInMinutes, 'minutes'
+    environment.apiTokenExpiresInMinutes,
+    'minutes'
   ).asSeconds()
 
-  return {
+  const emailVerificationTokenExpiresInSeconds = moment.duration(
+    environment.emailVerificationTokenExpiresInMinutes,
+    'minutes'
+  ).asSeconds()
+
+  const passwordChangeTokenExpiresInSeconds = moment.duration(
+    environment.passwordChangeTokenExpiresInMinutes,
+    'minutes'
+  ).asSeconds()
+
+  const result = {
     // Returns user or throws.
     async getUserById (userId) {
       const user = usersRepository.getUserById(userId)
       if (user === undefined) {
-        createError({ name: ErrorName.INVALID_CREDENTIALS })
+        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
       return user
     },
@@ -26,60 +44,84 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
       return user
     },
 
-    async generateApiToken (user) {
-      return await cryptographyService.generateJwt({
-        key: 'user',
+    async createApiToken (user) {
+      return await cryptographyService.createToken({
         payload: {
-          id: user.id,
-          isActivated: user.activationStatus.isActivated,
+          type: TokenType.API,
+          email: user.email,
+          email_verified: user.isEmailVerified,
           roles: user.roles
         },
         expiresIn: apiTokenExpiresInSeconds,
-        secret: apiTokenSecret,
         subject: user.id
       })
     },
 
-    // Checks whether `apiToken` is valid. Returns decoded `token` or throws.
-    async validateAndDecodeJwt (apiToken) {
-      return await cryptographyService.validateAndDecodeJwt(apiToken, apiTokenSecret)
+    async validateAndDecodeApiToken (token) {
+      return await validateAndDecodeToken(token, TokenType.API)
     },
 
-    async generateActivationCode () {
-      return await cryptographyService.generateActivationCode()
+    async createEmailVerificationToken (user) {
+      return await cryptographyService.createToken({
+        payload: {
+          type: TokenType.EMAIL_VERIFICATION,
+          email: user.email
+        },
+        expiresIn: emailVerificationTokenExpiresInSeconds,
+        subject: user.id
+      })
     },
 
-    // Checks whether `user` can be activated with `activationCode`. Returns undefined or throws.
-    async verifyActivationCode (user, activationCode) {
-      if (user.activationStatus.isActivated) {
-        throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
-      }
+    async validateAndDecodeEmailVerificationToken (token) {
+      return await validateAndDecodeToken(token, TokenType.EMAIL_VERIFICATION)
+    },
 
-      if (user.activationStatus.didExpire()) {
-        throw createError({ name: ErrorName.ACTIVATION_CODE_EXPIRED })
-      }
+    async createPasswordChangeToken (user) {
+      return await cryptographyService.createToken({
+        payload: {
+          type: TokenType.PASSWORD_CHANGE,
+          email: user.email
+        },
+        expiresIn: passwordChangeTokenExpiresInSeconds,
+        subject: user.id
+      })
+    },
 
-      const isActivationCodeValid = await cryptographyService.isCryptographicHashValid(
-        user.activationStatus.activationCodeHash,
-        activationCode
-      )
-
-      if (!isActivationCodeValid) {
-        throw createError({ name: ErrorName.INVALID_ACTIVATION_CODE })
-      }
+    async validateAndDecodePasswordChangeToken (token) {
+      return await validateAndDecodeToken(token, TokenType.PASSWORD_CHANGE)
     },
 
     async verifyCredentialsAndGetUser ({ email, password }) {
-      const user = await this.getUserByEmailOrThrow(email)
+      const user = await this.getUserByEmail(email)
 
       const isPasswordValid = await cryptographyService.isCryptographicHashValid(
         user.passwordHash,
         password
       )
 
-      if (!isPasswordValid) throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      if (!isPasswordValid) {
+        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      }
 
       return user
     }
   }
+
+  // Checks whether `token` is valid and of the required `type`. Returns decoded `token` or throws.
+  const validateAndDecodeToken = async (token, type) => {
+    let decodedToken
+    try {
+      decodedToken = await cryptographyService.validateAndDecodeToken(token, tokenSecret)
+    } catch (error) {
+      throw createError({ name: ErrorName.TOKEN_INVALID })
+    }
+
+    if (decodedToken.type !== type) {
+      throw createError({ name: ErrorName.TOKEN_INVALID })
+    }
+
+    return decodedToken
+  }
+
+  return result
 }

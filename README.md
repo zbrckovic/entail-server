@@ -5,9 +5,7 @@
 Name                                    | Description                                              | Default
 ----------------------------------------|----------------------------------------------------------|--------
 NODE_ENV                                | Mode: `development`, `production` or `test`              | `development`
-PORT                                    | Port on which server will listen                         | `4000`
-BCRYPT_SALT_ROUNDS                      | Configuration parameter for password encryption (bcrypt) | `10`
-ACTIVATION_CODE_VALIDITY_PERIOD_MINUTES | For how long activation code will stay valid             | `60`
+PORT                                    | Port on which the server will listen                     | `4000`
 SUPER_ADMIN_EMAIL                       | *                                                        | `undefined`
 SUPER_ADMIN_PASSWORD                    | *                                                        | `undefined`
 
@@ -37,6 +35,16 @@ In order to run the application you will need PostgreSQL. You need to create a d
 name which you will later pass to the application using `PGDATABASE`.  Application will use the 
 default `public` schema which should already be there after you created your database. To run tests 
 you will also need another schema named `test`.
+
+### Cryptography
+
+Name                                        |                                                          | Default
+--------------------------------------------|----------------------------------------------------------|--------
+BCRYPT_SALT_ROUNDS                          | Configuration parameter for password encryption (bcrypt) | `10`
+TOKEN_SECRET                                |                                                          | `undefined`
+API_TOKEN_EXPIRES_IN_MINUTES                |                                                          | `undefined`
+EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_MINUTES |                                                          | `undefined`
+PASSWORD_CHANGE_TOKEN_EXPIRES_IN_MINUTES    |                                                          | `undefined`
 
 ### Details
 

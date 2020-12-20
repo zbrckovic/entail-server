@@ -110,13 +110,11 @@ const wireUpDependencies = () => (
     .setFactory(
       'entryService',
       ({
-        environment,
         usersRepository,
         cryptographyService,
         emailService,
         authenticationService
       }) => EntryService({
-        environment,
         usersRepository,
         cryptographyService,
         emailService,

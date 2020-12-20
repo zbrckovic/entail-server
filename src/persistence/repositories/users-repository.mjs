@@ -1,20 +1,16 @@
 import { createError, ErrorName } from '../../common/error.mjs'
 import { userMapper } from '../mappers/user-mapper.mjs'
 import { roleMapper } from '../mappers/role-mapper.mjs'
-import { activationStatusMapper } from '../mappers/activation-status-mapper.mjs'
 
 export const UsersRepository = ({ sequelize }) => {
-  const {
-    UserModel,
-    ActivationStatusModel
-  } = sequelize.models
+  const { UserModel } = sequelize.models
 
   return {
     // Returns user or undefined.
     async getUserByEmail (email) {
       const userDAO = await UserModel.findOne({
         where: { email },
-        include: ['roles', 'activationStatus']
+        include: ['roles']
       })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
@@ -22,7 +18,7 @@ export const UsersRepository = ({ sequelize }) => {
     // Returns user or undefined.
     async getUserById (id) {
       const userDAO = await UserModel.findByPk(id, {
-        include: ['roles', 'activationStatus']
+        include: ['roles']
       })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
@@ -31,11 +27,6 @@ export const UsersRepository = ({ sequelize }) => {
     async createUser (user) {
       try {
         const userDAO = await UserModel.create(userMapper.toPersistence(user))
-
-        await userDAO.createActivationStatus(
-          activationStatusMapper.toPersistence(user.activationStatus, user.id)
-        )
-
         await userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
       } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
@@ -50,12 +41,6 @@ export const UsersRepository = ({ sequelize }) => {
     async updateUser (user) {
       const userDAO = UserModel.findByPk(user.id, { include: ['session'] })
       await userDAO.update(userMapper.toPersistence(user))
-
-      await ActivationStatusModel.update(
-        activationStatusMapper.toPersistence(user.activationStatus, user.id),
-        { where: { userId: user.id } }
-      )
-
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
     }
   }

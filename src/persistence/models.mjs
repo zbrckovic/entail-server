@@ -14,6 +14,11 @@ export const createModels = sequelize => {
       allowNull: false,
       unique: true
     },
+    isEmailVerified: {
+      type: DataTypes.Boolean,
+      allowNull: false,
+      defaultValue: false
+    },
     passwordHash: {
       type: DataTypes.STRING(60),
       allowNull: false
@@ -37,27 +42,5 @@ export const createModels = sequelize => {
     through: 'UsersRoles',
     as: 'users',
     foreignKey: 'roleName'
-  })
-
-  const ActivationStatusModel = sequelize.define('ActivationStatus', {
-    isActivated: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
-    activationCodeHash: {
-      type: DataTypes.STRING(60)
-    },
-    activationCodeExpiresOn: {
-      type: DataTypes.DATE
-    }
-  })
-
-  UserModel.hasOne(ActivationStatusModel, {
-    foreignKey: 'userId',
-    as: 'activationStatus'
-  })
-  ActivationStatusModel.belongsTo(UserModel, {
-    as: 'user'
   })
 }

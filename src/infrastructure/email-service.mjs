@@ -24,11 +24,11 @@ export const EmailService = ({ environment, i18nService }) => {
       }
     },
 
-    async sendActivationCode (activationCode, recipientEmailAddress) {
+    async sendEmailVerificationToken (emailVerificationToken, recipientEmailAddress) {
       const from = 'authentication@entail.com'
       const to = recipientEmailAddress
-      const subject = t('activationEmail.subject')
-      const text = t('activationEmail.text')
+      const subject = t('verificationEmail.subject')
+      const text = `${t('verificationEmail.text')}\n${emailVerificationToken}`
 
       await transport.sendMail({ from, to, subject, text })
     }

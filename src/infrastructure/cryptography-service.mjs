@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt'
-import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
+import { createError, ErrorName } from '../common/error.mjs'
 
 export const CryptographyService = ({ environment }) => ({
   async createCryptographicHash (value) {
@@ -12,23 +12,11 @@ export const CryptographyService = ({ environment }) => ({
     return bcrypt.compare(value, hash)
   },
 
-  async generateCryptographicRandomBytes (size = 64) {
-    return new Promise((resolve, reject) => {
-      crypto.randomBytes(size, (error, buffer) => {
-        if (error) {
-          reject(error)
-        } else {
-          resolve(buffer.toString('hex'))
-        }
-      })
-    })
-  },
-
-  async generateJwt ({ key, payload, expiresIn, secret, subject }) {
+  async createToken ({ payload = {}, expiresIn, subject }) {
     return new Promise((resolve, reject) => {
       jwt.sign(
-        { [key]: payload },
-        secret,
+        payload,
+        environment.tokenSecret,
         { expiresIn, subject },
         (error, token) => {
           if (error !== null) {
@@ -42,7 +30,7 @@ export const CryptographyService = ({ environment }) => ({
   },
 
   // Checks whether `token` is valid. Returns decoded `token` or throws.
-  async validateAndDecodeJwt (token, secret) {
+  async validateAndDecodeToken (token, secret) {
     return new Promise((resolve, reject) => {
       jwt.verify(
         token,
@@ -50,6 +38,14 @@ export const CryptographyService = ({ environment }) => ({
         {},
         (error, decodedToken) => {
           if (error !== null) {
+            if (error.name === 'TokenExpiredError') {
+              reject(createError({ name: ErrorName.TOKEN_EXPIRED }))
+              return
+            }
+            if (error.name === 'JsonWebTokenError') {
+              reject(createError({ name: ErrorName.TOKEN_INVALID }))
+              return
+            }
             reject(error)
           } else {
             resolve(decodedToken)

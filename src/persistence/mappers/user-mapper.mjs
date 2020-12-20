@@ -1,32 +1,21 @@
 import { User } from '../../domain/user.mjs'
-import { activationStatusMapper } from './activation-status-mapper.mjs'
-import { sessionMapper } from './session-mapper.mjs'
 import { roleMapper } from './role-mapper.mjs'
 
 export const userMapper = {
-  fromPersistence ({
-    id,
-    email,
-    passwordHash,
-    activationStatus,
-    roles
-  }) {
+  fromPersistence ({ id, email, isEmailVerified, passwordHash, roles }) {
     return User({
       id: id ?? undefined,
       email,
+      isEmailVerified,
       passwordHash,
-      activationStatus: activationStatusMapper.fromPersistence(activationStatus),
       roles: roles.map(role => roleMapper.fromPersistence(role))
     })
   },
-  toPersistence ({
-    id,
-    email,
-    passwordHash
-  }) {
+  toPersistence ({ id, email, isEmailVerified, passwordHash }) {
     return {
       id: id ?? null,
       email,
+      isEmailVerified,
       passwordHash
     }
   }

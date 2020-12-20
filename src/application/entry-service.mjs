@@ -1,9 +1,7 @@
-import moment from 'moment'
 import { createError, ErrorName } from '../common/error.mjs'
-import { ActivationStatus, Role, User } from '../domain/user.mjs'
+import { Role, User } from '../domain/user.mjs'
 
 export const EntryService = ({
-  environment,
   usersRepository,
   cryptographyService,
   emailService,
@@ -12,81 +10,43 @@ export const EntryService = ({
   const result = {
     async register ({ email, password }) {
       const passwordHash = await cryptographyService.createCryptographicHash(password)
-
-      const [activationStatus, activationCode] = await generateActivationStatusWithCode()
-
-      const user = User({
-        email,
-        passwordHash,
-        activationStatus,
-        roles: [Role.REGULAR]
-      })
-
+      const user = User({ email, passwordHash, roles: [Role.REGULAR] })
       await usersRepository.createUser(user)
-      await emailService.sendActivationCode(activationCode, email)
+      await createAndSendEmailVerificationToken(user)
 
-      return await authenticationService.generateApiToken()
+      return await authenticationService.createApiToken(user)
     },
 
     async login ({ email, password }) {
       const user = await authenticationService.verifyCredentialsAndGetUser({ email, password })
-      if (!user.activityStatus.isActivated) {
-        throw createError({ name: ErrorName.USER_NOT_ACTIVATED })
-      }
-      return await authenticationService.generateApiToken(user)
+      return await authenticationService.createApiToken(user)
     },
 
-    async refreshApiToken (userId) {
+    async createApiToken (userId) {
       const user = await authenticationService.getUserById(userId)
-      if (!user.activityStatus.isActivated) {
-        throw createError({ name: ErrorName.USER_NOT_ACTIVATED })
-      }
-      return await authenticationService.generateApiToken(user)
+      return await authenticationService.createApiToken(user)
     },
 
-    async activateUser (userId, activationCode) {
-      const user = await authenticationService.getUserById(userId)
-      await authenticationService.verifyActivationCode(user, activationCode)
-
-      await usersRepository.updateUser({
-        ...user,
-        activationStatus: ActivationStatus({
-          isActivated: true,
-          activationCodeHash: undefined,
-          activationCodeExpiresOn: undefined
-        })
-      })
-    },
-
-    async refreshActivationCode (userId) {
+    async createEmailVerificationToken (userId) {
       const user = await authenticationService.getUserById(userId)
 
-      if (user.activationStatus.isActivated) {
-        throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
+      if (user.isEmailVerified) {
+        throw createError({ name: ErrorName.EMAIL_ALREADY_VERIFIED })
       }
 
-      const [activationStatus, activationCode] = await generateActivationStatusWithCode()
+      await createAndSendEmailVerificationToken(user)
+    },
 
-      await usersRepository.updateUser({ ...user, activationStatus })
-      await emailService.sendActivationCode(activationCode, user.email)
+    async verifyEmail (userId, emailVerificationToken) {
+      const user = await authenticationService.getUserById(userId)
+      await authenticationService.validateAndDecodeEmailVerificationToken(emailVerificationToken)
+      await usersRepository.updateUser({ ...user, isEmailVerified: true })
     }
   }
 
-  const generateActivationStatusWithCode = async () => {
-    const activationCode = await authenticationService.generateActivationCode()
-    const activationCodeHash = await cryptographyService.createCryptographicHash(activationCode)
-    const activationCodeExpiresOn = moment().add(
-      environment.activationCodeValidPeriodMinutes,
-      'minutes'
-    )
-
-    const activationStatus = ActivationStatus({
-      isActivated: false,
-      activationCodeHash,
-      activationCodeExpiresOn
-    })
-
-    return [activationStatus, activationCode]
+  const createAndSendEmailVerificationToken = async user => {
+    const emailVerificationToken = await authenticationService.createEmailVerificationToken(user)
+    await emailService.sendEmailVerificationToken(emailVerificationToken, user.email)
   }
 
   return result

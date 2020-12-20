@@ -1,8 +1,8 @@
 export const en = {
   translation: {
-    activationEmail: {
-      subject: 'Entail - Activation',
-      text: 'Your activation code is here!'
+    verificationEmail: {
+      subject: 'Entail - Email Verification',
+      text: 'Your email verification link is here!'
     }
   }
 }
