@@ -12,13 +12,13 @@ import { EmailService } from './infrastructure/email-service.mjs'
 import { AuthenticationService } from './infrastructure/authentication-service.mjs'
 import { AuthorizationService } from './infrastructure/authorization-service.mjs'
 import { EntryService } from './application/entry-service.mjs'
-import { UsersService } from './application/users-service.mjs'
 import { AuthenticationMiddlewareFactory } from './presentation/web/middleware/authentication-middleware-factory.mjs'
 import { AuthorizationMiddlewareFactory } from './presentation/web/middleware/authorization-middleware-factory.mjs'
 import { ValidationMiddlewareFactory } from './presentation/web/middleware/validation-middleware-factory.mjs'
 import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
-import { UsersRouter } from './presentation/web/routers/users-router.mjs'
+import { AccountRouter } from './presentation/web/routers/account-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
+import { AccountService } from './application/account-service.mjs'
 
 (async () => {
   console.log(figlet.textSync('Entail', { font: 'slant' }))
@@ -43,70 +43,39 @@ import { WebInitializer } from './presentation/web/web-initializer.mjs'
 
 const wireUpDependencies = () => (
   IocContainer()
-    .setValue(
-      'environment',
-      environment
-    )
+    .setValue('environment', environment)
 
     // persistence
-    .setFactory(
-      'sequelize',
-      ({ environment }) => createSequelize({ environment })
-    )
-    .setFactory(
-      'rolesRepository',
-      ({ sequelize }) => RolesRepository({ sequelize })
-    )
-    .setFactory(
-      'usersRepository',
-      ({ sequelize }) => UsersRepository({ sequelize })
-    )
+    .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
+    .setFactory('rolesRepository', ({ sequelize }) => RolesRepository({ sequelize }))
+    .setFactory('usersRepository', ({ sequelize }) => UsersRepository({ sequelize }))
     .setFactory(
       'dataInitializationService',
       ({
-        rolesRepository,
-        usersRepository,
-        environment,
-        cryptographyService
+        rolesRepository, usersRepository, environment, cryptographyService
       }) => DataInitializationService({
-        rolesRepository,
-        usersRepository,
-        environment,
-        cryptographyService
+        rolesRepository, usersRepository, environment, cryptographyService
       })
     )
 
     // infrastructure
-    .setFactory(
-      'i18nService',
-      ({ environment }) => I18nService({ environment })
-    )
-    .setFactory(
-      'cryptographyService',
-      ({ environment }) => CryptographyService({ environment })
-    )
+    .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
+    .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
     .setFactory(
       'emailService',
       ({ i18nService, environment }) => EmailService({ i18nService, environment })
     )
-
-    // application
     .setFactory(
       'authenticationService',
       ({
-        environment,
-        cryptographyService,
-        usersRepository
+        environment, cryptographyService, usersRepository
       }) => AuthenticationService({
-        environment,
-        cryptographyService,
-        usersRepository
+        environment, cryptographyService, usersRepository
       })
     )
-    .setFactory(
-      'authorizationService',
-      () => AuthorizationService()
-    )
+    .setFactory('authorizationService', () => AuthorizationService())
+
+    // application
     .setFactory(
       'entryService',
       ({
@@ -121,6 +90,13 @@ const wireUpDependencies = () => (
         authenticationService
       })
     )
+    .setFactory(
+      'accountService',
+      ({
+        authenticationService, usersRepository, emailService, cryptographyService
+      }) => AccountService({
+        authenticationService, usersRepository, emailService, cryptographyService
+      }))
 
     // presentation
     .setFactory(
@@ -137,22 +113,28 @@ const wireUpDependencies = () => (
     )
     .setFactory(
       'entryRouter',
+      ({ entryService, validationMiddlewareFactory }) => EntryRouter({
+        entryService, validationMiddlewareFactory
+      })
+    )
+    .setFactory(
+      'accountRouter',
       ({
-        entryService,
+        environment,
+        accountService,
         authenticationMiddlewareFactory,
         validationMiddlewareFactory
-      }) => EntryRouter({
-        entryService,
+      }) => AccountRouter({
+        environment,
+        accountService,
         authenticationMiddlewareFactory,
         validationMiddlewareFactory
       })
     )
     .setFactory(
       'webInitializer',
-      ({
-        entryRouter
-      }) => WebInitializer({
-        entryRouter
+      ({ entryRouter, accountRouter }) => WebInitializer({
+        entryRouter, accountRouter
       })
     )
 )

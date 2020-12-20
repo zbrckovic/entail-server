@@ -31,6 +31,15 @@ export const EmailService = ({ environment, i18nService }) => {
       const text = `${t('verificationEmail.text')}\n${emailVerificationToken}`
 
       await transport.sendMail({ from, to, subject, text })
+    },
+
+    async sendPasswordChangeToken (passwordChangeToken, recipientEmailAddress) {
+      const from = 'authentication@entail.com'
+      const to = recipientEmailAddress
+      const subject = t('passwordChangeEmail.subject')
+      const text = `${t('passwordChangeEmail.text')}\n${passwordChangeToken}`
+
+      await transport.sendMail({ from, to, subject, text })
     }
   }
 }

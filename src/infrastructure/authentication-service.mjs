@@ -1,11 +1,6 @@
 import moment from 'moment'
 import { createError, ErrorName } from '../common/error.mjs'
-
-const TokenType = {
-  API: 'API',
-  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
-  PASSWORD_CHANGE: 'PASSWORD_CHANGE'
-}
+import { TokenType } from './token-type.mjs'
 
 export const AuthenticationService = ({ environment, cryptographyService, usersRepository }) => {
   const tokenSecret = environment.tokenSecret
@@ -89,21 +84,6 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
 
     async validateAndDecodePasswordChangeToken (token) {
       return await validateAndDecodeToken(token, TokenType.PASSWORD_CHANGE)
-    },
-
-    async verifyCredentialsAndGetUser ({ email, password }) {
-      const user = await this.getUserByEmail(email)
-
-      const isPasswordValid = await cryptographyService.isCryptographicHashValid(
-        user.passwordHash,
-        password
-      )
-
-      if (!isPasswordValid) {
-        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-      }
-
-      return user
     }
   }
 
