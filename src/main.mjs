@@ -5,7 +5,7 @@ import { IocContainer } from './common/ioc-container.mjs'
 import { createSequelize } from './persistence/sequelize.mjs'
 import { RolesRepository } from './persistence/repositories/roles-repository.mjs'
 import { UsersRepository } from './persistence/repositories/users-repository.mjs'
-import { DataInitializationService } from './application/data-initialization-service.mjs'
+import { DataInitializationService } from './persistence/data-initialization-service.mjs'
 import { I18nService } from './infrastructure/i18n/i18n-service.mjs'
 import { CryptographyService } from './infrastructure/cryptography-service.mjs'
 import { EmailService } from './infrastructure/email-service.mjs'
@@ -123,10 +123,6 @@ const wireUpDependencies = () => (
         authenticationService
       })
     )
-    .setFactory(
-      'usersService',
-      ({ usersRepository }) => UsersService({ usersRepository })
-    )
 
     // presentation
     .setFactory(
@@ -154,25 +150,11 @@ const wireUpDependencies = () => (
       })
     )
     .setFactory(
-      'usersRouter',
-      ({
-        usersService,
-        authenticationMiddlewareFactory,
-        authorizationMiddlewareFactory
-      }) => UsersRouter({
-        usersService,
-        authenticationMiddlewareFactory,
-        authorizationMiddlewareFactory
-      })
-    )
-    .setFactory(
       'webInitializer',
       ({
-        entryRouter,
-        usersRouter
+        entryRouter
       }) => WebInitializer({
-        entryRouter,
-        usersRouter
+        entryRouter
       })
     )
 )

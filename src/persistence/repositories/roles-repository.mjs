@@ -6,7 +6,7 @@ export const RolesRepository = ({ sequelize }) => {
   } = sequelize.models
 
   return {
-    async saveRoles (roles) {
+    async createRoles (roles) {
       await RoleModel.bulkCreate(
         roles.map(role => roleMapper.toPersistence(role)),
         { ignoreDuplicates: true }

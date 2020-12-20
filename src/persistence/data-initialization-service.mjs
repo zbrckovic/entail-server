@@ -9,27 +9,24 @@ export const DataInitializationService = ({
 }) => {
   const result = {
     async initData () {
-      await saveAllRoles()
+      await createAllRoles()
 
-      const {
-        superAdminEmail,
-        superAdminPassword
-      } = environment
+      const { superAdminEmail, superAdminPassword } = environment
 
       if (superAdminEmail !== undefined && superAdminPassword !== undefined) {
-        await saveSuperAdmin(superAdminEmail, superAdminPassword)
+        await createSuperAdmin(superAdminEmail, superAdminPassword)
       }
     }
   }
 
   // Inserts all roles into database if they don't already exist.
-  const saveAllRoles = async () => {
+  const createAllRoles = async () => {
     const roles = Object.values(Role)
-    await rolesRepository.saveRoles(roles)
+    await rolesRepository.createRoles(roles)
   }
 
-  // Inserts super admin with specified credentials into database.
-  const saveSuperAdmin = async (email, password) => {
+  // Inserts super admin with specified credentials into database if it doesn't already exist.
+  const createSuperAdmin = async (email, password) => {
     const passwordHash = await cryptographyService.createSecureHash(password)
     const user = User({
       email,

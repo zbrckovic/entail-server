@@ -25,42 +25,50 @@ export const EntryService = ({
       await usersRepository.createUser(user)
       await emailService.sendActivationCode(activationCode, email)
 
-      const apiToken = await authenticationService.generateApiToken()
-
-      return [user, apiToken]
+      return await authenticationService.generateApiToken()
     },
 
     async login ({ email, password }) {
-      const user = await authenticationService.verifyCredentials({ email, password })
-      const apiToken = await authenticationService.generateApiToken()
-
-      return [user, apiToken]
+      const user = await authenticationService.verifyCredentialsAndGetUser({ email, password })
+      if (!user.activityStatus.isActivated) {
+        throw createError({ name: ErrorName.USER_NOT_ACTIVATED })
+      }
+      return await authenticationService.generateApiToken(user)
     },
 
-    async activate (user, activationCode) {
+    async refreshApiToken (userId) {
+      const user = await authenticationService.getUserById(userId)
+      if (!user.activityStatus.isActivated) {
+        throw createError({ name: ErrorName.USER_NOT_ACTIVATED })
+      }
+      return await authenticationService.generateApiToken(user)
+    },
+
+    async activateUser (userId, activationCode) {
+      const user = await authenticationService.getUserById(userId)
       await authenticationService.verifyActivationCode(user, activationCode)
 
-      const activationStatus = ActivationStatus({ isActivated: true })
-      const userWithNewActivationStatus = { ...user, activationStatus }
-
-      await usersRepository.updateUser(userWithNewActivationStatus)
+      await usersRepository.updateUser({
+        ...user,
+        activationStatus: ActivationStatus({
+          isActivated: true,
+          activationCodeHash: undefined,
+          activationCodeExpiresOn: undefined
+        })
+      })
     },
 
     async refreshActivationCode (userId) {
+      const user = await authenticationService.getUserById(userId)
+
       if (user.activationStatus.isActivated) {
         throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
       }
 
-      const [activationStatus, activationCode] = generateActivationStatusWithCode()
-      const userWithNewActivationStatus = { ...user, activationStatus }
-      await usersRepository.updateUser(userWithNewActivationStatus)
+      const [activationStatus, activationCode] = await generateActivationStatusWithCode()
 
-      return activationCode
-    },
-
-    async refreshApiToken (userId) {
-      const user = await usersRepository.getUserById(userId)
-      return await authenticationService.generateApiToken(user)
+      await usersRepository.updateUser({ ...user, activationStatus })
+      await emailService.sendActivationCode(activationCode, user.email)
     }
   }
 

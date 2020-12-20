@@ -14,9 +14,10 @@ export const EmailService = ({ environment, i18nService }) => {
   })
 
   return {
+    // Throws if connection is not ok.
     async verifyConnection () {
       try {
-        return await transport.verify()
+        await transport.verify()
       } catch (error) {
         console.error('Couldn\'t connect to SMTP server.')
         throw error
@@ -29,7 +30,7 @@ export const EmailService = ({ environment, i18nService }) => {
       const subject = t('activationEmail.subject')
       const text = t('activationEmail.text')
 
-      return await transport.sendMail({ from, to, subject, text })
+      await transport.sendMail({ from, to, subject, text })
     }
   }
 }

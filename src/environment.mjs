@@ -67,4 +67,3 @@ export const environment = {
   insertInitData,
   logI18n
 }
-

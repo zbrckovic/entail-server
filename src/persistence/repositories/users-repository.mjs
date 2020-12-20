@@ -10,13 +10,7 @@ export const UsersRepository = ({ sequelize }) => {
   } = sequelize.models
 
   return {
-    async getAllUsers () {
-      const userDAOs = await UserModel.findAll({
-        include: ['roles', 'activationStatus']
-      })
-      return userDAOs.map(userDAO => userMapper.fromPersistence(userDAO))
-    },
-
+    // Returns user or undefined.
     async getUserByEmail (email) {
       const userDAO = await UserModel.findOne({
         where: { email },
@@ -25,6 +19,7 @@ export const UsersRepository = ({ sequelize }) => {
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 
+    // Returns user or undefined.
     async getUserById (id) {
       const userDAO = await UserModel.findByPk(id, {
         include: ['roles', 'activationStatus']
@@ -32,6 +27,7 @@ export const UsersRepository = ({ sequelize }) => {
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 
+    // Creates user or throws `EMAIL_ALREADY_USED`.
     async createUser (user) {
       try {
         const userDAO = await UserModel.create(userMapper.toPersistence(user))

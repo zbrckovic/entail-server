@@ -7,8 +7,8 @@ export const CryptographyService = ({ environment }) => ({
     return bcrypt.hash(value, environment.bcryptSaltRounds)
   },
 
-  // Returns boolean.
-  async verifyCryptographicHash (value, hash) {
+  // Checks whether `hash` is a cryptographic hash of `value`.
+  async isCryptographicHashValid (hash, value) {
     return bcrypt.compare(value, hash)
   },
 
@@ -24,10 +24,10 @@ export const CryptographyService = ({ environment }) => ({
     })
   },
 
-  async generateJwt ({ payload, expiresIn, secret, subject }) {
+  async generateJwt ({ key, payload, expiresIn, secret, subject }) {
     return new Promise((resolve, reject) => {
       jwt.sign(
-        { payload },
+        { [key]: payload },
         secret,
         { expiresIn, subject },
         (error, token) => {
@@ -41,9 +41,8 @@ export const CryptographyService = ({ environment }) => ({
     })
   },
 
-  // Checks whether `token` is encoded with `secret` and is still valid. Returns decoded `token`
-  // or throws.
-  async verifyJwt (token, secret) {
+  // Checks whether `token` is valid. Returns decoded `token` or throws.
+  async validateAndDecodeJwt (token, secret) {
     return new Promise((resolve, reject) => {
       jwt.verify(
         token,
