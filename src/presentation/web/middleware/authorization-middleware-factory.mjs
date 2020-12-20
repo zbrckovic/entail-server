@@ -1,7 +1,7 @@
 import { ErrorName } from '../../../common/error.mjs'
 
 export const AuthorizationMiddlewareFactory = ({ authorizationService }) => {
-  return Object.freeze({
+  return {
     isAuthorized (...requiredPermissions) {
       return (req, res, next) => {
         const user = req.user
@@ -14,5 +14,5 @@ export const AuthorizationMiddlewareFactory = ({ authorizationService }) => {
         next()
       }
     }
-  })
+  }
 }

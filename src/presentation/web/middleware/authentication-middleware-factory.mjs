@@ -3,7 +3,7 @@ import { ErrorName } from '../../../common/error.mjs'
 export const AuthenticationMiddlewareFactory = ({ authenticationService }) => {
   const authorizationHeaderPattern = /^Bearer (.+)$/
 
-  return Object.freeze({
+  return {
     isAuthenticated () {
       return async (req, res, next) => {
         try {
@@ -33,5 +33,5 @@ export const AuthenticationMiddlewareFactory = ({ authenticationService }) => {
         }
       }
     }
-  })
+  }
 }

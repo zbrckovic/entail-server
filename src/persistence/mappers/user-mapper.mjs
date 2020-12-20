@@ -3,13 +3,12 @@ import { activationStatusMapper } from './activation-status-mapper.mjs'
 import { sessionMapper } from './session-mapper.mjs'
 import { roleMapper } from './role-mapper.mjs'
 
-export const userMapper = Object.freeze({
+export const userMapper = {
   fromPersistence ({
     id,
     email,
     passwordHash,
     activationStatus,
-    session,
     roles
   }) {
     return User({
@@ -17,7 +16,6 @@ export const userMapper = Object.freeze({
       email,
       passwordHash,
       activationStatus: activationStatusMapper.fromPersistence(activationStatus),
-      session: session !== null ? sessionMapper.fromPersistence(session) : undefined,
       roles: roles.map(role => roleMapper.fromPersistence(role))
     })
   },
@@ -32,4 +30,4 @@ export const userMapper = Object.freeze({
       passwordHash
     }
   }
-})
+}

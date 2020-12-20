@@ -1,4 +1,7 @@
-export const UsersService = ({ repository }) =>
-  Object.freeze({
-    async getAll () { return await repository.getUsers() }
-  })
+export const UsersService = ({ repository }) => ({
+  async getById () {
+    return await repository.getUsers()
+  },
+
+  async getAll () { return await repository.getUsers() }
+})

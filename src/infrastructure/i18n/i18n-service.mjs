@@ -5,7 +5,7 @@ import { en } from './en.mjs'
 export const I18nService = ({ environment }) => {
   let t
 
-  return Object.freeze({
+  return {
     async initT () {
       if (t !== undefined) return
 
@@ -21,5 +21,5 @@ export const I18nService = ({ environment }) => {
       if (t === undefined) throw createError({ message: 'I18n is not yet initialized.' })
       return t
     }
-  })
+  }
 }

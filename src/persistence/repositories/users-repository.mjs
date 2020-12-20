@@ -2,7 +2,6 @@ import { createError, ErrorName } from '../../common/error.mjs'
 import { userMapper } from '../mappers/user-mapper.mjs'
 import { roleMapper } from '../mappers/role-mapper.mjs'
 import { activationStatusMapper } from '../mappers/activation-status-mapper.mjs'
-import { sessionMapper } from '../mappers/session-mapper.mjs'
 
 export const UsersRepository = ({ sequelize }) => {
   const {
@@ -10,10 +9,10 @@ export const UsersRepository = ({ sequelize }) => {
     ActivationStatusModel
   } = sequelize.models
 
-  return Object.freeze({
+  return {
     async getAllUsers () {
       const userDAOs = await UserModel.findAll({
-        include: ['roles', 'activationStatus', 'session']
+        include: ['roles', 'activationStatus']
       })
       return userDAOs.map(userDAO => userMapper.fromPersistence(userDAO))
     },
@@ -21,7 +20,14 @@ export const UsersRepository = ({ sequelize }) => {
     async getUserByEmail (email) {
       const userDAO = await UserModel.findOne({
         where: { email },
-        include: ['roles', 'activationStatus', 'session']
+        include: ['roles', 'activationStatus']
+      })
+      return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
+    },
+
+    async getUserById (id) {
+      const userDAO = await UserModel.findByPk(id, {
+        include: ['roles', 'activationStatus']
       })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
@@ -33,10 +39,6 @@ export const UsersRepository = ({ sequelize }) => {
         await userDAO.createActivationStatus(
           activationStatusMapper.toPersistence(user.activationStatus, user.id)
         )
-
-        if (user.session !== undefined) {
-          await userDAO.createSession(sessionMapper.toPersistence(user.session, user.id))
-        }
 
         await userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
       } catch (error) {
@@ -58,17 +60,7 @@ export const UsersRepository = ({ sequelize }) => {
         { where: { userId: user.id } }
       )
 
-      if (user.session !== undefined) {
-        if (userDAO.session !== null) {
-          await userDAO.setSession(userMapper.toPersistence(user.session, user.id))
-        } else {
-          await userDAO.createSession(userMapper.toPersistence(user.session, user.id))
-        }
-      } else {
-        await userDAO.setSession(null)
-      }
-
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
     }
-  })
+  }
 }

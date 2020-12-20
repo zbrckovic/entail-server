@@ -1,7 +1,7 @@
 import { ActivationStatus } from '../../domain/user.mjs'
 import moment from 'moment'
 
-export const activationStatusMapper = Object.freeze({
+export const activationStatusMapper = {
   fromPersistence ({
     isActivated,
     activationCodeHash,
@@ -30,4 +30,4 @@ export const activationStatusMapper = Object.freeze({
       activationCodeExpiresOn: activationCodeExpiresOn?.toDate() ?? null
     }
   }
-})
+}

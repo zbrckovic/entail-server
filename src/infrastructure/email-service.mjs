@@ -13,18 +13,23 @@ export const EmailService = ({ environment, i18nService }) => {
     }
   })
 
-  return Object.freeze({
+  return {
     async verifyConnection () {
-      return await transport.verify()
+      try {
+        return await transport.verify()
+      } catch (error) {
+        console.error('Couldn\'t connect to SMTP server.')
+        throw error
+      }
     },
 
-    async sendActivationCode (activationCode, recipientAddress) {
+    async sendActivationCode (activationCode, recipientEmailAddress) {
       const from = 'authentication@entail.com'
-      const to = recipientAddress
+      const to = recipientEmailAddress
       const subject = t('activationEmail.subject')
       const text = t('activationEmail.text')
 
       return await transport.sendMail({ from, to, subject, text })
     }
-  })
+  }
 }

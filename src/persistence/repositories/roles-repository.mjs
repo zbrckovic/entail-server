@@ -5,12 +5,12 @@ export const RolesRepository = ({ sequelize }) => {
     RoleModel
   } = sequelize.models
 
-  return Object.freeze({
+  return {
     async saveRoles (roles) {
       await RoleModel.bulkCreate(
         roles.map(role => roleMapper.toPersistence(role)),
         { ignoreDuplicates: true }
       )
     }
-  })
+  }
 }

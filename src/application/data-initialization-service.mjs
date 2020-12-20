@@ -7,7 +7,7 @@ export const DataInitializationService = ({
   environment,
   cryptographyService
 }) => {
-  const result = Object.freeze({
+  const result = {
     async initData () {
       await saveAllRoles()
 
@@ -20,7 +20,7 @@ export const DataInitializationService = ({
         await saveSuperAdmin(superAdminEmail, superAdminPassword)
       }
     }
-  })
+  }
 
   // Inserts all roles into database if they don't already exist.
   const saveAllRoles = async () => {

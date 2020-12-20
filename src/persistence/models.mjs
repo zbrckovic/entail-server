@@ -60,23 +60,4 @@ export const createModels = sequelize => {
   ActivationStatusModel.belongsTo(UserModel, {
     as: 'user'
   })
-
-  const SessionModel = sequelize.define('Session', {
-    refreshTokenHash: {
-      type: DataTypes.STRING(60),
-      allowNull: false
-    },
-    refreshTokenExpiresOn: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
-  })
-
-  UserModel.hasOne(SessionModel, {
-    foreignKey: 'userId',
-    as: 'session'
-  })
-  SessionModel.belongsTo(UserModel, {
-    as: 'user'
-  })
 }

@@ -7,7 +7,21 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
     environment.apiTokenExpiresInMinutes, 'minutes'
   ).asSeconds()
 
-  return Object.freeze({
+  return {
+    async getUserById (userId) {
+      const user = usersRepository.getUserById(userId)
+      if (user === undefined) {
+        createError({ name: ErrorName.INVALID_CREDENTIALS })
+      }
+    },
+
+    async getUserByEmail (email) {
+      const user = await usersRepository.getUserByEmail(email)
+      if (user === undefined) {
+        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      }
+    },
+
     async generateApiToken (user) {
       const payload = {
         id: user.id,
@@ -23,30 +37,16 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
       })
     },
 
+    // Checks whether `token` is valid. Returns decoded `token` or throws.
     async verifyApiToken (apiToken) {
       return await cryptographyService.verifyJwt(apiToken, apiTokenSecret)
     },
 
-    async generateRefreshToken () {
-      return await cryptographyService.generateSecureCode()
-    },
-
-    async verifyRefreshToken (user, refreshToken) {
-      const refreshTokenHash = user.session?.refreshTokenHash
-
-      if (refreshTokenHash === undefined) return false
-
-      const isRefreshTokenValid = await cryptographyService.doesValueMatchSecureHash(
-        refreshToken, refreshTokenHash
-      )
-
-      if (!isRefreshTokenValid) return false
-    },
-
     async generateActivationCode () {
-      return await cryptographyService.createSecureHash()
+      return await cryptographyService.generateActivationCode()
     },
 
+    // Checks whether `user` can be activated with `activationCode`.
     async verifyActivationCode (user, activationCode) {
       if (user.activationStatus.isActivated) {
         throw createError({ name: ErrorName.USER_ALREADY_ACTIVATED })
@@ -61,18 +61,15 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
       )
 
       if (!isActivationCodeCorrect) {
-        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+        throw createError({ name: ErrorName.INVALID_ACTIVATION_CODE })
       }
     },
 
+    // Checks whether credentials match any user. Returns matching user or throws.
     async verifyCredentials ({ email, password }) {
-      const user = await usersRepository.getUserByEmail(email)
+      const user = await this.getUserByEmail(email)
 
-      if (user === undefined) {
-        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-      }
-
-      const isPasswordValid = await cryptographyService.doesValueMatchSecureHash(
+      const isPasswordValid = await cryptographyService.doesValueMatchCryptographicHash(
         password,
         user.passwordHash
       )
@@ -81,5 +78,5 @@ export const AuthenticationService = ({ environment, cryptographyService, usersR
 
       return user
     }
-  })
+  }
 }
