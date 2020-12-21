@@ -3,12 +3,12 @@ import { userMapper } from '../mappers/user-mapper.mjs'
 import { roleMapper } from '../mappers/role-mapper.mjs'
 
 export const UsersRepository = ({ sequelize }) => {
-  const { UserModel } = sequelize.models
+  const { User, Role } = sequelize.models
 
   return {
     // Returns user or undefined.
     async getUserByEmail (email) {
-      const userDAO = await UserModel.findOne({
+      const userDAO = await User.findOne({
         where: { email },
         include: ['roles']
       })
@@ -17,7 +17,7 @@ export const UsersRepository = ({ sequelize }) => {
 
     // Returns user or undefined.
     async getUserById (id) {
-      const userDAO = await UserModel.findByPk(id, {
+      const userDAO = await User.findByPk(id, {
         include: ['roles']
       })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
@@ -26,8 +26,11 @@ export const UsersRepository = ({ sequelize }) => {
     // Creates user or throws `EMAIL_ALREADY_USED`.
     async createUser (user) {
       try {
-        const userDAO = await UserModel.create(userMapper.toPersistence(user))
-        await userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
+        const userDAO = await User.create(userMapper.toPersistence(user))
+        const roles = user.roles
+          .map(role => roleMapper.toPersistence(role))
+          .map(role => Role.build(role))
+        await userDAO.setRoles(roles)
       } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
           if (Object.prototype.hasOwnProperty.call(error.fields, 'email')) {
@@ -39,7 +42,7 @@ export const UsersRepository = ({ sequelize }) => {
     },
 
     async updateUser (user) {
-      const userDAO = UserModel.findByPk(user.id, { include: ['session'] })
+      const userDAO = User.findByPk(user.id, { include: ['session'] })
       await userDAO.update(userMapper.toPersistence(user))
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
     }

@@ -1,13 +1,11 @@
 import { roleMapper } from '../mappers/role-mapper.mjs'
 
 export const RolesRepository = ({ sequelize }) => {
-  const {
-    RoleModel
-  } = sequelize.models
+  const { Role } = sequelize.models
 
   return {
     async createRoles (roles) {
-      await RoleModel.bulkCreate(
+      await Role.bulkCreate(
         roles.map(role => roleMapper.toPersistence(role)),
         { ignoreDuplicates: true }
       )

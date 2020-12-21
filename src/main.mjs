@@ -22,27 +22,8 @@ import { AccountService } from './application/account-service.mjs'
 
 (async () => {
   console.log(figlet.textSync('Entail', { font: 'slant' }))
-  const iocContainer = wireUpDependencies()
-  await iocContainer.i18nService.initT()
-  await iocContainer.sequelize.authenticate()
-  await iocContainer.sequelize.sync({ force: true })
-  if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
-  const app = express()
-  iocContainer.webInitializer.init(app)
-
-  return new Promise(resolve => {
-    app.listen(environment.port, () => {
-      console.info(`Listening on port ${environment.port}.`)
-      resolve()
-    })
-  })
-})().then(() => {
-  console.info('Application has been successfully initialized.')
-})
-
-const wireUpDependencies = () => (
-  IocContainer()
+  const iocContainer = IocContainer()
     .setValue('environment', environment)
 
     // persistence
@@ -101,11 +82,11 @@ const wireUpDependencies = () => (
     // presentation
     .setFactory(
       'authorizationMiddlewareFactory',
-      ({ authorizationService }) => AuthenticationMiddlewareFactory({ authorizationService })
+      ({ authorizationService }) => AuthorizationMiddlewareFactory({ authorizationService })
     )
     .setFactory(
       'authenticationMiddlewareFactory',
-      ({ authenticationService }) => AuthorizationMiddlewareFactory({ authenticationService })
+      ({ authenticationService }) => AuthenticationMiddlewareFactory({ authenticationService })
     )
     .setFactory(
       'validationMiddlewareFactory',
@@ -113,8 +94,8 @@ const wireUpDependencies = () => (
     )
     .setFactory(
       'entryRouter',
-      ({ entryService, validationMiddlewareFactory }) => EntryRouter({
-        entryService, validationMiddlewareFactory
+      ({ environment, entryService, validationMiddlewareFactory }) => EntryRouter({
+        environment, entryService, validationMiddlewareFactory
       })
     )
     .setFactory(
@@ -137,4 +118,20 @@ const wireUpDependencies = () => (
         entryRouter, accountRouter
       })
     )
-)
+  await iocContainer.i18nService.initT()
+  await iocContainer.sequelize.authenticate()
+  await iocContainer.sequelize.sync({ force: true })
+  if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
+
+  const app = express()
+  iocContainer.webInitializer.init(app)
+
+  return new Promise(resolve => {
+    app.listen(environment.port, () => {
+      console.info(`Listening on port ${environment.port}.`)
+      resolve()
+    })
+  })
+})().then(() => {
+  console.info('Application has been successfully initialized.')
+})

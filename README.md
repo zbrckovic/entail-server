@@ -42,9 +42,9 @@ Name                                        |                                   
 --------------------------------------------|----------------------------------------------------------|--------
 BCRYPT_SALT_ROUNDS                          | Configuration parameter for password encryption (bcrypt) | `10`
 TOKEN_SECRET                                |                                                          | `undefined`
-API_TOKEN_EXPIRES_IN_MINUTES                |                                                          | `undefined`
-EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_MINUTES |                                                          | `undefined`
-PASSWORD_CHANGE_TOKEN_EXPIRES_IN_MINUTES    |                                                          | `undefined`
+API_TOKEN_EXPIRES_IN_MINUTES                |                                                          | `15`
+EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_MINUTES |                                                          | `15`
+PASSWORD_CHANGE_TOKEN_EXPIRES_IN_MINUTES    |                                                          | `15`
 
 ### Details
 

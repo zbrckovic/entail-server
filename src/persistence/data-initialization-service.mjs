@@ -1,4 +1,4 @@
-import { ActivationStatus, Role, User } from '../domain/user.mjs'
+import { Role, User } from '../domain/user.mjs'
 import { ErrorName } from '../common/error.mjs'
 
 export const DataInitializationService = ({
@@ -27,17 +27,8 @@ export const DataInitializationService = ({
 
   // Inserts super admin with specified credentials into database if it doesn't already exist.
   const createSuperAdmin = async (email, password) => {
-    const passwordHash = await cryptographyService.createSecureHash(password)
-    const user = User({
-      email,
-      passwordHash,
-      activationStatus: ActivationStatus({
-        isActivated: true,
-        activationCodeHash: undefined,
-        activationCodeExpiresOn: undefined
-      }),
-      roles: [Role.SUPER_ADMIN]
-    })
+    const passwordHash = await cryptographyService.createCryptographicHash(password)
+    const user = User({ email, passwordHash, isEmailVerified: true, roles: [Role.SUPER_ADMIN] })
     try {
       await usersRepository.createUser(user)
     } catch (error) {

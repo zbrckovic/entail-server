@@ -3,7 +3,7 @@ import sequelizeLibrary from 'sequelize'
 const { DataTypes } = sequelizeLibrary
 
 export const createModels = sequelize => {
-  const UserModel = sequelize.define('User', {
+  const User = sequelize.define('User', {
     id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -15,7 +15,7 @@ export const createModels = sequelize => {
       unique: true
     },
     isEmailVerified: {
-      type: DataTypes.Boolean,
+      type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
     },
@@ -25,7 +25,7 @@ export const createModels = sequelize => {
     }
   })
 
-  const RoleModel = sequelize.define('Role', {
+  const Role = sequelize.define('Role', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -33,12 +33,12 @@ export const createModels = sequelize => {
     }
   }, { timestamps: false })
 
-  UserModel.belongsToMany(RoleModel, {
+  User.belongsToMany(Role, {
     through: 'UsersRoles',
     as: 'roles',
     foreignKey: 'userId'
   })
-  RoleModel.belongsToMany(UserModel, {
+  Role.belongsToMany(User, {
     through: 'UsersRoles',
     as: 'users',
     foreignKey: 'roleName'

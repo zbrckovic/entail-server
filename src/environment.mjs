@@ -30,12 +30,14 @@ const pgSchema = mode === 'test' ? 'test' : 'public'
 
 const bcryptSaltRounds = parseNumber(process.env.BCRYPT_SALT_ROUNDS, 10)
 const tokenSecret = process.env.TOKEN_SECRET
-const apiTokenExpiresInMinutes = parseNumber(process.env.API_TOKEN_EXPIRES_IN_MINUTES)
+const apiTokenExpiresInMinutes = parseNumber(
+  process.env.API_TOKEN_EXPIRES_IN_MINUTES, 15
+)
 const emailVerificationTokenExpiresInMinutes = parseNumber(
-  process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_MINUTES
+  process.env.EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_MINUTES, 15
 )
 const passwordChangeTokenExpiresInMinutes = parseNumber(
-  process.env.PASSWORD_CHANGE_TOKEN_EXPIRES_IN_MINUTES
+  process.env.PASSWORD_CHANGE_TOKEN_EXPIRES_IN_MINUTES, 15
 )
 
 const logSql = parseBoolean(process.env.LOG_SQL, false)
