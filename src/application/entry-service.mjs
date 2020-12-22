@@ -6,8 +6,7 @@ export const EntryService = ({
   usersRepository,
   cryptographyService,
   emailService,
-  authenticationService,
-  withTransaction
+  authenticationService
 }) => ({
   async register ({ email, password }) {
     const passwordHash = await cryptographyService.createCryptographicHash(password)
