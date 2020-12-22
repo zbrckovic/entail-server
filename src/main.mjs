@@ -19,6 +19,7 @@ import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { AccountRouter } from './presentation/web/routers/account-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
 import { AccountService } from './application/account-service.mjs'
+import cors from 'cors'
 
 (async () => {
   console.log(figlet.textSync('Entail', { font: 'slant' }))
@@ -54,6 +55,8 @@ import { AccountService } from './application/account-service.mjs'
   if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
   const app = express()
+  app.use(cors())
+
   iocContainer.webInitializer.init(app)
 
   return new Promise(resolve => {

@@ -7,7 +7,7 @@ export const WebInitializer = ({ entryRouter, accountRouter }) => ({
     app.use(express.json({ type: 'application/json' }))
     app.use(cookieParser())
 
-    app.use('/entry', entryRouter)
+    app.use(entryRouter)
     app.use('/account', accountRouter)
 
     return app
