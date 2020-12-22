@@ -1,9 +1,10 @@
 import sequelizeLibrary from 'sequelize'
 import { createModels } from './models.mjs'
+import cls from 'cls-hooked'
 
-const {
-  Sequelize
-} = sequelizeLibrary
+const { Sequelize } = sequelizeLibrary
+const namespace = cls.createNamespace('zbrckovic/entail-server')
+Sequelize.useCLS(namespace)
 
 export const createSequelize = ({ environment }) => {
   const {
@@ -29,3 +30,7 @@ export const createSequelize = ({ environment }) => {
 
   return sequelize
 }
+
+export const createFnWithTransaction = ({ sequelize }) => async task => (
+  namespace.get('transaction') ? await task() : await sequelize.transaction(task)
+)

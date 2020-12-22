@@ -6,7 +6,8 @@ export const EntryService = ({
   usersRepository,
   cryptographyService,
   emailService,
-  authenticationService
+  authenticationService,
+  withTransaction
 }) => ({
   async register ({ email, password }) {
     const passwordHash = await cryptographyService.createCryptographicHash(password)
@@ -27,9 +28,7 @@ export const EntryService = ({
       password
     )
 
-    if (!isPasswordValid) {
-      throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-    }
+    if (!isPasswordValid) { throw createError({ name: ErrorName.INVALID_CREDENTIALS }) }
 
     return await authenticationService.createApiToken(user)
   }

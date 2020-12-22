@@ -2,7 +2,7 @@ import express from 'express'
 import { environment } from './environment.mjs'
 import figlet from 'figlet'
 import { IocContainer } from './common/ioc-container.mjs'
-import { createSequelize } from './persistence/sequelize.mjs'
+import { createFnWithTransaction, createSequelize } from './persistence/sequelize.mjs'
 import { RolesRepository } from './persistence/repositories/roles-repository.mjs'
 import { UsersRepository } from './persistence/repositories/users-repository.mjs'
 import { DataInitializationService } from './persistence/data-initialization-service.mjs'
@@ -25,99 +25,29 @@ import { AccountService } from './application/account-service.mjs'
 
   const iocContainer = IocContainer()
     .setValue('environment', environment)
-
     // persistence
-    .setFactory('sequelize', ({ environment }) => createSequelize({ environment }))
-    .setFactory('rolesRepository', ({ sequelize }) => RolesRepository({ sequelize }))
-    .setFactory('usersRepository', ({ sequelize }) => UsersRepository({ sequelize }))
-    .setFactory(
-      'dataInitializationService',
-      ({
-        rolesRepository, usersRepository, environment, cryptographyService
-      }) => DataInitializationService({
-        rolesRepository, usersRepository, environment, cryptographyService
-      })
-    )
-
+    .setFactory('sequelize', createSequelize)
+    .setFactory('withTransaction', createFnWithTransaction)
+    .setFactory('rolesRepository', RolesRepository)
+    .setFactory('usersRepository', UsersRepository)
+    .setFactory('dataInitializationService', DataInitializationService)
     // infrastructure
-    .setFactory('i18nService', ({ environment }) => I18nService({ environment }))
-    .setFactory('cryptographyService', ({ environment }) => CryptographyService({ environment }))
-    .setFactory(
-      'emailService',
-      ({ i18nService, environment }) => EmailService({ i18nService, environment })
-    )
-    .setFactory(
-      'authenticationService',
-      ({
-        environment, cryptographyService, usersRepository
-      }) => AuthenticationService({
-        environment, cryptographyService, usersRepository
-      })
-    )
-    .setFactory('authorizationService', () => AuthorizationService())
-
+    .setFactory('i18nService', I18nService)
+    .setFactory('cryptographyService', CryptographyService)
+    .setFactory('emailService', EmailService)
+    .setFactory('authenticationService', AuthenticationService)
+    .setFactory('authorizationService', AuthorizationService)
     // application
-    .setFactory(
-      'entryService',
-      ({
-        usersRepository,
-        cryptographyService,
-        emailService,
-        authenticationService
-      }) => EntryService({
-        usersRepository,
-        cryptographyService,
-        emailService,
-        authenticationService
-      })
-    )
-    .setFactory(
-      'accountService',
-      ({
-        authenticationService, usersRepository, emailService, cryptographyService
-      }) => AccountService({
-        authenticationService, usersRepository, emailService, cryptographyService
-      }))
-
+    .setFactory('entryService', EntryService)
+    .setFactory('accountService', AccountService)
     // presentation
-    .setFactory(
-      'authorizationMiddlewareFactory',
-      ({ authorizationService }) => AuthorizationMiddlewareFactory({ authorizationService })
-    )
-    .setFactory(
-      'authenticationMiddlewareFactory',
-      ({ authenticationService }) => AuthenticationMiddlewareFactory({ authenticationService })
-    )
-    .setFactory(
-      'validationMiddlewareFactory',
-      () => ValidationMiddlewareFactory()
-    )
-    .setFactory(
-      'entryRouter',
-      ({ environment, entryService, validationMiddlewareFactory }) => EntryRouter({
-        environment, entryService, validationMiddlewareFactory
-      })
-    )
-    .setFactory(
-      'accountRouter',
-      ({
-        environment,
-        accountService,
-        authenticationMiddlewareFactory,
-        validationMiddlewareFactory
-      }) => AccountRouter({
-        environment,
-        accountService,
-        authenticationMiddlewareFactory,
-        validationMiddlewareFactory
-      })
-    )
-    .setFactory(
-      'webInitializer',
-      ({ entryRouter, accountRouter }) => WebInitializer({
-        entryRouter, accountRouter
-      })
-    )
+    .setFactory('authorizationMiddlewareFactory', AuthorizationMiddlewareFactory)
+    .setFactory('authenticationMiddlewareFactory', AuthenticationMiddlewareFactory)
+    .setFactory('validationMiddlewareFactory', ValidationMiddlewareFactory)
+    .setFactory('entryRouter', EntryRouter)
+    .setFactory('accountRouter', AccountRouter)
+    .setFactory('webInitializer', WebInitializer)
+
   await iocContainer.i18nService.initT()
   await iocContainer.sequelize.authenticate()
   await iocContainer.sequelize.sync({ force: true })

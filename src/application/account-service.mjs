@@ -6,7 +6,8 @@ export const AccountService = ({
   authenticationService,
   usersRepository,
   emailService,
-  cryptographyService
+  cryptographyService,
+  withTransaction
 }) => ({
   async requestEmailVerification (userId) {
     const user = await authenticationService.getUserById(userId)
@@ -20,21 +21,25 @@ export const AccountService = ({
   },
 
   async verifyEmail (userId, token) {
-    const user = await authenticationService.getUserById(userId)
+    await withTransaction(async () => {
+      const user = await authenticationService.getUserById(userId)
 
-    if (user.isEmailVerified) {
-      throw createError({ name: ErrorName.EMAIL_ALREADY_VERIFIED })
-    }
+      if (user.isEmailVerified) {
+        throw createError({ name: ErrorName.EMAIL_ALREADY_VERIFIED })
+      }
 
-    const decodedToken = await authenticationService.validateAndDecodeEmailVerificationToken(token)
-    if (decodedToken.sub !== user.id) {
-      throw createError({
-        name: ErrorName.TOKEN_INVALID,
-        extra: { tokenType: TokenType.EMAIL_VERIFICATION }
-      })
-    }
+      const decodedToken =
+        await authenticationService.validateAndDecodeEmailVerificationToken(token)
 
-    await usersRepository.updateUser({ ...user, isEmailVerified: true })
+      if (decodedToken.sub !== user.id) {
+        throw createError({
+          name: ErrorName.TOKEN_INVALID,
+          extra: { tokenType: TokenType.EMAIL_VERIFICATION }
+        })
+      }
+
+      await usersRepository.updateUser({ ...user, isEmailVerified: true })
+    })
   },
 
   async requestPasswordChange (userId) {
@@ -44,34 +49,38 @@ export const AccountService = ({
   },
 
   async changePasswordWithToken ({ userId, password, token }) {
-    const user = await authenticationService.getUserById(userId)
-    const decodedToken = await authenticationService.validateAndDecodePasswordChangeToken(token)
+    await withTransaction(async () => {
+      const user = await authenticationService.getUserById(userId)
+      const decodedToken = await authenticationService.validateAndDecodePasswordChangeToken(token)
 
-    if (decodedToken.sub !== user.id) {
-      throw createError({
-        name: ErrorName.TOKEN_INVALID,
-        extra: { tokenType: TokenType.PASSWORD_CHANGE }
-      })
-    }
+      if (decodedToken.sub !== user.id) {
+        throw createError({
+          name: ErrorName.TOKEN_INVALID,
+          extra: { tokenType: TokenType.PASSWORD_CHANGE }
+        })
+      }
 
-    const passwordHash = await cryptographyService.createCryptographicHash(password)
-    await usersRepository.updateUser({ ...user, passwordHash })
+      const passwordHash = await cryptographyService.createCryptographicHash(password)
+      await usersRepository.updateUser({ ...user, passwordHash })
+    })
   },
 
   async changePasswordWithOldPassword ({ userId, oldPassword, newPassword }) {
-    const user = await authenticationService.getUserById(userId)
+    await withTransaction(async () => {
+      const user = await authenticationService.getUserById(userId)
 
-    const isPasswordValid = await cryptographyService.isCryptographicHashValid(
-      user.passwordHash,
-      oldPassword
-    )
+      const isPasswordValid = await cryptographyService.isCryptographicHashValid(
+        user.passwordHash,
+        oldPassword
+      )
 
-    if (!isPasswordValid) {
-      throw createError({ name: ErrorName.INVALID_CREDENTIALS })
-    }
+      if (!isPasswordValid) {
+        throw createError({ name: ErrorName.INVALID_CREDENTIALS })
+      }
 
-    const passwordHash = await cryptographyService.createCryptographicHash(newPassword)
-    await usersRepository.updateUser({ ...user, passwordHash })
+      const passwordHash = await cryptographyService.createCryptographicHash(newPassword)
+      await usersRepository.updateUser({ ...user, passwordHash })
+    })
   },
 
   async refreshApiToken (userId) {

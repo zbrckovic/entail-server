@@ -2,7 +2,11 @@ import moment from 'moment'
 import { createError, ErrorName } from '../common/error.mjs'
 import { TokenType } from './token-type.mjs'
 
-export const AuthenticationService = ({ environment, cryptographyService, usersRepository }) => {
+export const AuthenticationService = ({
+  environment,
+  cryptographyService,
+  usersRepository
+}) => {
   const tokenSecret = environment.tokenSecret
 
   const apiTokenExpiresInSeconds = moment.duration(

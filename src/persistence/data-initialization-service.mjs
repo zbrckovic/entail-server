@@ -5,17 +5,20 @@ export const DataInitializationService = ({
   usersRepository,
   rolesRepository,
   environment,
-  cryptographyService
+  cryptographyService,
+  withTransaction
 }) => {
   const result = {
     async initData () {
-      await createAllRoles()
+      await withTransaction(async () => {
+        await createAllRoles()
 
-      const { superAdminEmail, superAdminPassword } = environment
+        const { superAdminEmail, superAdminPassword } = environment
 
-      if (superAdminEmail !== undefined && superAdminPassword !== undefined) {
-        await createSuperAdmin(superAdminEmail, superAdminPassword)
-      }
+        if (superAdminEmail !== undefined && superAdminPassword !== undefined) {
+          await createSuperAdmin(superAdminEmail, superAdminPassword)
+        }
+      })
     }
   }
 
