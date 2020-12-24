@@ -8,7 +8,7 @@ export const WebInitializer = ({ entryRouter, accountRouter }) => ({
     app.use(cookieParser())
 
     app.use(entryRouter)
-    app.use('/account', accountRouter)
+    app.use(accountRouter)
 
     return app
   }

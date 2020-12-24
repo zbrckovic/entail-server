@@ -3,6 +3,7 @@ import moment from 'moment'
 import { body } from 'express-validator'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../common/constants.mjs'
 
+// Enables regular users to manage details related to their account and session.
 export const AccountRouter = ({
   environment,
   accountService,
@@ -16,6 +17,7 @@ export const AccountRouter = ({
 
   return new Router()
     .use(authentication.isAuthenticated())
+    // Returns a fresh api token.
     .get(
       '/apiToken',
       async (req, res) => {
@@ -25,6 +27,8 @@ export const AccountRouter = ({
         res.send()
       }
     )
+    // Initiates email verification procedure - sends an email with further instructions to the
+    // user's email address.
     .post(
       '/requestEmailVerification',
       async (req, res) => {
@@ -33,8 +37,10 @@ export const AccountRouter = ({
         res.send()
       }
     )
+    // Flags users email as verified. Uses provided `token` for verification.
     .post(
       '/verifyEmail',
+      validation.isValid(body('token').isJWT()),
       async (req, res) => {
         const { sub } = req.token
         const { token } = req.body
@@ -42,6 +48,8 @@ export const AccountRouter = ({
         res.send()
       }
     )
+    // Initiates email verification procedure - sends an email with further instructions to the
+    // user's email address.
     .post(
       '/requestPasswordChange',
       async (req, res) => {
@@ -50,6 +58,7 @@ export const AccountRouter = ({
         res.send()
       }
     )
+    // Sets `password` as user's new password. Uses provided `token` for verification.
     .post(
       '/changePasswordWithToken',
       validation.isValid(
@@ -63,10 +72,10 @@ export const AccountRouter = ({
         res.send()
       }
     )
+    // Sets `newPassword` as user's new password. Uses provided `oldPassword` for verification.
     .post(
       '/changePasswordWithOldPassword',
       validation.isValid(
-        body('token').isJWT(),
         body('oldPassword').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }),
         body('newPassword').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
       ),

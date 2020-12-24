@@ -1,20 +1,20 @@
 // Extracts data from all required environment variables and exports it as `environment` object.
-// Rest of the application will read only `environment`, never `process.env`.
+// Rest of the application will access this data only through exported `environment`, never directly
+// through `process.env`.
 
 const parseBoolean = (value, defaultValue) => {
-  if (value === undefined) return defaultValue
-  return JSON.parse(value)
+  return value === undefined ? defaultValue : JSON.parse(value)
 }
 
 const parseNumber = (value, defaultValue) => {
-  if (value === undefined) return defaultValue
-  return JSON.parse(value)
+  return value === undefined ? defaultValue : JSON.parse(value)
 }
 
 const mode = process.env.NODE_ENV ?? 'development'
 const port = parseNumber(process.env.PORT, 5000)
 const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
 const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
+const corsOrigin = process.env.CORS_ORIGIN
 
 const emailServerHost = process.env.EMAIL_SERVER_HOST
 const emailServerPort = parseNumber(process.env.EMAIL_SERVER_PORT)
@@ -50,6 +50,7 @@ export const environment = {
   port,
   superAdminEmail,
   superAdminPassword,
+  corsOrigin,
 
   emailServerHost,
   emailServerPort,

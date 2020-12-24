@@ -55,7 +55,12 @@ import cors from 'cors'
   if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
   const app = express()
-  app.use(cors())
+
+  app.use(cors({
+    origin: environment.corsOrigin,
+    credentials: true,
+    optionsSuccessStatus: 200
+  }))
 
   iocContainer.webInitializer.init(app)
 

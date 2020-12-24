@@ -8,6 +8,7 @@ NODE_ENV                                | Mode: `development`, `production` or `
 PORT                                    | Port on which the server will listen                     | `4000`
 SUPER_ADMIN_EMAIL                       | *                                                        | `undefined`
 SUPER_ADMIN_PASSWORD                    | *                                                        | `undefined`
+CORS_ORIGIN                             | Origin approved by CORS middleware                       | `undefined`
 
 * If `SUPER_ADMIN_EMAIL` and `SUPER_ADMIN_PASSWORD` are defined this user will be created as super
   admin on application startup (unless it already exists).
