@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import moment from 'moment'
 import { body } from 'express-validator'
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../common/constants.mjs'
+import { isSufficientlyStrongPassword } from '../../validators.mjs'
 
 // Enables regular users to manage details related to their account and session.
 export const AccountRouter = ({
@@ -63,7 +63,7 @@ export const AccountRouter = ({
       '/changePasswordWithToken',
       validation.isValid(
         body('token').isJWT(),
-        body('password').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
+        body('password').custom(isSufficientlyStrongPassword)
       ),
       async (req, res) => {
         const { sub } = req.token
@@ -76,8 +76,8 @@ export const AccountRouter = ({
     .post(
       '/changePasswordWithOldPassword',
       validation.isValid(
-        body('oldPassword').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }),
-        body('newPassword').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
+        body('oldPassword').isString(),
+        body('newPassword').custom(isSufficientlyStrongPassword)
       ),
       async (req, res) => {
         const { sub } = req.token

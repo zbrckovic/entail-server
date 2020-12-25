@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { ErrorName } from '../../../common/error.mjs'
 import moment from 'moment'
 import { body } from 'express-validator'
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../../../common/constants.mjs'
+import { isSufficientlyStrongPassword } from '../../validators.mjs'
 
 export const EntryRouter = ({
   environment,
@@ -14,46 +14,51 @@ export const EntryRouter = ({
     'minutes'
   ).asMilliseconds()
 
-  const validateCredentials = () => (
-    validation.isValid(
-      body('email').normalizeEmail().isEmail(),
-      body('password').isLength({ min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
-    )
-  )
-
   return new Router()
-    .post('/register', validateCredentials(), async (req, res, next) => {
-      try {
-        const { body: { email, password } } = req
-        const token = await entryService.register({ email, password })
-        res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-        res.send()
-      } catch (error) {
-        const { name } = error
-        if (name === ErrorName.INVALID_CREDENTIALS) {
-          res.status(403).json({ name })
-          return
+    .post(
+      '/register',
+      validation.isValid(
+        body('email').normalizeEmail().isEmail(),
+        body('password').custom(isSufficientlyStrongPassword)
+      ),
+      async (req, res, next) => {
+        try {
+          const { body: { email, password } } = req
+          const token = await entryService.register({ email, password })
+          res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
+          res.send()
+        } catch (error) {
+          const { name } = error
+          if (name === ErrorName.INVALID_CREDENTIALS) {
+            res.status(403).json({ name })
+            return
+          }
+          if (name === ErrorName.EMAIL_ALREADY_USED) {
+            res.status(409).json({ name })
+            return
+          }
+          next(error)
         }
-        if (name === ErrorName.EMAIL_ALREADY_USED) {
-          res.status(409).json({ name })
-          return
+      })
+    .post(
+      '/login',
+      validation.isValid(
+        body('email').normalizeEmail().isEmail(),
+        body('password').isString()
+      ),
+      async (req, res, next) => {
+        try {
+          const { email, password } = req.body
+          const token = await entryService.login({ email, password })
+          res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
+          res.send()
+        } catch (error) {
+          const { name } = error
+          if (name === ErrorName.INVALID_CREDENTIALS) {
+            res.status(403).json({ name })
+            return
+          }
+          next(error)
         }
-        next(error)
-      }
-    })
-    .post('/login', validateCredentials(), async (req, res, next) => {
-      try {
-        const { email, password } = req.body
-        const token = await entryService.login({ email, password })
-        res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-        res.send()
-      } catch (error) {
-        const { name } = error
-        if (name === ErrorName.INVALID_CREDENTIALS) {
-          res.status(403).json({ name })
-          return
-        }
-        next(error)
-      }
-    })
+      })
 }
