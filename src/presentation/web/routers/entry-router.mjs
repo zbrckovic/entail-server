@@ -29,10 +29,6 @@ export const EntryRouter = ({
           res.send()
         } catch (error) {
           const { name } = error
-          if (name === ErrorName.INVALID_CREDENTIALS) {
-            res.status(403).json({ name })
-            return
-          }
           if (name === ErrorName.EMAIL_ALREADY_USED) {
             res.status(409).json({ name })
             return
