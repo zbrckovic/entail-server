@@ -48,30 +48,6 @@ export const AccountRouter = ({
         res.send()
       }
     )
-    // Initiates email verification procedure - sends an email with further instructions to the
-    // user's email address.
-    .post(
-      '/requestPasswordChange',
-      async (req, res) => {
-        const { sub } = req.token
-        await accountService.requestPasswordChange(sub)
-        res.send()
-      }
-    )
-    // Sets `password` as user's new password. Uses provided `token` for verification.
-    .post(
-      '/changePasswordWithToken',
-      validation.isValid(
-        body('token').isJWT(),
-        body('password').custom(isSufficientlyStrongPassword)
-      ),
-      async (req, res) => {
-        const { sub } = req.token
-        const { password, token } = req.body
-        await accountService.changePasswordWithToken({ userId: sub, password, token })
-        res.send()
-      }
-    )
     // Sets `newPassword` as user's new password. Uses provided `oldPassword` for verification.
     .post(
       '/changePasswordWithOldPassword',

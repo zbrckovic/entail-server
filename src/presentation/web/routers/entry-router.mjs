@@ -57,4 +57,35 @@ export const EntryRouter = ({
           next(error)
         }
       })
+    .post('/logout', async (req, res) => {
+      res.clearCookie('token')
+      res.send()
+    })
+    // Initiates email verification procedure - sends an email with further instructions to the
+    // user's email address.
+    .post(
+      '/requestPasswordChange',
+      validation.isValid(
+        body('email').normalizeEmail().isEmail()
+      ),
+      async (req, res) => {
+        const { body: { email } } = req
+        await entryService.requestPasswordChange(email)
+        res.send()
+      }
+    )
+    // Sets `password` as user's new password. Uses provided `token` for verification.
+    .post(
+      '/changePasswordWithToken',
+      validation.isValid(
+        body('token').isJWT(),
+        body('password').custom(isSufficientlyStrongPassword)
+      ),
+      async (req, res) => {
+        const { sub } = req.token
+        const { password, token } = req.body
+        await entryService.changePasswordWithToken({ userId: sub, password, token })
+        res.send()
+      }
+    )
 }

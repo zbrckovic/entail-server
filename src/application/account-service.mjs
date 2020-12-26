@@ -42,29 +42,6 @@ export const AccountService = ({
     })
   },
 
-  async requestPasswordChange (userId) {
-    const user = await authenticationService.getUserById(userId)
-    const passwordChangeToken = await authenticationService.createPasswordChangeToken(user)
-    await emailService.sendPasswordChangeToken(passwordChangeToken, user.email)
-  },
-
-  async changePasswordWithToken ({ userId, password, token }) {
-    await withTransaction(async () => {
-      const user = await authenticationService.getUserById(userId)
-      const decodedToken = await authenticationService.validateAndDecodePasswordChangeToken(token)
-
-      if (decodedToken.sub !== user.id) {
-        throw createError({
-          name: ErrorName.TOKEN_INVALID,
-          extra: { tokenType: TokenType.PASSWORD_CHANGE }
-        })
-      }
-
-      const passwordHash = await cryptographyService.createCryptographicHash(password)
-      await usersRepository.updateUser({ ...user, passwordHash })
-    })
-  },
-
   async changePasswordWithOldPassword ({ userId, oldPassword, newPassword }) {
     await withTransaction(async () => {
       const user = await authenticationService.getUserById(userId)
