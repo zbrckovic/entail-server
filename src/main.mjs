@@ -57,7 +57,7 @@ import cors from 'cors'
   const app = express()
 
   app.use(cors({
-    origin: environment.corsOrigin,
+    origin: environment.uiUrl,
     credentials: true,
     optionsSuccessStatus: 200
   }))

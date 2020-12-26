@@ -64,7 +64,7 @@ export const EntryRouter = ({
     // Initiates email verification procedure - sends an email with further instructions to the
     // user's email address.
     .post(
-      '/requestPasswordChange',
+      '/request-password-change',
       validation.isValid(
         body('email').normalizeEmail().isEmail()
       ),
@@ -76,7 +76,7 @@ export const EntryRouter = ({
     )
     // Sets `password` as user's new password. Uses provided `token` for verification.
     .post(
-      '/changePasswordWithToken',
+      '/change-password-with-token',
       validation.isValid(
         body('token').isJWT(),
         body('password').custom(isSufficientlyStrongPassword)

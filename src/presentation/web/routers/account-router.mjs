@@ -19,7 +19,7 @@ export const AccountRouter = ({
     .use(authentication.isAuthenticated())
     // Returns a fresh api token.
     .get(
-      '/apiToken',
+      '/api-token',
       async (req, res) => {
         const { sub } = req.token
         const newToken = await accountService.refreshApiToken(sub)
@@ -30,7 +30,7 @@ export const AccountRouter = ({
     // Initiates email verification procedure - sends an email with further instructions to the
     // user's email address.
     .post(
-      '/requestEmailVerification',
+      '/request-email-verification',
       async (req, res) => {
         const { sub } = req.token
         await accountService.requestEmailVerification(sub)
@@ -39,7 +39,7 @@ export const AccountRouter = ({
     )
     // Flags users email as verified. Uses provided `token` for verification.
     .post(
-      '/verifyEmail',
+      '/verify-email',
       validation.isValid(body('token').isJWT()),
       async (req, res) => {
         const { sub } = req.token
@@ -50,7 +50,7 @@ export const AccountRouter = ({
     )
     // Sets `newPassword` as user's new password. Uses provided `oldPassword` for verification.
     .post(
-      '/changePasswordWithOldPassword',
+      '/change-password-with-old-password',
       validation.isValid(
         body('oldPassword').isString(),
         body('newPassword').custom(isSufficientlyStrongPassword)

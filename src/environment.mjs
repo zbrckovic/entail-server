@@ -14,7 +14,7 @@ const mode = process.env.NODE_ENV ?? 'development'
 const port = parseNumber(process.env.PORT, 5000)
 const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
 const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD
-const corsOrigin = process.env.CORS_ORIGIN
+const uiUrl = process.env.UI_URL
 
 const emailServerHost = process.env.EMAIL_SERVER_HOST
 const emailServerPort = parseNumber(process.env.EMAIL_SERVER_PORT)
@@ -50,7 +50,7 @@ export const environment = {
   port,
   superAdminEmail,
   superAdminPassword,
-  corsOrigin,
+  uiUrl,
 
   emailServerHost,
   emailServerPort,
