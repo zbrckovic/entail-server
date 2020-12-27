@@ -42,7 +42,7 @@ export const UsersRepository = ({ sequelize }) => {
     },
 
     async updateUser (user) {
-      const userDAO = User.findByPk(user.id, { include: ['session'] })
+      const userDAO = await User.findByPk(user.id, { include: ['roles'] })
       await userDAO.update(userMapper.toPersistence(user))
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
     }

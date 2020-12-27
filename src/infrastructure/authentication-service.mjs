@@ -27,7 +27,7 @@ export const AuthenticationService = ({
   const result = {
     // Returns user or throws.
     async getUserById (userId) {
-      const user = usersRepository.getUserById(userId)
+      const user = await usersRepository.getUserById(userId)
       if (user === undefined) {
         throw createError({ name: ErrorName.INVALID_CREDENTIALS })
       }
@@ -93,12 +93,7 @@ export const AuthenticationService = ({
 
   // Checks whether `token` is valid and of the required `type`. Returns decoded `token` or throws.
   const validateAndDecodeToken = async (token, type) => {
-    let decodedToken
-    try {
-      decodedToken = await cryptographyService.validateAndDecodeToken(token, tokenSecret)
-    } catch (error) {
-      throw createError({ name: ErrorName.TOKEN_INVALID })
-    }
+    const decodedToken = await cryptographyService.validateAndDecodeToken(token, tokenSecret)
 
     if (decodedToken.type !== type) {
       throw createError({ name: ErrorName.TOKEN_INVALID })

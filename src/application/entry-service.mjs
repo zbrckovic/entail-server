@@ -40,18 +40,11 @@ export const EntryService = ({
     await emailService.sendPasswordChangeToken(passwordChangeToken, user.email)
   },
 
-  async changePasswordWithToken ({ userId, password, token }) {
+  async changePasswordWithToken ({ password, token }) {
     await withTransaction(async () => {
-      const user = await authenticationService.getUserById(userId)
       const decodedToken = await authenticationService.validateAndDecodePasswordChangeToken(token)
-
-      if (decodedToken.sub !== user.id) {
-        throw createError({
-          name: ErrorName.TOKEN_INVALID,
-          extra: { tokenType: TokenType.PASSWORD_CHANGE }
-        })
-      }
-
+      const userId = decodedToken.sub
+      const user = await authenticationService.getUserById(userId)
       const passwordHash = await cryptographyService.createCryptographicHash(password)
       await usersRepository.updateUser({ ...user, passwordHash })
     })

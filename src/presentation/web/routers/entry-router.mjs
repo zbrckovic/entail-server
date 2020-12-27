@@ -81,11 +81,27 @@ export const EntryRouter = ({
         body('token').isJWT(),
         body('password').custom(isSufficientlyStrongPassword)
       ),
-      async (req, res) => {
-        const { sub } = req.token
-        const { password, token } = req.body
-        await entryService.changePasswordWithToken({ userId: sub, password, token })
-        res.send()
+      async (req, res, next) => {
+        try {
+          const { password, token } = req.body
+          await entryService.changePasswordWithToken({ password, token })
+          res.send()
+        } catch (error) {
+          const { name } = error
+          if (name === ErrorName.INVALID_CREDENTIALS) {
+            res.status(403).json({ name })
+            return
+          }
+          if (name === ErrorName.TOKEN_EXPIRED) {
+            res.status(401).json({ name })
+            return
+          }
+          if (name === ErrorName.TOKEN_INVALID) {
+            res.status(401).json({ name })
+            return
+          }
+          next(error)
+        }
       }
     )
 }
