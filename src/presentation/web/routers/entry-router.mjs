@@ -24,9 +24,9 @@ export const EntryRouter = ({
       async (req, res, next) => {
         try {
           const { body: { email, password } } = req
-          const token = await entryService.register({ email, password })
+          const [user, token] = await entryService.register({ email, password })
           res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-          res.send()
+          res.json(user)
         } catch (error) {
           const { name } = error
           if (name === ErrorName.EMAIL_ALREADY_USED) {
@@ -45,9 +45,9 @@ export const EntryRouter = ({
       async (req, res, next) => {
         try {
           const { email, password } = req.body
-          const token = await entryService.login({ email, password })
+          const [user, token] = await entryService.login({ email, password })
           res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-          res.send()
+          res.json(user)
         } catch (error) {
           const { name } = error
           if (name === ErrorName.INVALID_CREDENTIALS) {
@@ -65,9 +65,7 @@ export const EntryRouter = ({
     // user's email address.
     .post(
       '/request-password-change',
-      validation.isValid(
-        body('email').normalizeEmail().isEmail()
-      ),
+      validation.isValid(body('email').normalizeEmail().isEmail()),
       async (req, res) => {
         const { body: { email } } = req
         await entryService.requestPasswordChange(email)

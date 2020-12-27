@@ -22,9 +22,9 @@ export const AccountRouter = ({
       '/api-token',
       async (req, res) => {
         const { sub } = req.token
-        const newToken = await accountService.refreshApiToken(sub)
-        res.cookie('token', newToken, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-        res.send()
+        const [user, token] = await accountService.refreshApiToken(sub)
+        res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
+        res.json(user)
       }
     )
     // Initiates email verification procedure - sends an email with further instructions to the

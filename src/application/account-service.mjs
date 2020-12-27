@@ -62,6 +62,7 @@ export const AccountService = ({
 
   async refreshApiToken (userId) {
     const user = await authenticationService.getUserById(userId)
-    return await authenticationService.createApiToken(user)
+    const token = await authenticationService.createApiToken(user)
+    return [user, token]
   }
 })

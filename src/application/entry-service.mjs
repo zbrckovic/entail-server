@@ -18,7 +18,8 @@ export const EntryService = ({
     const emailVerificationToken = await authenticationService.createEmailVerificationToken(user)
     await emailService.sendEmailVerificationToken(emailVerificationToken, user.email)
 
-    return await authenticationService.createApiToken(user)
+    const token = await authenticationService.createApiToken(user)
+    return [user, token]
   },
 
   async login ({ email, password }) {
@@ -31,7 +32,9 @@ export const EntryService = ({
 
     if (!isPasswordValid) { throw createError({ name: ErrorName.INVALID_CREDENTIALS }) }
 
-    return await authenticationService.createApiToken(user)
+    const token = await authenticationService.createApiToken(user)
+
+    return [user, token]
   },
 
   async requestPasswordChange (email) {
