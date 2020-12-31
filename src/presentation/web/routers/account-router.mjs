@@ -2,6 +2,7 @@ import { Router } from 'express'
 import moment from 'moment'
 import { body } from 'express-validator'
 import { isSufficientlyStrongPassword } from '../../validators.mjs'
+import { userMapper } from '../mappers/user-mapper.mjs'
 
 // Enables regular users to manage details related to their account and session.
 export const AccountRouter = ({
@@ -17,14 +18,24 @@ export const AccountRouter = ({
 
   return new Router()
     .use(authentication.isAuthenticated())
-    // Returns a fresh api token.
+    // Returns current user and fresh api token.
     .get(
-      '/api-token',
+      '/user-and-api-token',
       async (req, res) => {
         const { sub } = req.token
         const [user, token] = await accountService.refreshApiToken(sub)
         res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-        res.json(user)
+        res.json(userMapper.toPresentation(user))
+      }
+    )
+    // Returns fresh api token.
+    .get(
+      '/api-token',
+      async (req, res) => {
+        const { sub } = req.token
+        const [, token] = await accountService.refreshApiToken(sub)
+        res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
+        res.send()
       }
     )
     // Initiates email verification procedure - sends an email with further instructions to the
@@ -37,7 +48,7 @@ export const AccountRouter = ({
         res.send()
       }
     )
-    // Flags users email as verified. Uses provided `token` for verification.
+    // Flags user's email as verified. Uses provided `token` for verification.
     .post(
       '/verify-email',
       validation.isValid(body('token').isJWT()),

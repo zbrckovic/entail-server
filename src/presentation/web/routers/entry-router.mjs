@@ -3,6 +3,7 @@ import { ErrorName } from '../../../common/error.mjs'
 import moment from 'moment'
 import { body } from 'express-validator'
 import { isSufficientlyStrongPassword } from '../../validators.mjs'
+import { userMapper } from '../mappers/user-mapper.mjs'
 
 export const EntryRouter = ({
   environment,
@@ -26,7 +27,7 @@ export const EntryRouter = ({
           const { body: { email, password } } = req
           const [user, token] = await entryService.register({ email, password })
           res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-          res.json(user)
+          res.json(userMapper.toPresentation(user))
         } catch (error) {
           const { name } = error
           if (name === ErrorName.EMAIL_ALREADY_USED) {
@@ -47,7 +48,7 @@ export const EntryRouter = ({
           const { email, password } = req.body
           const [user, token] = await entryService.login({ email, password })
           res.cookie('token', token, { maxAge: apiTokenCookieMaxAge, httpOnly: true })
-          res.json(user)
+          res.json(userMapper.toPresentation(user))
         } catch (error) {
           const { name } = error
           if (name === ErrorName.INVALID_CREDENTIALS) {
