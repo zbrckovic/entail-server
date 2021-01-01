@@ -1,6 +1,7 @@
 import { createError, ErrorName } from '../../common/error.mjs'
 import { userMapper } from '../mappers/user-mapper.mjs'
 import { roleMapper } from '../mappers/role-mapper.mjs'
+import { OrderDirection } from '../../domain/order-direction.mjs'
 
 export const UsersRepository = ({ sequelize }) => {
   const { User, Role } = sequelize.models
@@ -47,11 +48,16 @@ export const UsersRepository = ({ sequelize }) => {
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
     },
 
-    async getUsers (pageNumber, pageSize) {
+    async getUsers ({ pageNumber, pageSize, orderProp, orderDir }) {
+      const order = orderProp === undefined
+        ? undefined
+        : [[orderProp, orderDir ?? OrderDirection.ASC]]
+
       const { count: total, rows: userDAOs } = await User.findAndCountAll({
         include: ['roles'],
         offset: pageNumber * pageSize,
-        limit: pageSize
+        limit: pageSize,
+        order
       })
 
       const users = userDAOs.map(userDAO => userMapper.fromPersistence(userDAO))
