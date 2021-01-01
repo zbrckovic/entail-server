@@ -4,9 +4,8 @@ export const AuthorizationService = () => {
   const result = {
     // Checks whether every required permission is owned by at least one role.
     isAuthorized (roles, requiredPermissions) {
-      const requiredPermissionsSet = new Set(requiredPermissions)
       const permissions = getPermissionsForRoles(roles)
-      return requiredPermissionsSet.every(requiredPermission => permissions.has(requiredPermission))
+      return requiredPermissions.every(requiredPermission => permissions.has(requiredPermission))
     }
   }
 

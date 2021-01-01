@@ -45,6 +45,18 @@ export const UsersRepository = ({ sequelize }) => {
       const userDAO = await User.findByPk(user.id, { include: ['roles'] })
       await userDAO.update(userMapper.toPersistence(user))
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
+    },
+
+    async getUsers (pageNumber, pageSize) {
+      const { count: total, rows: userDAOs } = await User.findAndCountAll({
+        include: ['roles'],
+        offset: pageNumber * pageSize,
+        limit: pageSize
+      })
+
+      const users = userDAOs.map(userDAO => userMapper.fromPersistence(userDAO))
+
+      return { total, items: users }
     }
   }
 }

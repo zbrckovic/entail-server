@@ -19,6 +19,8 @@ import { EntryRouter } from './presentation/web/routers/entry-router.mjs'
 import { AccountRouter } from './presentation/web/routers/account-router.mjs'
 import { WebInitializer } from './presentation/web/web-initializer.mjs'
 import { AccountService } from './application/account-service.mjs'
+import { UsersService } from './application/users-service.mjs'
+import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import cors from 'cors'
 
 (async () => {
@@ -41,12 +43,14 @@ import cors from 'cors'
     // application
     .setFactory('entryService', EntryService)
     .setFactory('accountService', AccountService)
+    .setFactory('usersService', UsersService)
     // presentation
     .setFactory('authorizationMiddlewareFactory', AuthorizationMiddlewareFactory)
     .setFactory('authenticationMiddlewareFactory', AuthenticationMiddlewareFactory)
     .setFactory('validationMiddlewareFactory', ValidationMiddlewareFactory)
     .setFactory('entryRouter', EntryRouter)
     .setFactory('accountRouter', AccountRouter)
+    .setFactory('usersRouter', UsersRouter)
     .setFactory('webInitializer', WebInitializer)
 
   await iocContainer.i18nService.initT()
