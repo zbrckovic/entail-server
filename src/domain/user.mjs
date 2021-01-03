@@ -5,13 +5,15 @@ export const User = ({
   email,
   isEmailVerified = false,
   passwordHash,
-  roles = []
+  roles = [],
+  createdAt
 } = {}) => ({
   id: id ?? uuid(),
   email: email,
   passwordHash: passwordHash,
   isEmailVerified,
-  roles: roles
+  roles: roles,
+  createdAt
 })
 
 export const Role = {

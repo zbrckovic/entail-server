@@ -32,6 +32,7 @@ export const UsersRepository = ({ sequelize }) => {
           .map(role => roleMapper.toPersistence(role))
           .map(role => Role.build(role))
         await userDAO.setRoles(roles)
+        return await this.getUserById(userDAO.id) // TODO: find better solution
       } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
           if (Object.prototype.hasOwnProperty.call(error.fields, 'email')) {
@@ -46,6 +47,7 @@ export const UsersRepository = ({ sequelize }) => {
       const userDAO = await User.findByPk(user.id, { include: ['roles'] })
       await userDAO.update(userMapper.toPersistence(user))
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
+      return userMapper.fromPersistence(userDAO)
     },
 
     async getUsers ({ pageNumber, pageSize, orderProp, orderDir }) {

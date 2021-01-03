@@ -1,6 +1,5 @@
 import { Role, User } from '../domain/user.mjs'
 import { createError, ErrorName } from '../common/error.mjs'
-import { TokenType } from '../infrastructure/token-type.mjs'
 
 // Entry point for non-authenticated users.
 export const EntryService = ({
@@ -12,8 +11,8 @@ export const EntryService = ({
 }) => ({
   async register ({ email, password }) {
     const passwordHash = await cryptographyService.createCryptographicHash(password)
-    const user = User({ email, passwordHash, roles: [Role.REGULAR] })
-    await usersRepository.createUser(user)
+    let user = User({ email, passwordHash, roles: [Role.REGULAR] })
+    user = await usersRepository.createUser(user)
 
     const emailVerificationToken = await authenticationService.createEmailVerificationToken(user)
     await emailService.sendEmailVerificationToken(emailVerificationToken, user.email)
