@@ -18,7 +18,7 @@ export const UsersRouter = ({
       validation.isValid(
         query('pageNumber').isInt({ min: 0 }),
         query('pageSize').isInt({ min: 1 }),
-        query('orderProp').optional().isIn(['email', 'isEmailVerified', 'passwordHash']),
+        query('orderProp').optional().isIn(['email', 'createdAt']),
         query('orderDir').optional().isIn(Object.values(OrderDirection))
       ),
       async (req, res, next) => {
