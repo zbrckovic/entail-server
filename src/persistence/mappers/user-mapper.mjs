@@ -5,7 +5,7 @@ import moment from 'moment'
 export const userMapper = {
   fromPersistence ({ id, email, isEmailVerified, passwordHash, roles, createdAt }) {
     return User({
-      id: id ?? undefined,
+      id,
       email,
       isEmailVerified,
       passwordHash,

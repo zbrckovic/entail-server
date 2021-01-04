@@ -22,6 +22,9 @@ import { AccountService } from './application/account-service.mjs'
 import { UsersService } from './application/users-service.mjs'
 import { UsersRouter } from './presentation/web/routers/users-router.mjs'
 import cors from 'cors'
+import { ProjectsRepository } from './persistence/repositories/projects-repository.mjs'
+import { ProjectsService } from './application/projects-service.mjs'
+import { ProjectsRouter } from './presentation/web/routers/projects-router.mjs'
 
 (async () => {
   console.log(figlet.textSync('Entail', { font: 'slant' }))
@@ -33,6 +36,7 @@ import cors from 'cors'
     .setFactory('withTransaction', createFnWithTransaction)
     .setFactory('rolesRepository', RolesRepository)
     .setFactory('usersRepository', UsersRepository)
+    .setFactory('projectsRepository', ProjectsRepository)
     .setFactory('dataInitializationService', DataInitializationService)
     // infrastructure
     .setFactory('i18nService', I18nService)
@@ -44,6 +48,7 @@ import cors from 'cors'
     .setFactory('entryService', EntryService)
     .setFactory('accountService', AccountService)
     .setFactory('usersService', UsersService)
+    .setFactory('projectsService', ProjectsService)
     // presentation
     .setFactory('authorizationMiddlewareFactory', AuthorizationMiddlewareFactory)
     .setFactory('authenticationMiddlewareFactory', AuthenticationMiddlewareFactory)
@@ -51,6 +56,7 @@ import cors from 'cors'
     .setFactory('entryRouter', EntryRouter)
     .setFactory('accountRouter', AccountRouter)
     .setFactory('usersRouter', UsersRouter)
+    .setFactory('projectsRouter', ProjectsRouter)
     .setFactory('webInitializer', WebInitializer)
 
   await iocContainer.i18nService.initT()

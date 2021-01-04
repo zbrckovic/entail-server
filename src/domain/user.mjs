@@ -8,7 +8,7 @@ export const User = ({
   roles = [],
   createdAt
 } = {}) => ({
-  id: id ?? uuid(),
+  id,
   email: email,
   passwordHash: passwordHash,
   isEmailVerified,

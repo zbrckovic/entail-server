@@ -1,4 +1,5 @@
 import sequelizeLibrary from 'sequelize'
+import { PropositionalRulesSet } from '../domain/project.mjs'
 
 const { DataTypes } = sequelizeLibrary
 
@@ -43,4 +44,31 @@ export const createModels = sequelize => {
     as: 'users',
     foreignKey: 'roleName'
   })
+
+  const Project = sequelize.define('Project', {
+    id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      primaryKey: true
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    isFirstOrder: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    propositionalRulesSet: {
+      type: DataTypes.ENUM(Object.values(PropositionalRulesSet)),
+      allowNull: false
+    }
+  })
+
+  User.hasMany(Project, { foreignKey: 'ownerId' })
+  Project.belongsTo(User)
 }
