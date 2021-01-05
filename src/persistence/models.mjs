@@ -69,6 +69,16 @@ export const createModels = sequelize => {
     }
   })
 
-  User.hasMany(Project, { foreignKey: 'ownerId' })
-  Project.belongsTo(User)
+  User.hasMany(Project, {
+    foreignKey: {
+      name: 'ownerId',
+      allowNull: false
+    }
+  })
+  Project.belongsTo(User, {
+    foreignKey: {
+      name: 'ownerId',
+      allowNull: false
+    }
+  })
 }
