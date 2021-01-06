@@ -56,8 +56,7 @@ export const createModels = sequelize => {
       allowNull: false
     },
     description: {
-      type: DataTypes.TEXT,
-      allowNull: true
+      type: DataTypes.TEXT
     },
     isFirstOrder: {
       type: DataTypes.BOOLEAN,
@@ -78,6 +77,49 @@ export const createModels = sequelize => {
   Project.belongsTo(User, {
     foreignKey: {
       name: 'ownerId',
+      allowNull: false
+    }
+  })
+
+  const Deduction = sequelize.define('Deduction', {
+    id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      primaryKey: true
+    },
+    name: {
+      type: DataTypes.STRING
+    },
+    description: {
+      type: DataTypes.TEXT
+    },
+    steps: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    },
+    syms: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    },
+    presentations: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    },
+    theorem: {
+      type: DataTypes.JSONB,
+      allowNull: false
+    }
+  })
+
+  Project.hasMany(Deduction, {
+    foreignKey: {
+      name: 'projectId',
+      allowNull: false
+    }
+  })
+  Deduction.belongsTo(Project, {
+    foreignKey: {
+      name: 'projectId',
       allowNull: false
     }
   })

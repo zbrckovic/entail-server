@@ -61,7 +61,7 @@ import { ProjectsRouter } from './presentation/web/routers/projects-router.mjs'
 
   await iocContainer.i18nService.initT()
   await iocContainer.sequelize.authenticate()
-  await iocContainer.sequelize.sync({ force: true })
+  await iocContainer.sequelize.sync()
   if (environment.insertInitData) await iocContainer.dataInitializationService.initData()
 
   const app = express()

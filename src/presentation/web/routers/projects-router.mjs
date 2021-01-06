@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { projectMapper } from '../mappers/project-mapper.mjs'
-import { body } from 'express-validator'
+import { projectMapper, projectWithDeductionsMapper } from '../mappers/project-mapper.mjs'
+import { body, param } from 'express-validator'
 import { PropositionalRulesSet } from '../../../domain/project.mjs'
 
 export const ProjectsRouter = ({
@@ -14,7 +14,7 @@ export const ProjectsRouter = ({
       '/',
       async (req, res) => {
         const { sub } = req.token
-        const projects = await projectsService.getByOwnerId(sub)
+        const projects = await projectsService.getProjectsByOwnerId(sub)
         const projectDTOs = projects.map(project => projectMapper.toPresentation(project))
         res.json({ projects: projectDTOs })
       }
@@ -29,12 +29,26 @@ export const ProjectsRouter = ({
       ),
       async (req, res) => {
         const { sub } = req.token
-        console.log(sub)
         const projectDTOIncoming = req.body
         const projectIncoming = projectMapper.fromPresentation(projectDTOIncoming)
         const projectOutgoing = await projectsService.createProject(sub, projectIncoming)
         const projectDTOOutgoing = projectMapper.toPresentation(projectOutgoing)
         res.json(projectDTOOutgoing)
+      }
+    )
+    .get(
+      '/:id',
+      validation.isValid(param('id').isUUID()),
+      async (req, res) => {
+        const { id: projectId } = req.params
+        const { sub } = req.token
+        const project = await projectsService.getProjectWithDeductionsById(sub, projectId)
+        if (project === undefined) {
+          res.status(404).send()
+          return
+        }
+        const projectDTOs = projectWithDeductionsMapper.toPresentation(project)
+        res.json({ projects: projectDTOs })
       }
     )
 }
