@@ -1,9 +1,10 @@
-import { Deduction, Project, ProjectWithDeductions } from '../../../domain/project.mjs'
-import { v4 as uuid } from 'uuid'
+import { Deduction } from '../../../domain/project.mjs'
 
-export const projectMapper = {
-  toPresentation (project) {
-    const { id, name, description, isFirstOrder, propositionalRulesSet, createdAt } = project
+const projectMapperBase = {
+  fromPresentation ({ name, description, isFirstOrder, propositionalRulesSet }) {
+    return { name, description, isFirstOrder, propositionalRulesSet }
+  },
+  toPresentation ({ id, name, description, isFirstOrder, propositionalRulesSet, createdAt }) {
     return {
       id,
       name,
@@ -12,17 +13,24 @@ export const projectMapper = {
       propositionalRulesSet,
       createdAt: createdAt.format()
     }
-  },
-  fromPresentation (project) {
-    const { name, description, isFirstOrder, propositionalRulesSet } = project
-    return Project({ name, description, isFirstOrder, propositionalRulesSet })
   }
 }
 
-export const projectWithDeductionsMapper = {
-  toPresentation ({ deductions, ...projectProps }) {
-    const projectDTO = projectMapper.toPresentation(projectProps)
-    projectDTO.deductions = deductions.map(deduction => deductionMapper.toPresentation(deduction))
+export const projectSummaryMapper = {
+  fromPresentation (projectDTO) {
+    return projectMapperBase.fromPresentation(projectDTO)
+  },
+  toPresentation (project) {
+    return projectMapperBase.toPresentation(project)
+  }
+}
+
+export const projectMapper = {
+  toPresentation (project) {
+    const projectDTO = projectMapperBase.toPresentation(project)
+    projectDTO.deductions = project.deductions.map(
+      deduction => deductionMapper.toPresentation(deduction)
+    )
     return projectDTO
   }
 }

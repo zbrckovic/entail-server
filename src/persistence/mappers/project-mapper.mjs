@@ -1,16 +1,16 @@
-import { Project, Deduction, ProjectWithDeductions } from '../../domain/project.mjs'
+import { Deduction, Project, ProjectSummary } from '../../domain/project.mjs'
 import moment from 'moment'
 
-export const projectMapper = {
+const projectMapperBase = {
   fromPersistence ({ id, name, description, isFirstOrder, propositionalRulesSet, createdAt }) {
-    return Project({
+    return {
       id,
       name,
       description: description ?? undefined,
       isFirstOrder,
       propositionalRulesSet,
       createdAt: moment(createdAt)
-    })
+    }
   },
   toPersistence ({ id, name, description, isFirstOrder, propositionalRulesSet }) {
     return {
@@ -23,18 +23,23 @@ export const projectMapper = {
   }
 }
 
-export const projectWithDeductionsMapper = ({
-  fromPersistence (props) {
-    return ProjectWithDeductions({
-      ...projectMapper.fromPersistence(props),
-      deductions: props.deductions.map(deduction => deductionMapper.fromPersistence(deduction))
-    })
+export const projectSummaryMapper = ({
+  fromPersistence (projectDAO) {
+    return ProjectSummary(projectMapperBase.fromPersistence(projectDAO))
   },
   toPersistence (project) {
-    return {
-      ...projectMapper.toPersistence(project),
-      deductions: project.deductions.map(deduction => deductionMapper.toPersistence(deduction))
-    }
+    return projectMapperBase.toPersistence(project)
+  }
+})
+
+export const projectMapper = ({
+  fromPersistence (projectDAO) {
+    return Project({
+      ...projectMapperBase.fromPersistence(projectDAO),
+      deductions: projectDAO.deductions.map(
+        deductionDAO => deductionMapper.fromPersistence(deductionDAO)
+      )
+    })
   }
 })
 

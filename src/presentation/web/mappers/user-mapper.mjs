@@ -1,6 +1,5 @@
 export const userMapper = {
-  toPresentation: user => {
-    const { id, email, roles, isEmailVerified, createdAt } = user
+  toPresentation: ({ id, email, roles, isEmailVerified, createdAt }) => {
     return { id, email, roles, isEmailVerified, createdAt: createdAt.format() }
   }
 }

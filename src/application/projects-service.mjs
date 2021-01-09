@@ -5,7 +5,7 @@ export const ProjectsService = ({ projectsRepository }) => ({
   async createProject (ownerId, project) {
     return await projectsRepository.createProject(ownerId, project)
   },
-  async getProjectWithDeductionsById (ownerId, projectId) {
-    return await projectsRepository.getProjectWithDeductionsById(ownerId, projectId)
+  async getProjectByOwnerIdAndProjectId (ownerId, projectId) {
+    return await projectsRepository.getProjectByOwnerIdAndProjectId(ownerId, projectId)
   }
 })
