@@ -1,5 +1,9 @@
 import { Router } from 'express'
-import { projectMapper, projectSummaryMapper } from '../mappers/project-mapper.mjs'
+import {
+  projectCreateRequestMapper,
+  projectMapper,
+  projectSummaryMapper
+} from '../mappers/project-mapper.mjs'
 import { body, param } from 'express-validator'
 import { PropositionalRulesSet } from '../../../domain/project.mjs'
 
@@ -31,11 +35,11 @@ export const ProjectsRouter = ({
       ),
       async (req, res) => {
         const { sub } = req.token
-        const projectDTOIncoming = req.body
-        const projectIncoming = projectSummaryMapper.fromPresentation(projectDTOIncoming)
-        const projectOutgoing = await projectsService.createProject(sub, projectIncoming)
-        const projectDTOOutgoing = projectSummaryMapper.toPresentation(projectOutgoing)
-        res.json(projectDTOOutgoing)
+        const createRequestDTO = req.body
+        const createRequest = projectCreateRequestMapper.fromPresentation(createRequestDTO)
+        const project = await projectsService.createProject(sub, createRequest)
+        const projectDTO = projectSummaryMapper.toPresentation(project)
+        res.json(projectDTO)
       }
     )
     .get(
