@@ -1,19 +1,21 @@
 import { v4 as uuid } from 'uuid'
 
-const ProjectBase = ({
+export const Project = ({
   id = uuid(),
   name,
   description,
   isFirstOrder = true,
   propositionalRulesSet = PropositionalRulesSet.FULL,
-  createdAt
-}) => ({
+  createdAt,
+  deductions
+} = {}) => ({
   id,
   name,
   description,
   isFirstOrder,
   propositionalRulesSet,
-  createdAt
+  createdAt,
+  deductions
 })
 
 export const PropositionalRulesSet = {
@@ -21,9 +23,6 @@ export const PropositionalRulesSet = {
   TAUTOLOGICAL_IMPLICATION_ONLY: 'TAUTOLOGICAL_IMPLICATION_ONLY',
   SPECIFIC_ONLY: 'SPECIFIC_ONLY'
 }
-
-export const ProjectSummary = spec => ProjectBase(spec)
-export const Project = spec => ({ ...ProjectBase(spec), deductions: spec.deductions })
 
 export const Deduction = ({
   id = uuid(),
@@ -34,7 +33,7 @@ export const Deduction = ({
   presentations,
   theorem,
   createdAt
-}) => ({
+} = {}) => ({
   id,
   name,
   description,

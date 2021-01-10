@@ -1,9 +1,5 @@
 import { Router } from 'express'
-import {
-  projectCreateRequestMapper,
-  projectMapper,
-  projectSummaryMapper
-} from '../mappers/project-mapper.mjs'
+import { projectMapper } from '../mappers/project-mapper.mjs'
 import { body, param } from 'express-validator'
 import { PropositionalRulesSet } from '../../../domain/project.mjs'
 
@@ -19,10 +15,7 @@ export const ProjectsRouter = ({
       async (req, res) => {
         const { sub } = req.token
         const projects = await projectsService.getProjectsByOwnerId(sub)
-        const projectDTOs = projects.map(
-          projectSummary => projectSummaryMapper.toPresentation(projectSummary)
-        )
-        res.json({ projects: projectDTOs })
+        res.json({ projects: projects.map(project => projectMapper.toPresentation(project)) })
       }
     )
     .post(
@@ -35,11 +28,11 @@ export const ProjectsRouter = ({
       ),
       async (req, res) => {
         const { sub } = req.token
-        const createRequestDTO = req.body
-        const createRequest = projectCreateRequestMapper.fromPresentation(createRequestDTO)
-        const project = await projectsService.createProject(sub, createRequest)
-        const projectDTO = projectSummaryMapper.toPresentation(project)
-        res.json(projectDTO)
+        const projectDTOIncoming = req.body
+        const projectIncoming = projectMapper.fromPresentation(projectDTOIncoming)
+        const projectOutgoing = await projectsService.createProject(sub, projectIncoming)
+        const projectDTOOutgoing = projectMapper.toPresentation(projectOutgoing)
+        res.json(projectDTOOutgoing)
       }
     )
     .get(

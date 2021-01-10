@@ -1,39 +1,23 @@
-import { ProjectSummary } from '../../../domain/project.mjs'
-
-export const projectSummaryMapper = {
-  toPresentation (projectSummary) {
-    return {
-      ...projectSummary,
-      createdAt: projectSummary.createdAt.format()
-    }
-  }
-}
+import { Deduction, Project } from '../../../domain/project.mjs'
 
 export const projectMapper = {
-  toPresentation (project) {
+  fromPresentation (projectDTO) {
+    return Project(projectDTO)
+  },
+  toPresentation ({ createdAt, deductions, ...projectRest }) {
     return {
-      ...project,
-      createdAt: project.createdAt.format(),
-      deductions: project.deductions.map(deduction => deductionMapper.toPresentation(deduction))
+      ...projectRest,
+      createdAt: createdAt.format(),
+      deductions: deductions?.map(deduction => deductionMapper.toPresentation(deduction))
     }
   }
 }
 
-export const projectCreateRequestMapper = ({
-  fromPresentation (createProjectRequest) { return ProjectSummary(createProjectRequest) }
+export const deductionMapper = ({
+  fromPresentation (deductionDTO) {
+    return Deduction(deductionDTO)
+  },
+  toPresentation ({ createdAt, ...deductionRest }) {
+    return { ...deductionRest, createdAt: createdAt.format() }
+  }
 })
-
-export const deductionMapper = {
-  toPresentation ({ id, name, description, steps, syms, presentations, theorem, createdAt }) {
-    return {
-      id,
-      name,
-      description,
-      steps,
-      syms,
-      presentations,
-      theorem,
-      createdAt: createdAt.format()
-    }
-  }
-}

@@ -9,10 +9,10 @@ export const User = ({
   createdAt
 } = {}) => ({
   id,
-  email: email,
-  passwordHash: passwordHash,
+  email,
+  passwordHash,
   isEmailVerified,
-  roles: roles,
+  roles,
   createdAt
 })
 

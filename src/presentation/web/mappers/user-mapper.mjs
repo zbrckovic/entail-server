@@ -1,5 +1,5 @@
 export const userMapper = {
-  toPresentation: ({ id, email, roles, isEmailVerified, createdAt }) => {
-    return { id, email, roles, isEmailVerified, createdAt: createdAt.format() }
+  toPresentation: ({ passwordHash, createdAt, ...userRest }) => {
+    return { ...userRest, createdAt: createdAt.format() }
   }
 }

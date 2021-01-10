@@ -1,4 +1,4 @@
-import { roleMapper } from '../mappers/role-mapper.mjs'
+import { roleMapper } from '../mappers/user-mapper.mjs'
 
 export const RolesRepository = ({ sequelize }) => {
   const { Role } = sequelize.models

@@ -1,5 +1,4 @@
 import { User } from '../../domain/user.mjs'
-import { roleMapper } from './role-mapper.mjs'
 import moment from 'moment'
 
 export const userMapper = {
@@ -9,16 +8,16 @@ export const userMapper = {
       email,
       isEmailVerified,
       passwordHash,
-      roles: roles.map(role => roleMapper.fromPersistence(role)),
+      roles: roles?.map(roleDAO => roleMapper.fromPersistence(roleDAO)),
       createdAt: moment(createdAt)
     })
   },
-  toPersistence ({ id, email, isEmailVerified, passwordHash }) {
-    return {
-      id: id ?? null,
-      email,
-      isEmailVerified,
-      passwordHash
-    }
+  toPersistence ({ id = null, email, isEmailVerified, passwordHash }) {
+    return { id, email, isEmailVerified, passwordHash }
   }
+}
+
+export const roleMapper = {
+  fromPersistence (role) { return role.name },
+  toPersistence (role) { return { name: role } }
 }

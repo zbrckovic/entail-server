@@ -1,8 +1,4 @@
-import {
-  deductionMapper,
-  projectMapper,
-  projectSummaryMapper
-} from '../mappers/project-mapper.mjs'
+import { deductionMapper, projectMapper } from '../mappers/project-mapper.mjs'
 
 export const ProjectsRepository = ({ sequelize }) => {
   const { Project, Deduction } = sequelize.models
@@ -10,13 +6,13 @@ export const ProjectsRepository = ({ sequelize }) => {
   return {
     async getProjectsByOwnerId (ownerId) {
       const projectDAOs = await Project.findAll({ where: { ownerId } })
-      return projectDAOs.map(projectDAO => projectSummaryMapper.fromPersistence(projectDAO))
+      return projectDAOs.map(projectDAO => projectMapper.fromPersistence(projectDAO))
     },
     async createProject (ownerId, project) {
-      const projectDAOIncoming = projectSummaryMapper.toPersistence(project)
+      const projectDAOIncoming = projectMapper.toPersistence(project)
       projectDAOIncoming.ownerId = ownerId
       const projectDAOOutgoing = await Project.create(projectDAOIncoming)
-      return projectSummaryMapper.fromPersistence(projectDAOOutgoing)
+      return projectMapper.fromPersistence(projectDAOOutgoing)
     },
     async createDeduction (projectId, deduction) {
       const deductionDAOIncoming = deductionMapper.toPersistence(deduction)

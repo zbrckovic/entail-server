@@ -1,6 +1,5 @@
 import { createError, ErrorName } from '../../common/error.mjs'
-import { userMapper } from '../mappers/user-mapper.mjs'
-import { roleMapper } from '../mappers/role-mapper.mjs'
+import { userMapper, roleMapper } from '../mappers/user-mapper.mjs'
 import { OrderDirection } from '../../domain/order-direction.mjs'
 
 export const UsersRepository = ({ sequelize }) => {
@@ -9,18 +8,13 @@ export const UsersRepository = ({ sequelize }) => {
   return {
     // Returns user or undefined.
     async getUserByEmail (email) {
-      const userDAO = await User.findOne({
-        where: { email },
-        include: ['roles']
-      })
+      const userDAO = await User.findOne({ where: { email }, include: ['roles'] })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 
     // Returns user or undefined.
     async getUserById (id) {
-      const userDAO = await User.findByPk(id, {
-        include: ['roles']
-      })
+      const userDAO = await User.findByPk(id, { include: ['roles'] })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 

@@ -1,54 +1,60 @@
-import { Deduction, Project, ProjectSummary } from '../../domain/project.mjs'
+import { Deduction, Project } from '../../domain/project.mjs'
 import moment from 'moment'
 
-const projectMapperBase = {
-  fromPersistence ({ id, name, description, isFirstOrder, propositionalRulesSet, createdAt }) {
+export const projectMapper = {
+  fromPersistence ({
+    id,
+    name,
+    description = undefined,
+    isFirstOrder,
+    propositionalRulesSet,
+    createdAt,
+    deductions
+  }) {
+    return Project({
+      id,
+      name,
+      description,
+      isFirstOrder,
+      propositionalRulesSet,
+      createdAt: moment(createdAt),
+      deductions: deductions?.map(deductionsDAO => deductionMapper.fromPersistence(deductionsDAO))
+    })
+  },
+  toPersistence ({
+    id = null,
+    name,
+    description = null,
+    isFirstOrder,
+    propositionalRulesSet,
+    deductions
+  }) {
     return {
       id,
       name,
-      description: description ?? undefined,
+      description,
       isFirstOrder,
       propositionalRulesSet,
-      createdAt: moment(createdAt)
-    }
-  },
-  toPersistence ({ id, name, description, isFirstOrder, propositionalRulesSet }) {
-    return {
-      id: id ?? null,
-      name,
-      description: description ?? null,
-      isFirstOrder,
-      propositionalRulesSet
+      deductions: deductions?.map(deduction => deductionMapper.toPersistence(deduction))
     }
   }
 }
 
-export const projectSummaryMapper = ({
-  fromPersistence (projectDAO) {
-    return ProjectSummary(projectMapperBase.fromPersistence(projectDAO))
-  },
-  toPersistence (project) {
-    return projectMapperBase.toPersistence(project)
-  }
-})
-
-export const projectMapper = ({
-  fromPersistence (projectDAO) {
-    return Project({
-      ...projectMapperBase.fromPersistence(projectDAO),
-      deductions: projectDAO.deductions.map(
-        deductionDAO => deductionMapper.fromPersistence(deductionDAO)
-      )
-    })
-  }
-})
-
 export const deductionMapper = ({
-  fromPersistence ({ id, name, description, steps, syms, presentations, theorem, createdAt }) {
+  fromPersistence ({
+    id,
+    name,
+    description = undefined,
+    steps,
+    syms,
+    presentations,
+    theorem,
+    createdAt
+  }) {
     return Deduction({
       id,
       name,
-      description: description ?? undefined,
+      description,
       steps,
       syms,
       presentations,
@@ -56,15 +62,7 @@ export const deductionMapper = ({
       createdAt: moment(createdAt)
     })
   },
-  toPersistence ({ id, name, description, steps, syms, presentations, theorem }) {
-    return {
-      id: id ?? null,
-      name,
-      description: description ?? null,
-      steps,
-      syms,
-      presentations,
-      theorem
-    }
+  toPersistence ({ id, name, description = null, steps, syms, presentations, theorem }) {
+    return { id, name, description, steps, syms, presentations, theorem }
   }
 })
