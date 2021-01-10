@@ -50,7 +50,7 @@ export const ProjectsRouter = ({
           return
         }
         const projectDTO = projectMapper.toPresentation(project)
-        res.json({ projects: projectDTO })
+        res.json(projectDTO)
       }
     )
 }

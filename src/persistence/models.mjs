@@ -115,7 +115,8 @@ export const createModels = sequelize => {
     foreignKey: {
       name: 'projectId',
       allowNull: false
-    }
+    },
+    as: 'deductions'
   })
   Deduction.belongsTo(Project, {
     foreignKey: {
