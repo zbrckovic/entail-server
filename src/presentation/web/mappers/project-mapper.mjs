@@ -1,3 +1,5 @@
+import { ProjectSummary } from '../../../domain/project.mjs'
+
 export const projectSummaryMapper = {
   toPresentation (projectSummary) {
     return {
@@ -18,7 +20,7 @@ export const projectMapper = {
 }
 
 export const projectCreateRequestMapper = ({
-  fromPresentation (createProjectRequest) { return createProjectRequest }
+  fromPresentation (createProjectRequest) { return ProjectSummary(createProjectRequest) }
 })
 
 export const deductionMapper = {
