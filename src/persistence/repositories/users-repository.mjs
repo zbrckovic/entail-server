@@ -1,30 +1,32 @@
 import { createError, ErrorName } from '../../common/error.mjs'
 import { userMapper, roleMapper } from '../mappers/user-mapper.mjs'
 import { OrderDirection } from '../../domain/order-direction.mjs'
+import stampit from '@stamp/it'
 
-export const UsersRepository = ({ sequelize }) => {
-  const { User, Role } = sequelize.models
-
-  return {
+export const UsersRepository = stampit({
+  init ({ sequelize }) {
+    this.models = sequelize.models
+  },
+  methods: {
     // Returns user or undefined.
     async getUserByEmail (email) {
-      const userDAO = await User.findOne({ where: { email }, include: ['roles'] })
+      const userDAO = await this.models.User.findOne({ where: { email }, include: ['roles'] })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 
     // Returns user or undefined.
     async getUserById (id) {
-      const userDAO = await User.findByPk(id, { include: ['roles'] })
+      const userDAO = await this.models.User.findByPk(id, { include: ['roles'] })
       return userDAO === null ? undefined : userMapper.fromPersistence(userDAO)
     },
 
     // Creates user or throws `EMAIL_ALREADY_USED`.
     async createUser (user) {
       try {
-        const userDAO = await User.create(userMapper.toPersistence(user))
+        const userDAO = await this.models.User.create(userMapper.toPersistence(user))
         const roles = user.roles
           .map(role => roleMapper.toPersistence(role))
-          .map(role => Role.build(role))
+          .map(role => this.models.Role.build(role))
         await userDAO.setRoles(roles)
         return await this.getUserById(userDAO.id) // TODO: find better solution
       } catch (error) {
@@ -38,7 +40,7 @@ export const UsersRepository = ({ sequelize }) => {
     },
 
     async updateUser (user) {
-      const userDAO = await User.findByPk(user.id, { include: ['roles'] })
+      const userDAO = await this.models.User.findByPk(user.id, { include: ['roles'] })
       await userDAO.update(userMapper.toPersistence(user))
       userDAO.setRoles(user.roles.map(role => roleMapper.toPersistence(role)))
       return userMapper.fromPersistence(userDAO)
@@ -49,7 +51,7 @@ export const UsersRepository = ({ sequelize }) => {
         ? undefined
         : [[orderProp, orderDir ?? OrderDirection.ASC]]
 
-      const { count: total, rows: userDAOs } = await User.findAndCountAll({
+      const { count: total, rows: userDAOs } = await this.models.User.findAndCountAll({
         include: ['roles'],
         offset: pageNumber * pageSize,
         limit: pageSize,
@@ -61,4 +63,4 @@ export const UsersRepository = ({ sequelize }) => {
       return { total, items: users }
     }
   }
-}
+})
