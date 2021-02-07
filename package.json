@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/zbrckovic/entail-server#readme",
   "dependencies": {
+    "@stamp/it": "^1.1.0",
     "@zbrckovic/entail-core": "0.0.45",
     "bcrypt": "^5.0.0",
     "cls-hooked": "^4.2.2",
